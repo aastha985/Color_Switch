@@ -9,6 +9,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
@@ -31,7 +32,7 @@ public class Main extends Application {
         Button start = new Button("Start");
 
         Circle circle = new Circle();
-        Group root = circle.show();
+        Group root = circle.show(300.0f,100.0f,50.0f,25.0f);
         circle.move(root);
 
         Square square = new Square();
@@ -104,44 +105,22 @@ class Square extends Rotating{
 }
 
 class Circle extends Rotating{
-    public Group show(){
-        Arc arc1o = new Arc(300.0f,100.0f,50.0f,50.0f,0.0f,90.0f);
-        Arc arc1i = new Arc(300.0f,100.0f,25.0f,25.0f,0.0f,90.0f);
-        arc1o.setType(ArcType.ROUND);
-        arc1i.setType(ArcType.ROUND);
+    public Group show(float x,float y,float radiusOuter,float radiusInner){
+        float angle = 0.0f;
+        Shape arcs[] = new Shape[4];
 
-        Shape ring = Shape.subtract(arc1o,arc1i);
-        ring.setFill(Color.ORANGE);
-        arc1i.setFill(null);
-
-        Arc arc2o = new Arc(300.0f,100.0f,50.0f,50.0f,90.0f,90.0f);
-        Arc arc2i = new Arc(300.0f,100.0f,25.0f,25.0f,90.0f,90.0f);
-        arc2o.setType(ArcType.ROUND);
-        arc2i.setType(ArcType.ROUND);
-
-        Shape ring2 = Shape.subtract(arc2o,arc2i);
-        ring2.setFill(Color.YELLOW);
-        arc2i.setFill(null);
-
-        Arc arc3o = new Arc(300.0f,100.0f,50.0f,50.0f,180.0f,90.0f);
-        Arc arc3i = new Arc(300.0f,100.0f,25.0f,25.0f,180.0f,90.0f);
-        arc3o.setType(ArcType.ROUND);
-        arc3i.setType(ArcType.ROUND);
-
-        Shape ring3 = Shape.subtract(arc3o,arc3i);
-        ring3.setFill(Color.GREEN);
-        arc3i.setFill(null);
-
-        Arc arc4o = new Arc(300.0f,100.0f,50.0f,50.0f,270.0f,90.0f);
-        Arc arc4i = new Arc(300.0f,100.0f,25.0f,25.0f,270.0f,90.0f);
-        arc4o.setType(ArcType.ROUND);
-        arc4i.setType(ArcType.ROUND);
-
-        Shape ring4 = Shape.subtract(arc4o,arc4i);
-        ring4.setFill(Color.PINK);
-        arc4i.setFill(null);
-
-        Group root = new Group(ring,ring2,ring3,ring4);
+        Paint paint[] = {Color.PINK,Color.RED,Color.GREEN,Color.BLACK};
+        for(int i=0;i<4;i++){
+            Arc arc1o = new Arc(x,y,radiusOuter,radiusOuter,angle,90.0f);
+            Arc arc1i = new Arc(x,y,radiusInner,radiusInner,angle,90.0f);
+            arc1o.setType(ArcType.ROUND);
+            arc1i.setType(ArcType.ROUND);
+            arcs[i] = Shape.subtract(arc1o,arc1i);
+            arcs[i].setFill(paint[i]);
+            arc1i.setFill(null);
+            angle+=90.0f;
+        }
+        Group root = new Group(arcs[0],arcs[1],arcs[2],arcs[3]);
         return root;
     }
 }
