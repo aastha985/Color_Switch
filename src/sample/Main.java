@@ -9,9 +9,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Arc;
-import javafx.scene.shape.ArcType;
-import javafx.scene.shape.Shape;
+import javafx.scene.shape.*;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.scene.control.Button;
@@ -31,14 +29,19 @@ public class Main extends Application {
         //Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         Label label1 = new Label("COLOR GAME");
         Button start = new Button("Start");
+
         Circle circle = new Circle();
         Group root = circle.show();
         circle.move(root);
 
+        Square square = new Square();
+        Group root2 = square.show(100.0f,150.0f,100.0f,50.0f);
+        square.move(root2);
+
         start.setOnAction(e->primaryStage.setScene(game));
 
         VBox layout1 = new VBox(50);
-        layout1.getChildren().addAll(label1,start,root);
+        layout1.getChildren().addAll(label1,start,root,root2);
         menu = new Scene(layout1,300,500);
 
         Button exit = new Button("Exit");
@@ -63,7 +66,7 @@ class Game extends Main{}
 class Obstacles extends Game{}
 
 class Rotating extends Obstacles{
-    
+
     public void move(Group root){
         RotateTransition rotate = new RotateTransition();
         rotate.setAxis(Rotate.Z_AXIS);
@@ -76,7 +79,29 @@ class Rotating extends Obstacles{
     }
 }
 
-class Square extends Obstacles{}
+class Square extends Rotating{
+    public Group show(float x,float y,float length,float breadth){
+
+        Line line1 = new Line(x,y,x+length,y);
+        line1.setStrokeWidth(10);
+        line1.setStroke(Color.RED);
+
+        Line line2 = new Line(x,y+breadth,x+length,y+breadth);
+        line2.setStrokeWidth(10);
+        line2.setStroke(Color.GREEN);
+
+        Line line3 = new Line(x,y,x,y+breadth);
+        line3.setStrokeWidth(10);
+        line3.setStroke(Color.PINK);
+
+        Line line4 = new Line(x+length,y,x+length,y+breadth);
+        line4.setStrokeWidth(10);
+        line4.setStroke(Color.ORANGE);
+
+        Group root = new Group(line1,line2,line3,line4);
+        return root;
+    }
+}
 
 class Circle extends Rotating{
     public Group show(){
