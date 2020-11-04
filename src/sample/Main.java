@@ -81,22 +81,27 @@ class Rotating extends Obstacles{
 }
 
 class Square extends Rotating{
+    private final int strokeWidth;
+
+    Square(){
+        this.strokeWidth=10;
+    }
     public Group show(float x,float y,float length,float breadth){
 
         Line line1 = new Line(x,y,x+length,y);
-        line1.setStrokeWidth(10);
+        line1.setStrokeWidth(strokeWidth);
         line1.setStroke(Color.RED);
 
         Line line2 = new Line(x,y+breadth,x+length,y+breadth);
-        line2.setStrokeWidth(10);
+        line2.setStrokeWidth(strokeWidth);
         line2.setStroke(Color.GREEN);
 
         Line line3 = new Line(x,y,x,y+breadth);
-        line3.setStrokeWidth(10);
+        line3.setStrokeWidth(strokeWidth);
         line3.setStroke(Color.PINK);
 
         Line line4 = new Line(x+length,y,x+length,y+breadth);
-        line4.setStrokeWidth(10);
+        line4.setStrokeWidth(strokeWidth);
         line4.setStroke(Color.ORANGE);
 
         Group root = new Group(line1,line2,line3,line4);
