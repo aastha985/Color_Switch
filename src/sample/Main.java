@@ -31,6 +31,55 @@ public class Main extends Application {
         //Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         Label label1 = new Label("COLOR GAME");
         Button start = new Button("Start");
+        Circle circle = new Circle();
+        Group root = circle.show();
+        circle.move(root);
+
+        start.setOnAction(e->primaryStage.setScene(game));
+
+        VBox layout1 = new VBox(50);
+        layout1.getChildren().addAll(label1,start,root);
+        menu = new Scene(layout1,300,500);
+
+        Button exit = new Button("Exit");
+        exit.setOnAction(e->primaryStage.setScene(menu));
+
+        StackPane layout2 = new StackPane();
+        layout2.getChildren().add(exit);
+        game = new Scene(layout2,300,500);
+
+        primaryStage.setScene(menu);
+        primaryStage.setTitle("Color Switch");
+        primaryStage.show();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+}
+
+class Game extends Main{}
+
+class Obstacles extends Game{}
+
+class Rotating extends Obstacles{
+    
+    public void move(Group root){
+        RotateTransition rotate = new RotateTransition();
+        rotate.setAxis(Rotate.Z_AXIS);
+        rotate.setByAngle(360);
+        rotate.setCycleCount(1000);
+        rotate.setDuration(Duration.millis(2000));
+        rotate.setInterpolator(Interpolator.LINEAR);
+        rotate.setNode(root);
+        rotate.play();
+    }
+}
+
+class Square extends Obstacles{}
+
+class Circle extends Rotating{
+    public Group show(){
         Arc arc1o = new Arc(300.0f,100.0f,50.0f,50.0f,0.0f,90.0f);
         Arc arc1i = new Arc(300.0f,100.0f,25.0f,25.0f,0.0f,90.0f);
         arc1o.setType(ArcType.ROUND);
@@ -68,34 +117,6 @@ public class Main extends Application {
         arc4i.setFill(null);
 
         Group root = new Group(ring,ring2,ring3,ring4);
-
-        RotateTransition rotate = new RotateTransition();
-        rotate.setAxis(Rotate.Z_AXIS);
-        rotate.setByAngle(360);
-        rotate.setCycleCount(1000);
-        rotate.setDuration(Duration.millis(2000));
-        rotate.setInterpolator(Interpolator.LINEAR);
-        rotate.setNode(root);
-        rotate.play();
-        start.setOnAction(e->primaryStage.setScene(game));
-
-        VBox layout1 = new VBox(50);
-        layout1.getChildren().addAll(label1,start,root);
-        menu = new Scene(layout1,300,500);
-
-        Button exit = new Button("Exit");
-        exit.setOnAction(e->primaryStage.setScene(menu));
-
-        StackPane layout2 = new StackPane();
-        layout2.getChildren().add(exit);
-        game = new Scene(layout2,300,500);
-
-        primaryStage.setScene(menu);
-        primaryStage.setTitle("Color Switch");
-        primaryStage.show();
-    }
-
-    public static void main(String[] args) {
-        launch(args);
+        return root;
     }
 }
