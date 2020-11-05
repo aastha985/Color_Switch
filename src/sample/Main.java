@@ -6,6 +6,7 @@ import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -39,10 +40,14 @@ public class Main extends Application {
         Group root2 = square.show(100.0f,150.0f,100.0f,50.0f);
         square.move(root2);
 
+        Plus plus = new Plus();
+        Group root3 = plus.show(200.0f,300.0f,50.0f);
+        plus.move(root3);
+
         start.setOnAction(e->primaryStage.setScene(game));
 
         VBox layout1 = new VBox(50);
-        layout1.getChildren().addAll(label1,start,root,root2);
+        layout1.getChildren().addAll(label1,start,root,root2,root3);
         menu = new Scene(layout1,300,500);
 
         Button exit = new Button("Exit");
@@ -77,6 +82,35 @@ class Rotating extends Obstacles{
         rotate.setInterpolator(Interpolator.LINEAR);
         rotate.setNode(root);
         rotate.play();
+    }
+}
+
+class Plus extends Rotating{
+    private final int strokeWidth;
+
+    Plus(){
+        this.strokeWidth=10;
+    }
+
+    public Group show(float centerx,float centery,float length){
+        Line line1 = new Line(centerx,centery-length,centerx,centery);
+        line1.setStrokeWidth(strokeWidth);
+        line1.setStroke(Color.RED);
+
+        Line line2 = new Line(centerx,centery,centerx,centery+length);
+        line2.setStrokeWidth(strokeWidth);
+        line2.setStroke(Color.GREEN);
+
+        Line line3 = new Line(centerx,centery,centerx+length,centery);
+        line3.setStrokeWidth(strokeWidth);
+        line3.setStroke(Color.PINK);
+
+        Line line4 = new Line(centerx-length,centery,centerx,centery);
+        line4.setStrokeWidth(strokeWidth);
+        line4.setStroke(Color.ORANGE);
+
+        Group root = new Group(line1,line2,line3,line4);
+        return root;
     }
 }
 
