@@ -41,9 +41,9 @@ public class Main extends Application {
 //        Group root2 = square.show(100.0f,150.0f,100.0f,50.0f);
 //        square.move(root2);
 //
-//        Plus plus = new Plus();
-//        Group root3 = plus.show(200.0f,300.0f,50.0f);
-//        plus.move(root3);
+        Plus plus = new Plus();
+        Group root3 = plus.show(200.0f,300.0f,50.0f);
+        plus.move(root3);
 
         HorizontalLine horizontalLine = new HorizontalLine();
         Group root4 = horizontalLine.show(10.0f,75.0f);
@@ -52,7 +52,7 @@ public class Main extends Application {
         start.setOnAction(e->primaryStage.setScene(game));
 
         VBox layout1 = new VBox(50);
-        layout1.getChildren().addAll(label1,start,root4);
+        layout1.getChildren().addAll(label1,start,root4,root3);
         menu = new Scene(layout1,300,500);
 
         Button exit = new Button("Exit");
@@ -79,8 +79,8 @@ class Obstacles extends Game{}
 class Linear extends Obstacles{
     public void move(Group root){
         TranslateTransition translate = new TranslateTransition();
-        translate.setByX(-150);
-        translate.setDuration(Duration.millis(1000));
+        translate.setByX(-600);
+        translate.setDuration(Duration.millis(3000));
         translate.setCycleCount(500);
         translate.setAutoReverse(true);
         translate.setNode(root);
@@ -101,31 +101,16 @@ class HorizontalLine extends Linear{
 
     public Group show(float y,float len){
 
-        Line line1 = new Line(0,y,len,y);
-        line1.setStrokeWidth(strokeWidth);
-        line1.setStroke(Color.RED);
+        Line lines[] = new Line[12];
+        Paint paint[] = {Color.LIGHTBLUE,Color.PINK,Color.YELLOW,Color.PURPLE};
 
-        Line line2 = new Line(len,y,2*len,y);
-        line2.setStrokeWidth(strokeWidth);
-        line2.setStroke(Color.GREEN);
+        for(int i=-4;i<8;i++){
+            lines[i+4] = new Line(i*len,y,(i+1)*len,y);
+            lines[i+4].setStrokeWidth(strokeWidth);
+            lines[i+4].setStroke(paint[Math.abs(i%4)]);
+        }
 
-        Line line3 = new Line(2*len,y,3*len,y);
-        line3.setStrokeWidth(strokeWidth);
-        line3.setStroke(Color.PINK);
-
-        Line line4 = new Line(3*len,y,4*len,y);
-        line4.setStrokeWidth(strokeWidth);
-        line4.setStroke(Color.ORANGE);
-
-        Line line5 = new Line(4*len,y,5*len,y);
-        line5.setStrokeWidth(strokeWidth);
-        line5.setStroke(Color.PINK);
-
-        Line line6 = new Line(5*len,y,6*len,y);
-        line6.setStrokeWidth(strokeWidth);
-        line6.setStroke(Color.ORANGE);
-
-        Group root = new Group(line1,line2,line3,line4,line5,line6);
+        Group root = new Group(lines[0],lines[1],lines[2],lines[3],lines[4],lines[5],lines[6],lines[7],lines[8],lines[9],lines[10],lines[11]);
         return root;
     }
 }
