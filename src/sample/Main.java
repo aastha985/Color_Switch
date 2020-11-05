@@ -97,7 +97,7 @@ class Linear extends Obstacles{
 
     public void moveLeft(Group root){
         TranslateTransition translate = new TranslateTransition();
-        translate.setByX(-100);
+        translate.setByX(-300);
         translate.setDuration(Duration.millis(3000));
         translate.setCycleCount(500);
         translate.setAutoReverse(true);
@@ -107,7 +107,7 @@ class Linear extends Obstacles{
 
     public  void moveRight(Group root){
         TranslateTransition translate = new TranslateTransition();
-        translate.setByX(100);
+        translate.setByX(300);
         translate.setDuration(Duration.millis(3000));
         translate.setCycleCount(500);
         translate.setAutoReverse(true);
