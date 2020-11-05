@@ -32,22 +32,26 @@ public class Main extends Application {
         Label label1 = new Label("COLOR GAME");
         Button start = new Button("Start");
 
-        Circle circle = new Circle();
-        Group root = circle.show(300.0f,100.0f,50.0f,25.0f);
-        circle.move(root);
+//        Circle circle = new Circle();
+//        Group root = circle.show(300.0f,100.0f,50.0f,25.0f);
+//        circle.move(root);
+//
+//        Square square = new Square();
+//        Group root2 = square.show(100.0f,150.0f,100.0f,50.0f);
+//        square.move(root2);
+//
+//        Plus plus = new Plus();
+//        Group root3 = plus.show(200.0f,300.0f,50.0f);
+//        plus.move(root3);
 
-        Square square = new Square();
-        Group root2 = square.show(100.0f,150.0f,100.0f,50.0f);
-        square.move(root2);
-
-        Plus plus = new Plus();
-        Group root3 = plus.show(200.0f,300.0f,50.0f);
-        plus.move(root3);
+        HorizontalLine horizontalLine = new HorizontalLine();
+        Group root4 = horizontalLine.show(10.0f,75.0f);
+        horizontalLine.move(root4);
 
         start.setOnAction(e->primaryStage.setScene(game));
 
         VBox layout1 = new VBox(50);
-        layout1.getChildren().addAll(label1,start,root,root2,root3);
+        layout1.getChildren().addAll(label1,start,root4);
         menu = new Scene(layout1,300,500);
 
         Button exit = new Button("Exit");
@@ -70,6 +74,41 @@ public class Main extends Application {
 class Game extends Main{}
 
 class Obstacles extends Game{}
+
+class Linear extends Obstacles{
+    public void move(Group root){
+        
+    }
+}
+
+class HorizontalLine extends Linear{
+    private final int strokeWidth;
+
+    HorizontalLine(){
+        this.strokeWidth=10;
+    }
+
+    public Group show(float y,float len){
+        Line line1 = new Line(0,y,len,y);
+        line1.setStrokeWidth(strokeWidth);
+        line1.setStroke(Color.RED);
+
+        Line line2 = new Line(len,y,2*len,y);
+        line2.setStrokeWidth(strokeWidth);
+        line2.setStroke(Color.GREEN);
+
+        Line line3 = new Line(2*len,y,3*len,y);
+        line3.setStrokeWidth(strokeWidth);
+        line3.setStroke(Color.PINK);
+
+        Line line4 = new Line(3*len,y,4*len,y);
+        line4.setStrokeWidth(strokeWidth);
+        line4.setStroke(Color.ORANGE);
+
+        Group root = new Group(line1,line2,line3,line4);
+        return root;
+    }
+}
 
 class Rotating extends Obstacles{
 
