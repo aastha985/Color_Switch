@@ -2,6 +2,7 @@ package sample;
 
 import javafx.animation.Interpolator;
 import javafx.animation.RotateTransition;
+import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -77,8 +78,18 @@ class Obstacles extends Game{}
 
 class Linear extends Obstacles{
     public void move(Group root){
-        
+        TranslateTransition translate = new TranslateTransition();
+        translate.setByX(-150);
+        translate.setDuration(Duration.millis(1000));
+        translate.setCycleCount(500);
+        translate.setAutoReverse(true);
+        translate.setNode(root);
+        translate.play();
     }
+}
+
+class VerticalLine extends Linear{
+
 }
 
 class HorizontalLine extends Linear{
@@ -89,6 +100,7 @@ class HorizontalLine extends Linear{
     }
 
     public Group show(float y,float len){
+
         Line line1 = new Line(0,y,len,y);
         line1.setStrokeWidth(strokeWidth);
         line1.setStroke(Color.RED);
@@ -105,7 +117,15 @@ class HorizontalLine extends Linear{
         line4.setStrokeWidth(strokeWidth);
         line4.setStroke(Color.ORANGE);
 
-        Group root = new Group(line1,line2,line3,line4);
+        Line line5 = new Line(4*len,y,5*len,y);
+        line5.setStrokeWidth(strokeWidth);
+        line5.setStroke(Color.PINK);
+
+        Line line6 = new Line(5*len,y,6*len,y);
+        line6.setStrokeWidth(strokeWidth);
+        line6.setStroke(Color.ORANGE);
+
+        Group root = new Group(line1,line2,line3,line4,line5,line6);
         return root;
     }
 }
