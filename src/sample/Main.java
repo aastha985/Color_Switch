@@ -8,6 +8,7 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -41,18 +42,25 @@ public class Main extends Application {
 //        Group root2 = square.show(100.0f,150.0f,100.0f,50.0f);
 //        square.move(root2);
 //
-        Plus plus = new Plus();
-        Group root3 = plus.show(200.0f,300.0f,50.0f);
-        plus.move(root3);
+//        Plus plus = new Plus();
+//        Group root3 = plus.show(200.0f,300.0f,50.0f);
+//        plus.move(root3);
+//
+//        HorizontalLine horizontalLine = new HorizontalLine();
+//        Group root4 = horizontalLine.show(10.0f,75.0f);
+//        horizontalLine.move(root4);
 
-        HorizontalLine horizontalLine = new HorizontalLine();
-        Group root4 = horizontalLine.show(10.0f,75.0f);
-        horizontalLine.move(root4);
+        VerticalLine verticalLine = new VerticalLine();
+        Group root5[] = verticalLine.show();
+        verticalLine.moveRight(root5[0]);
+        verticalLine.moveLeft(root5[1]);
+        StackPane stack = new StackPane(root5[0],root5[1]);
+//        HBox hbox = new HBox(root5[0],root5[1]);
 
         start.setOnAction(e->primaryStage.setScene(game));
 
         VBox layout1 = new VBox(50);
-        layout1.getChildren().addAll(label1,start,root4,root3);
+        layout1.getChildren().addAll(label1,start,stack);
         menu = new Scene(layout1,300,500);
 
         Button exit = new Button("Exit");
@@ -86,10 +94,81 @@ class Linear extends Obstacles{
         translate.setNode(root);
         translate.play();
     }
+
+    public void moveLeft(Group root){
+        TranslateTransition translate = new TranslateTransition();
+        translate.setByX(-100);
+        translate.setDuration(Duration.millis(3000));
+        translate.setCycleCount(500);
+        translate.setAutoReverse(true);
+        translate.setNode(root);
+        translate.play();
+    }
+
+    public  void moveRight(Group root){
+        TranslateTransition translate = new TranslateTransition();
+        translate.setByX(100);
+        translate.setDuration(Duration.millis(3000));
+        translate.setCycleCount(500);
+        translate.setAutoReverse(true);
+        translate.setNode(root);
+        translate.play();
+    }
 }
 
 class VerticalLine extends Linear{
+    private final int strokeWidth;
 
+    VerticalLine(){
+        this.strokeWidth=10;
+    }
+
+    public Group[] show(){
+        Rectangle rectangle1 = new Rectangle(60.0f,75.0f,12.0f,100.0f);
+        rectangle1.setArcHeight(15.02);
+        rectangle1.setArcWidth(30.02);
+        rectangle1.setFill(Color.PINK);
+
+        Rectangle rectangle2 = new Rectangle(180.0f,75.0f,12.0f,100.0f);
+        rectangle2.setArcHeight(15.02);
+        rectangle2.setArcWidth(30.02);
+        rectangle2.setFill(Color.YELLOW);
+
+        Rectangle rectangle3 = new Rectangle(120,90.0f,8.0f,70.0f);
+        rectangle3.setArcHeight(15.02);
+        rectangle3.setArcWidth(30.02);
+        rectangle3.setFill(Color.PURPLE);
+
+        Rectangle rectangle4 = new Rectangle(240,90.0f,8f,70.0f);
+        rectangle4.setArcHeight(15.02);
+        rectangle4.setArcWidth(30.02);
+        rectangle4.setFill(Color.BLUE);
+
+        Rectangle rectangle5 = new Rectangle(40.0f,90.0f,8f,70.0f);
+        rectangle5.setArcHeight(15.02);
+        rectangle5.setArcWidth(30.02);
+        rectangle5.setFill(Color.PINK);
+
+        Rectangle rectangle6 = new Rectangle(160.0f,90.0f,8f,70.0f);
+        rectangle6.setArcHeight(15.02);
+        rectangle6.setArcWidth(30.02);
+        rectangle6.setFill(Color.PURPLE);
+
+        Rectangle rectangle7 = new Rectangle(100.0f,100.0f,6f,50.0f);
+        rectangle7.setArcHeight(15.02);
+        rectangle7.setArcWidth(30.02);
+        rectangle7.setFill(Color.YELLOW);
+
+        Rectangle rectangle8 = new Rectangle(220.0f,100.0f,6f,50.0f);
+        rectangle8.setArcHeight(15.02);
+        rectangle8.setArcWidth(30.02);
+        rectangle8.setFill(Color.BLUE);
+
+        Group root1 = new Group(rectangle1,rectangle2,rectangle3,rectangle4);
+        Group root2 = new Group(rectangle5,rectangle6,rectangle7,rectangle8);
+        Group arr[] ={root1,root2};
+        return arr;
+    }
 }
 
 class HorizontalLine extends Linear{
