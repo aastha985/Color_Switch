@@ -19,17 +19,37 @@ import javafx.stage.Stage;
 import javafx.scene.control.Button;
 import javafx.util.Duration;
 
-public class Main extends Application {
-
-    Button start;
-    Button exit;
-    Scene menu,game;
-
-
+public class Main extends Application{
     @Override
-    public void start(Stage primaryStage) throws Exception
+    public void start(Stage primaryStage) throws Exception{
+        Player P = new Player();
+        P.start(primaryStage);
+    }
+    public static void main(String[] args) {
+        launch(args);
+    }
+}
 
+class Player{
+    public void start(Stage primaryStage){
+        Game G = new Game();
+        G.start(primaryStage);
+    }
+}
+
+class Game extends Main{
+    public void start(Stage primaryStage)
     {
+        this.play(primaryStage);
+    }
+    private void resume(){
+        //show saved games
+        //choose saved game
+        //savedGame.start()
+    }
+    private void play(Stage primaryStage){
+        //start new game
+        Scene menu,game;
         //Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         Label label1 = new Label("COLOR GAME");
         Button start = new Button("Start");
@@ -39,16 +59,16 @@ public class Main extends Application {
 //        circle.move(root);
 //
 //        Square square = new Square();
-//        Group root2 = square.show(100.0f,150.0f,110.0f,110.0f);
-//        square.move(root2);
+//        Group root = square.show(100.0f,150.0f,110.0f,110.0f);
+//        square.move(root);
 //
 //        Plus plus = new Plus();
-//        Group root3 = plus.show(200.0f,300.0f,70.0f);
-//        plus.move(root3);
+//        Group root = plus.show(200.0f,300.0f,70.0f);
+//        plus.move(root);
 //
         HorizontalLine horizontalLine = new HorizontalLine();
-        Group root4 = horizontalLine.show(10.0f,75.0f);
-        horizontalLine.move(root4);
+        Group root = horizontalLine.show(10.0f,75.0f);
+        horizontalLine.move(root);
 
 //        VerticalLine verticalLine = new VerticalLine();
 //        Group root5[] = verticalLine.show();
@@ -57,10 +77,9 @@ public class Main extends Application {
 //        StackPane stack = new StackPane(root5[0],root5[1]);
 //        HBox hbox = new HBox(root5[0],root5[1]);
 
-        start.setOnAction(e->primaryStage.setScene(game));
 
         VBox layout1 = new VBox(50);
-        layout1.getChildren().addAll(label1,start,root4);
+        layout1.getChildren().addAll(label1,start,root);
         layout1.setStyle("-fx-background-color: #282828");
         menu = new Scene(layout1,300,500);
 
@@ -71,18 +90,13 @@ public class Main extends Application {
         layout2.getChildren().add(exit);
         layout1.setStyle("-fx-background-color: #282828");
         game = new Scene(layout2,300,500);
+        start.setOnAction(e->primaryStage.setScene(game));
 
         primaryStage.setScene(menu);
         primaryStage.setTitle("Color Switch");
         primaryStage.show();
     }
-
-    public static void main(String[] args) {
-        launch(args);
-    }
 }
-
-class Game extends Main{}
 
 class Obstacles extends Game{}
 
