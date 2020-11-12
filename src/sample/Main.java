@@ -7,6 +7,8 @@ import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -18,6 +20,9 @@ import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.scene.control.Button;
 import javafx.util.Duration;
+
+import java.io.FileInputStream;
+import java.io.IOException;
 
 public class Main extends Application{
     @Override
@@ -31,14 +36,14 @@ public class Main extends Application{
 }
 
 class Player{
-    public void start(Stage primaryStage){
+    public void start(Stage primaryStage) throws IOException{
         Game G = new Game();
         G.start(primaryStage);
     }
 }
 
 class Game extends Main{
-    public void start(Stage primaryStage)
+    public void start (Stage primaryStage)throws IOException
     {
         this.play(primaryStage);
     }
@@ -47,9 +52,9 @@ class Game extends Main{
         //choose saved game
         //savedGame.start()
     }
-    private void play(Stage primaryStage){
+    private void play(Stage primaryStage) throws IOException{
         //start new game
-        Scene menu,game;
+        Scene menu,game,titleScreen;
         //Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         Label label1 = new Label("COLOR GAME");
         Button start = new Button("Start");
@@ -92,9 +97,22 @@ class Game extends Main{
         game = new Scene(layout2,300,500);
         start.setOnAction(e->primaryStage.setScene(game));
 
-        primaryStage.setScene(menu);
+        titleScreen = titleImage();
+
+        primaryStage.setScene(titleScreen);
         primaryStage.setTitle("Color Switch");
         primaryStage.show();
+    }
+
+    private Scene titleImage() throws IOException{
+        Image image = new Image(new FileInputStream("src/TitleImage.jpg"));
+        ImageView titleImage = new ImageView(image);
+        titleImage.setFitWidth(300);
+        titleImage.setPreserveRatio(true);
+        StackPane layout3 = new StackPane();
+        layout3.getChildren().add(titleImage);
+        layout3.setStyle("-fx-background-color: #292929");
+        return new Scene(layout3,300,500);
     }
 }
 
