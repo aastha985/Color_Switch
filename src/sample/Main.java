@@ -23,6 +23,7 @@ import javafx.scene.control.Button;
 import javafx.util.Duration;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class Main extends Application{
@@ -55,22 +56,22 @@ class Game extends Main{
     }
     private void play(Stage primaryStage) throws IOException{
         //start new game
-        Scene menu,game,titleScreen,splashScreen;
+        Scene menu,game,titleScreen,splashScreen,mainMenu;
         //Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         Label label1 = new Label("COLOR GAME");
         Button start = new Button("Start");
 
 //        Circular circle = new Circular();
 //        Group root = circle.show(300.0f,100.0f,70.0f,56.0f);
-//        circle.move(root);
+//        circle.move(root,360);
 //
 //        Square square = new Square();
 //        Group root = square.show(100.0f,150.0f,110.0f,110.0f);
-//        square.move(root);
+//        square.move(root,360);
 //
 //        Plus plus = new Plus();
 //        Group root = plus.show(200.0f,300.0f,70.0f);
-//        plus.move(root);
+//        plus.move(root,360);
 //
         HorizontalLine horizontalLine = new HorizontalLine();
         Group root = horizontalLine.show(10.0f,75.0f);
@@ -102,11 +103,41 @@ class Game extends Main{
 //        pauseTransition(primaryStage,game,5);
 
         titleScreen = titleImage();
-        pauseTransition(primaryStage,splashScreen,2);
+//        pauseTransition(primaryStage,splashScreen,2);
 
-        primaryStage.setScene(titleScreen);
+        mainMenu = mainMenu();
+
+        primaryStage.setScene(mainMenu);
         primaryStage.setTitle("Color Switch");
         primaryStage.show();
+    }
+
+    private Scene mainMenu() throws IOException{
+        Group root = circleAnimation();
+        StackPane layout = new StackPane();
+        layout.getChildren().add(root);
+        layout.setStyle("-fx-background-color: #292929");
+        return new Scene(layout,300,500);
+    }
+
+    private Group circleAnimation() throws FileNotFoundException,IOException {
+        Circular outer = new Circular();
+        Group root = outer.show(300.0f,100.0f,120.0f,100.0f);
+        outer.move(root,360);
+        Circular middle = new Circular();
+        Group root2 = middle.show(300.0f,100.0f,95.0f,80.0f);
+        middle.move(root2,-360);
+        Circular inner = new Circular();
+        Group root3 = inner.show(300.0f,100.0f,75.0f,60.0f);
+        inner.move(root3,360);
+        Image image = new Image(new FileInputStream("src/Triangle.jpg"));
+        ImageView triangleImage = new ImageView(image);
+        triangleImage.setFitWidth(70);
+        triangleImage.setX(270);
+        triangleImage.setY(64);
+        triangleImage.setPreserveRatio(true);
+        Circle circle = new Circle(300.0f,100.0f,55.f,Color.valueOf("#585858"));
+        return new Group(root,root2,root3,circle,triangleImage);
     }
 
     private void pauseTransition(Stage primaryStage,Scene nextScene,int time){
@@ -118,9 +149,9 @@ class Game extends Main{
     private Scene splashScreen(){
         Circular circle = new Circular();
         Group root = circle.show(300.0f,100.0f,70.0f,56.0f);
-        circle.move(root);
+        circle.move(root,360);
         Ball ball = new Ball();
-        Group b = ball.show();
+        Circle b = ball.show();
         StackPane layout = new StackPane();
         layout.getChildren().add(root);
         layout.getChildren().add(b);
@@ -144,10 +175,9 @@ class Ball extends Game{
     Ball(){
 
     }
-    public Group show(){
+    public Circle show(){
         Circle circle = new Circle(10.f,Color.valueOf("#f7f7f7"));
-        Group root = new Group(circle);
-        return root;
+        return circle;
     }
 }
 
@@ -265,12 +295,12 @@ class HorizontalLine extends Linear{
 
 class Rotating extends Obstacles{
 
-    public void move(Group root){
+    public void move(Group root,int angle){
         RotateTransition rotate = new RotateTransition();
         rotate.setAxis(Rotate.Z_AXIS);
-        rotate.setByAngle(360);
+        rotate.setByAngle(angle);
         rotate.setCycleCount(1000);
-        rotate.setDuration(Duration.millis(3000));
+        rotate.setDuration(Duration.millis(3500));
         rotate.setInterpolator(Interpolator.LINEAR);
         rotate.setNode(root);
         rotate.play();
