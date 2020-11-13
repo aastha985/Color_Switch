@@ -1,25 +1,22 @@
 package sample;
 
-import javafx.animation.Interpolator;
-import javafx.animation.PauseTransition;
-import javafx.animation.RotateTransition;
-import javafx.animation.TranslateTransition;
+import javafx.animation.*;
 import javafx.application.Application;
+import javafx.geometry.Bounds;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
-import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 import javafx.scene.control.Button;
 import javafx.util.Duration;
@@ -58,7 +55,7 @@ class Game extends Main{
     }
     private void play(Stage primaryStage) throws IOException{
         //start new game
-        Scene menu,game,titleScreen,splashScreen,mainMenu,enterName;
+        Scene menu,game,titleScreen,splashScreen,mainMenu;
         //Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         Label label1 = new Label("COLOR GAME");
         Button start = new Button("Start");
@@ -109,43 +106,9 @@ class Game extends Main{
 
         mainMenu = mainMenu();
 
-        enterName = enterName();
-
-        primaryStage.setScene(enterName);
+        primaryStage.setScene(splashScreen);
         primaryStage.setTitle("Color Switch");
         primaryStage.show();
-    }
-
-    private Scene enterName() throws IOException{
-        Text text = new Text("Enter Name");
-        text.setId("text");
-        TextField name = new TextField();
-        name.setId("textField");
-        name.setMinSize(180,40);
-        name.setAlignment(Pos.CENTER);
-        Button next = new Button("NEXT");
-        next.setId("nextBtn");
-
-        Image image = new Image(new FileInputStream("src/ShortTitleImage.jpg"));
-        ImageView titleImage = new ImageView(image);
-        titleImage.setFitWidth(250);
-        titleImage.setPreserveRatio(true);
-
-        GridPane grid = new GridPane();
-        grid.setMinSize(300, 500);
-        grid.setPadding(new Insets(10, 10, 10, 10));
-        grid.setVgap(5);
-        grid.setHgap(20);
-        grid.setHalignment(text, HPos.CENTER);
-        grid.setHalignment(next, HPos.CENTER);
-        grid.add(titleImage,1,3);
-        grid.add(text, 1, 13);
-        grid.add(name, 1, 17);
-        grid.add(next,1,21);
-        grid.setStyle("-fx-background-color: #282828");
-        Scene scene =  new Scene(grid,300,500);
-        scene.getStylesheets().add("Theme.css");
-        return scene;
     }
 
     private Scene mainMenu() throws IOException{
@@ -203,14 +166,28 @@ class Game extends Main{
 
     private Scene splashScreen(){
         Circular circle = new Circular();
-        Group root = circle.show(300.0f,100.0f,70.0f,56.0f);
+        Group root = circle.show(30.0f,50.0f,70.0f,56.0f);
+        root.setLayoutX(121);
+        root.setLayoutY(140);
         circle.move(root,360);
         Ball ball = new Ball();
         Circle b = ball.show();
-        StackPane layout = new StackPane();
+        b.setCenterX(150);
+        b.setCenterY(450);
+        Pane layout = new Pane();
         layout.getChildren().add(root);
         layout.getChildren().add(b);
         layout.setStyle("-fx-background-color: #292929");
+        Path path = new Path();
+        path.getElements().add(new MoveTo(b.getCenterX(), b.getCenterY()));
+        path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 120, b.getCenterX(), 450));
+        path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 250, b.getCenterX(), 450));
+        path.getElements().add(new CubicCurveTo(b.getCenterX(), 450, b.getCenterX(), 187, b.getCenterX(), 187));
+        PathTransition pathTransition = new PathTransition();
+        pathTransition.setDuration(Duration.millis(2250));
+        pathTransition.setPath(path);
+        pathTransition.setNode(b);
+        pathTransition.play();
         return new Scene(layout,300,500);
     }
 
