@@ -1,0 +1,18 @@
+.button{
+    -fx-background-color: transparent;
+    -fx-background-radius: 9,8,5,4,3;
+    -fx-padding: 7 30 7 30;
+    -fx-border-color: #f7f7f7;
+    -fx-border-style: solid;
+    -fx-border-width: 2px;
+    -fx-font-family: "Helvetica";
+    -fx-font-size: 21px;
+    -fx-font-weight: 400;
+    -fx-text-fill: #f7f7f7;
+    -fx-alignment: center;
+    -fx-pref-width: 170px;
+}
+.button:hover{
+    -fx-background-color: linear-gradient(to right, #eed948, #5edcea);
+    -fx-text-fill:#282828;
+}

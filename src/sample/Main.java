@@ -5,19 +5,20 @@ import javafx.animation.PauseTransition;
 import javafx.animation.RotateTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
+import javafx.geometry.HPos;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
 import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 import javafx.scene.control.Button;
 import javafx.util.Duration;
@@ -114,10 +115,29 @@ class Game extends Main{
 
     private Scene mainMenu() throws IOException{
         Group root = circleAnimation();
-        StackPane layout = new StackPane();
-        layout.getChildren().add(root);
-        layout.setStyle("-fx-background-color: #292929");
-        return new Scene(layout,300,500);
+        Button start = new Button("START");
+        Button resume = new Button("RESUME");
+        Button exit = new Button("EXIT");
+        GridPane grid = new GridPane();
+        grid.setMinSize(300, 500);
+        grid.setPadding(new Insets(10, 10, 10, 10));
+        grid.setVgap(5);
+        grid.setHgap(5);
+        grid.setAlignment(Pos.CENTER);
+        grid.add(root, 1, 2);
+        grid.add(start, 1, 8);
+        grid.add(resume,1,10);
+        grid.add(exit,1,12);
+        grid.setStyle("-fx-background-color: #282828");
+        grid.setHalignment(start, HPos.CENTER);
+        grid.setHalignment(resume,HPos.CENTER);
+        grid.setHalignment(exit,HPos.CENTER);
+        Scene scene = new Scene(grid,300,500);
+        start.getStyleClass().add("button");
+        resume.getStyleClass().add("button");
+        exit.getStyleClass().add("button");
+        scene.getStylesheets().add("Theme.css");
+        return scene;
     }
 
     private Group circleAnimation() throws FileNotFoundException,IOException {
