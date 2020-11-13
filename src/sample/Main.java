@@ -98,19 +98,18 @@ class Game extends Main{
         game = new Scene(layout2,300,500);
         start.setOnAction(e->primaryStage.setScene(game));
 
-        splashScreen = splashScreen();
-//        pauseTransition(primaryStage,game,5);
-
-        titleScreen = titleImage();
-//        pauseTransition(primaryStage,splashScreen,2);
-
         mainMenu = mainMenu();
 
         enterName = enterName();
+        pauseTransition(primaryStage,mainMenu,20);
 
-        primaryStage.setScene(enterName);
+        splashScreen = splashScreen();
+        pauseTransition(primaryStage,enterName,10);
 
-//        primaryStage.setScene(splashScreen);
+        titleScreen = titleImage();
+        pauseTransition(primaryStage,splashScreen,2);
+
+        primaryStage.setScene(titleScreen);
         primaryStage.setTitle("Color Switch");
         primaryStage.show();
     }
@@ -217,10 +216,13 @@ class Game extends Main{
         Path path = new Path();
         path.getElements().add(new MoveTo(b.getCenterX(), b.getCenterY()));
         path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 120, b.getCenterX(), 450));
+        path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 120, b.getCenterX(), 450));
+        path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 120, b.getCenterX(), 450));
+        path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 120, b.getCenterX(), 450));
         path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 250, b.getCenterX(), 450));
         path.getElements().add(new CubicCurveTo(b.getCenterX(), 450, b.getCenterX(), 187, b.getCenterX(), 187));
         PathTransition pathTransition = new PathTransition();
-        pathTransition.setDuration(Duration.millis(2250));
+        pathTransition.setDuration(Duration.millis(4250));
         pathTransition.setPath(path);
         pathTransition.setNode(b);
         pathTransition.play();
