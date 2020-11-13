@@ -1,6 +1,7 @@
 package sample;
 
 import javafx.animation.Interpolator;
+import javafx.animation.PauseTransition;
 import javafx.animation.RotateTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
@@ -54,7 +55,7 @@ class Game extends Main{
     }
     private void play(Stage primaryStage) throws IOException{
         //start new game
-        Scene menu,game,titleScreen;
+        Scene menu,game,titleScreen,splashScreen;
         //Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         Label label1 = new Label("COLOR GAME");
         Button start = new Button("Start");
@@ -97,11 +98,31 @@ class Game extends Main{
         game = new Scene(layout2,300,500);
         start.setOnAction(e->primaryStage.setScene(game));
 
+        splashScreen = splashScreen();
+//        pauseTransition(primaryStage,game,5);
+
         titleScreen = titleImage();
+        pauseTransition(primaryStage,splashScreen,2);
 
         primaryStage.setScene(titleScreen);
         primaryStage.setTitle("Color Switch");
         primaryStage.show();
+    }
+
+    private void pauseTransition(Stage primaryStage,Scene nextScene,int time){
+        PauseTransition pauseTransition = new PauseTransition(Duration.seconds(time));
+        pauseTransition.setOnFinished( event -> primaryStage.setScene(nextScene) );
+        pauseTransition.play();
+    }
+
+    private Scene splashScreen(){
+        Circle circle = new Circle();
+        Group root = circle.show(300.0f,100.0f,70.0f,56.0f);
+        circle.move(root);
+        StackPane layout = new StackPane();
+        layout.getChildren().add(root);
+        layout.setStyle("-fx-background-color: #292929");
+        return new Scene(layout,300,500);
     }
 
     private Scene titleImage() throws IOException{
@@ -109,10 +130,10 @@ class Game extends Main{
         ImageView titleImage = new ImageView(image);
         titleImage.setFitWidth(300);
         titleImage.setPreserveRatio(true);
-        StackPane layout3 = new StackPane();
-        layout3.getChildren().add(titleImage);
-        layout3.setStyle("-fx-background-color: #292929");
-        return new Scene(layout3,300,500);
+        StackPane layout = new StackPane();
+        layout.getChildren().add(titleImage);
+        layout.setStyle("-fx-background-color: #292929");
+        return new Scene(layout,300,500);
     }
 }
 
