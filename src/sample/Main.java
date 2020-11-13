@@ -60,7 +60,7 @@ class Game extends Main{
         Label label1 = new Label("COLOR GAME");
         Button start = new Button("Start");
 
-//        Circle circle = new Circle();
+//        Circular circle = new Circular();
 //        Group root = circle.show(300.0f,100.0f,70.0f,56.0f);
 //        circle.move(root);
 //
@@ -116,11 +116,14 @@ class Game extends Main{
     }
 
     private Scene splashScreen(){
-        Circle circle = new Circle();
+        Circular circle = new Circular();
         Group root = circle.show(300.0f,100.0f,70.0f,56.0f);
         circle.move(root);
+        Ball ball = new Ball();
+        Group b = ball.show();
         StackPane layout = new StackPane();
         layout.getChildren().add(root);
+        layout.getChildren().add(b);
         layout.setStyle("-fx-background-color: #292929");
         return new Scene(layout,300,500);
     }
@@ -134,6 +137,17 @@ class Game extends Main{
         layout.getChildren().add(titleImage);
         layout.setStyle("-fx-background-color: #292929");
         return new Scene(layout,300,500);
+    }
+}
+
+class Ball extends Game{
+    Ball(){
+
+    }
+    public Group show(){
+        Circle circle = new Circle(10.f,Color.valueOf("#f7f7f7"));
+        Group root = new Group(circle);
+        return root;
     }
 }
 
@@ -321,7 +335,7 @@ class Square extends Rotating{
     }
 }
 
-class Circle extends Rotating{
+class Circular extends Rotating{
     public Group show(float x,float y,float radiusOuter,float radiusInner){
         float angle = 0.0f;
         Shape arcs[] = new Shape[4];
