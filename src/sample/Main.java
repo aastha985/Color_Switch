@@ -1,10 +1,8 @@
 package sample;
 
-import javafx.animation.Interpolator;
-import javafx.animation.PauseTransition;
-import javafx.animation.RotateTransition;
-import javafx.animation.TranslateTransition;
+import javafx.animation.*;
 import javafx.application.Application;
+import javafx.geometry.Bounds;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -108,7 +106,7 @@ class Game extends Main{
 
         mainMenu = mainMenu();
 
-        primaryStage.setScene(mainMenu);
+        primaryStage.setScene(splashScreen);
         primaryStage.setTitle("Color Switch");
         primaryStage.show();
     }
@@ -168,14 +166,28 @@ class Game extends Main{
 
     private Scene splashScreen(){
         Circular circle = new Circular();
-        Group root = circle.show(300.0f,100.0f,70.0f,56.0f);
+        Group root = circle.show(30.0f,50.0f,70.0f,56.0f);
+        root.setLayoutX(121);
+        root.setLayoutY(140);
         circle.move(root,360);
         Ball ball = new Ball();
         Circle b = ball.show();
-        StackPane layout = new StackPane();
+        b.setCenterX(150);
+        b.setCenterY(450);
+        Pane layout = new Pane();
         layout.getChildren().add(root);
         layout.getChildren().add(b);
         layout.setStyle("-fx-background-color: #292929");
+        Path path = new Path();
+        path.getElements().add(new MoveTo(b.getCenterX(), b.getCenterY()));
+        path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 120, b.getCenterX(), 450));
+        path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 250, b.getCenterX(), 450));
+        path.getElements().add(new CubicCurveTo(b.getCenterX(), 450, b.getCenterX(), 187, b.getCenterX(), 187));
+        PathTransition pathTransition = new PathTransition();
+        pathTransition.setDuration(Duration.millis(2250));
+        pathTransition.setPath(path);
+        pathTransition.setNode(b);
+        pathTransition.play();
         return new Scene(layout,300,500);
     }
 
