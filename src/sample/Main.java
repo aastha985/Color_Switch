@@ -15,6 +15,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Shear;
@@ -101,7 +102,7 @@ class Game extends Main{
 
         startGame = startGame();
 
-//        mainMenu = mainMenu();
+        mainMenu = mainMenu();
 //
 //        enterName = enterName();
 //        pauseTransition(primaryStage,mainMenu,20);
@@ -128,14 +129,15 @@ class Game extends Main{
             hbox.getChildren().add(new Circle(300.0f,100.0f,10.f,Color.valueOf("#e53e7b")));
         }
 
-        Text text = new Text("SAVED GAMES");
-        text.getStyleClass().add("headerText");
-
+        Text headerText = new Text("SAVED GAMES");
+        headerText.setFont(new Font(27));
+        headerText.setStyle("-fx-fill: #f7f7f7");
+        headerText.relocate(20,22);
         Pane pane = new Pane(line,hbox);
         pane.setStyle("-fx-background-color: #282828");
+        pane.getChildren().add(headerText);
         hbox.relocate(0,60);
-        StackPane stackPane = new StackPane(pane,text);
-        return new Scene(stackPane,300,500);
+        return new Scene(pane,300,500);
     }
 
     private Scene startGame() throws IOException{
@@ -260,11 +262,11 @@ class Game extends Main{
         path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 120, b.getCenterX(), 450));
         path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 120, b.getCenterX(), 450));
         path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 120, b.getCenterX(), 450));
-        path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 120, b.getCenterX(), 450));
-        path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 250, b.getCenterX(), 450));
+        path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 450, b.getCenterX(), 450));
+        path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 300, b.getCenterX(), 450));
         path.getElements().add(new CubicCurveTo(b.getCenterX(), 450, b.getCenterX(), 187, b.getCenterX(), 187));
         PathTransition pathTransition = new PathTransition();
-        pathTransition.setDuration(Duration.millis(4250));
+        pathTransition.setDuration(Duration.millis(4000));
         pathTransition.setPath(path);
         pathTransition.setNode(b);
         pathTransition.play();
