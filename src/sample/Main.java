@@ -58,7 +58,7 @@ class Game extends Main{
     }
     private void play(Stage primaryStage) throws IOException{
         //start new game
-        Scene menu,game,titleScreen,splashScreen,mainMenu,enterName,startGame;
+        Scene menu,game,titleScreen,splashScreen,mainMenu,enterName,startGame,resumeScreen;
         //Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         Label label1 = new Label("COLOR GAME");
         Button start = new Button("Start");
@@ -101,7 +101,7 @@ class Game extends Main{
         game = new Scene(layout2,300,500);
         start.setOnAction(e->primaryStage.setScene(game));
 
-        startGame = startGame();
+//        startGame = startGame();
 
 //        mainMenu = mainMenu();
 //
@@ -114,15 +114,31 @@ class Game extends Main{
 //        titleScreen = titleImage();
 //        pauseTransition(primaryStage,splashScreen,2);
 
-        primaryStage.setScene(startGame);
+        resumeScreen = resumeGame();
+
+        primaryStage.setScene(resumeScreen);
         primaryStage.setTitle("Color Switch");
         primaryStage.show();
     }
 
-//    private Scene resumeGame(){
-//
-//        return new Scene(pane,300,500);
-//    }
+    private Scene resumeGame(){
+        Line line = new Line(0,0,300,0);
+        line.setStrokeWidth(140);
+        line.setStroke(Color.valueOf("#e53e7b"));
+        HBox hbox = new HBox();
+        for(int i=0;i<18;i++){
+            hbox.getChildren().add(new Circle(300.0f,100.0f,10.f,Color.valueOf("#e53e7b")));
+        }
+
+        Text text = new Text("SAVED GAMES");
+        text.getStyleClass().add("headerText");
+
+        Pane pane = new Pane(line,hbox);
+        pane.setStyle("-fx-background-color: #282828");
+        hbox.relocate(0,60);
+        StackPane stackPane = new StackPane(pane,text);
+        return new Scene(stackPane,300,500);
+    }
 
     private Scene startGame() throws IOException{
         ColorChanger colorChanger = new ColorChanger();
