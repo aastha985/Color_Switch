@@ -2,6 +2,7 @@ package sample;
 
 import javafx.animation.*;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -11,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -102,20 +104,20 @@ class Game extends Main{
 
         startGame = startGame();
 
-        mainMenu = mainMenu();
-//
-//        enterName = enterName();
-//        pauseTransition(primaryStage,mainMenu,20);
-//
-//        splashScreen = splashScreen();
-//        pauseTransition(primaryStage,enterName,10);
-//
-//        titleScreen = titleImage();
-//        pauseTransition(primaryStage,splashScreen,2);
-
         resumeScreen = resumeGame();
+        mainMenu = mainMenu(resumeScreen, startGame,primaryStage);
 
-        primaryStage.setScene(resumeScreen);
+        enterName = enterName(mainMenu, primaryStage);
+
+        splashScreen = splashScreen();
+
+        pauseTransition(primaryStage,enterName,6);
+
+        titleScreen = titleImage();
+        pauseTransition(primaryStage,splashScreen,2);
+
+
+        primaryStage.setScene(titleScreen);
         primaryStage.setTitle("Color Switch");
         primaryStage.show();
     }
@@ -158,7 +160,7 @@ class Game extends Main{
         return new Scene(stackPane,300,500);
     }
 
-    private Scene enterName() throws IOException{
+    private Scene enterName(Scene mainMenu, Stage primaryStage) throws IOException{
         Text text = new Text("Enter Name");
         text.setId("text");
         TextField name = new TextField();
@@ -167,7 +169,7 @@ class Game extends Main{
         name.setAlignment(Pos.CENTER);
         Button next = new Button("NEXT");
         next.setId("nextBtn");
-
+        next.setOnAction(e->primaryStage.setScene(mainMenu));
         Image image = new Image(new FileInputStream("src/ShortTitleImage.jpg"));
         ImageView titleImage = new ImageView(image);
         titleImage.setFitWidth(250);
@@ -190,8 +192,8 @@ class Game extends Main{
         return scene;
     }
 
-    private Scene mainMenu() throws IOException{
-        Group root = circleAnimation();
+    private Scene mainMenu(Scene resumeScreen, Scene startScreen ,Stage primaryStage) throws IOException{
+        Group root = circleAnimation(startScreen, primaryStage);
         Button start = new Button("START");
         Button resume = new Button("RESUME");
         Button exit = new Button("EXIT");
@@ -211,13 +213,16 @@ class Game extends Main{
         grid.setHalignment(exit,HPos.CENTER);
         Scene scene = new Scene(grid,300,500);
         start.getStyleClass().add("button");
+        start.setOnAction(e->primaryStage.setScene(startScreen));
         resume.getStyleClass().add("button");
+        resume.setOnAction(e->primaryStage.setScene(resumeScreen));
         exit.getStyleClass().add("button");
+        exit.setOnAction(e->System.exit(1));
         scene.getStylesheets().add("Theme.css");
         return scene;
     }
 
-    private Group circleAnimation() throws FileNotFoundException,IOException {
+    private Group circleAnimation(Scene startScreen, Stage primaryStage) throws FileNotFoundException,IOException {
         Circular outer = new Circular();
         Group root = outer.show(300.0f,100.0f,120.0f,100.0f);
         outer.move(root,360);
@@ -233,7 +238,19 @@ class Game extends Main{
         triangleImage.setX(270);
         triangleImage.setY(64);
         triangleImage.setPreserveRatio(true);
+        triangleImage.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                primaryStage.setScene(startScreen);
+            }
+        });
         Circle circle = new Circle(300.0f,100.0f,55.f,Color.valueOf("#585858"));
+        circle.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                primaryStage.setScene(startScreen);
+            }
+        });
         return new Group(root,root2,root3,circle,triangleImage);
     }
 
