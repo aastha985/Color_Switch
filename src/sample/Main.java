@@ -55,7 +55,7 @@ class Game extends Main{
     }
     private void play(Stage primaryStage) throws IOException{
         //start new game
-        Scene menu,game,titleScreen,splashScreen,mainMenu,enterName;
+        Scene menu,game,titleScreen,splashScreen,mainMenu,enterName,startGame;
         //Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         Label label1 = new Label("COLOR GAME");
         Button start = new Button("Start");
@@ -98,20 +98,31 @@ class Game extends Main{
         game = new Scene(layout2,300,500);
         start.setOnAction(e->primaryStage.setScene(game));
 
-        mainMenu = mainMenu();
+        startGame = startGame();
 
-        enterName = enterName();
-        pauseTransition(primaryStage,mainMenu,20);
+//        mainMenu = mainMenu();
+//
+//        enterName = enterName();
+//        pauseTransition(primaryStage,mainMenu,20);
+//
+//        splashScreen = splashScreen();
+//        pauseTransition(primaryStage,enterName,10);
+//
+//        titleScreen = titleImage();
+//        pauseTransition(primaryStage,splashScreen,2);
 
-        splashScreen = splashScreen();
-        pauseTransition(primaryStage,enterName,10);
-
-        titleScreen = titleImage();
-        pauseTransition(primaryStage,splashScreen,2);
-
-        primaryStage.setScene(titleScreen);
+        primaryStage.setScene(startGame);
         primaryStage.setTitle("Color Switch");
         primaryStage.show();
+    }
+
+    private Scene startGame(){
+        ColorChanger colorChanger = new ColorChanger();
+        Group root = colorChanger.show(10,10);
+        StackPane stackPane = new StackPane();
+        stackPane.getChildren().add(root);
+        stackPane.setStyle("-fx-background-color: #282828");
+        return new Scene(stackPane,300,500);
     }
 
     private Scene enterName() throws IOException{
@@ -248,6 +259,28 @@ class Ball extends Game{
     public Circle show(){
         Circle circle = new Circle(10.f,Color.valueOf("#f7f7f7"));
         return circle;
+    }
+}
+
+class ColorChanger extends Game{
+    private final float radius;
+    ColorChanger(){
+        this.radius = 13;
+    }
+    public Group show(float x,float y){
+        float angle = 0.0f;
+        Arc arcs[] = new Arc[4];
+
+        Paint paint[] = {Color.valueOf("#e53e7b"),Color.valueOf("#8a49ef"),Color.valueOf("#eed948"),Color.valueOf("#5edcea")};
+        for(int i=0;i<4;i++){
+            arcs[i] = new Arc(x,y,radius,radius,angle,90.0f);
+
+            arcs[i].setType(ArcType.ROUND);
+            arcs[i].setFill(paint[i]);
+            angle+=90.0f;
+        }
+        Group root = new Group(arcs[0],arcs[1],arcs[2],arcs[3]);
+        return root;
     }
 }
 
