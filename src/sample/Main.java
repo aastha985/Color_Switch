@@ -6,9 +6,7 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -101,7 +99,7 @@ class Game extends Main{
         game = new Scene(layout2,300,500);
         start.setOnAction(e->primaryStage.setScene(game));
 
-//        startGame = startGame();
+        startGame = startGame();
 
 //        mainMenu = mainMenu();
 //
@@ -145,10 +143,12 @@ class Game extends Main{
         Group root = colorChanger.show(10,10);
 
         Star star = new Star();
-        ImageView starImage = star.show();
+        Group starImage = star.show();
+        star.blink(starImage);
 
         Diamond diamond = new Diamond();
         Group dia = diamond.show();
+        diamond.blink(dia);
 
         VBox stackPane = new VBox();
         stackPane.getChildren().addAll(root,starImage,dia);
@@ -294,21 +294,29 @@ class Ball extends Game{
 }
 
 class Reward extends Game{
-}
-
-class Star extends Game{
-    public ImageView show() throws IOException{
-        Image image = new Image(new FileInputStream("src/star.jpg"));
-        ImageView star = new ImageView(image);
-        star.setFitWidth(40);
-        star.setPreserveRatio(true);
-        return star;
+    public void blink(Group root){
+        ScaleTransition st = new ScaleTransition(Duration.millis(1000),root);
+         st.setByX(0.15f);
+         st.setByY(0.15f);
+         st.setCycleCount(100);
+         st.setAutoReverse(true);
+         st.play();
     }
 }
 
-class Diamond extends Game{
+class Star extends Reward{
+    public Group show() throws IOException{
+        Image image = new Image(new FileInputStream("src/star.jpg"));
+        ImageView star = new ImageView(image);
+        star.setFitWidth(35);
+        star.setPreserveRatio(true);
+        return new Group(star);
+    }
+}
+
+class Diamond extends Reward{
     public Group show(){
-        Rectangle dia = new Rectangle(50,50,23,23);
+        Rectangle dia = new Rectangle(50,50,20,20);
         dia.setArcWidth(3);
         dia.setArcHeight(2);
         dia.setFill(Color.valueOf("#f7f7f7"));
