@@ -6,7 +6,9 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -116,11 +118,18 @@ class Game extends Main{
         primaryStage.show();
     }
 
-    private Scene startGame(){
+    private Scene startGame() throws IOException{
         ColorChanger colorChanger = new ColorChanger();
         Group root = colorChanger.show(10,10);
-        StackPane stackPane = new StackPane();
-        stackPane.getChildren().add(root);
+
+        Star star = new Star();
+        ImageView starImage = star.show();
+
+        Diamond diamond = new Diamond();
+        Group dia = diamond.show();
+
+        VBox stackPane = new VBox();
+        stackPane.getChildren().addAll(root,starImage,dia);
         stackPane.setStyle("-fx-background-color: #282828");
         return new Scene(stackPane,300,500);
     }
@@ -259,6 +268,32 @@ class Ball extends Game{
     public Circle show(){
         Circle circle = new Circle(10.f,Color.valueOf("#f7f7f7"));
         return circle;
+    }
+}
+
+class Reward extends Game{
+}
+
+class Star extends Game{
+    public ImageView show() throws IOException{
+        Image image = new Image(new FileInputStream("src/star.jpg"));
+        ImageView star = new ImageView(image);
+        star.setFitWidth(40);
+        star.setPreserveRatio(true);
+        return star;
+    }
+}
+
+class Diamond extends Game{
+    public Group show(){
+        Rectangle dia = new Rectangle(50,50,23,23);
+        dia.setArcWidth(3);
+        dia.setArcHeight(2);
+        dia.setFill(Color.valueOf("#f7f7f7"));
+        Rotate rotate = new Rotate(45);
+        dia.getTransforms().add(rotate);
+        Group group = new Group(dia);
+        return group;
     }
 }
 
