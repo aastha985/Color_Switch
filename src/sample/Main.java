@@ -19,6 +19,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Shear;
 import javafx.stage.Stage;
 import javafx.scene.control.Button;
 import javafx.util.Duration;
@@ -117,6 +118,11 @@ class Game extends Main{
         primaryStage.setTitle("Color Switch");
         primaryStage.show();
     }
+
+//    private Scene resumeGame(){
+//
+//        return new Scene(pane,300,500);
+//    }
 
     private Scene startGame() throws IOException{
         ColorChanger colorChanger = new ColorChanger();
@@ -290,8 +296,10 @@ class Diamond extends Game{
         dia.setArcWidth(3);
         dia.setArcHeight(2);
         dia.setFill(Color.valueOf("#f7f7f7"));
-        Rotate rotate = new Rotate(45);
-        dia.getTransforms().add(rotate);
+        Rotate rotate = new Rotate(52);
+        Shear shear = new Shear();
+        shear.setX(0.3);
+        dia.getTransforms().addAll(rotate,shear);
         Group group = new Group(dia);
         return group;
     }
