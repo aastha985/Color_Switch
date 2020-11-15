@@ -55,21 +55,15 @@ class Game extends Main{
         Label label1 = new Label("COLOR GAME");
         Button start = new Button("Start");
 
-//        Circular circle = new Circular();
-//        Group root = circle.show(300.0f,100.0f,70.0f,56.0f);
-//        circle.move(root,360);
+//
 //
 //        Square square = new Square();
 //        Group root = square.show(100.0f,150.0f,110.0f,110.0f);
 //        square.move(root,360);
 //
-//        Plus plus = new Plus();
-//        Group root = plus.show(200.0f,300.0f,70.0f);
-//        plus.move(root,360);
-//
-        HorizontalLine horizontalLine = new HorizontalLine();
-        Group root = horizontalLine.show(10.0f,75.0f);
-        horizontalLine.move(root);
+        Plus plus = new Plus();
+        Group root = plus.show(200.0f,300.0f,70.0f);
+        plus.move(root,360);
 
 //        VerticalLine verticalLine = new VerticalLine();
 //        Group root5[] = verticalLine.show();
@@ -92,8 +86,6 @@ class Game extends Main{
         layout1.setStyle("-fx-background-color: #282828");
         game = new Scene(layout2,300,500);
         start.setOnAction(e->primaryStage.setScene(game));
-
-        play(primaryStage);
 
         mainMenu = mainMenu(primaryStage);
 
@@ -134,22 +126,51 @@ class Game extends Main{
     }
 
     private void play(Stage primaryStage) throws IOException{
-        ColorChanger colorChanger = new ColorChanger();
-        Group root = colorChanger.show(10,10);
-        root.relocate(40,120);
+
+        Ball ball = new Ball();
+        Circle b = ball.show();
+        b.setCenterX(150);
+        b.setCenterY(450);
+        Pane pane = new Pane();
+        pane.getChildren().add(b);
+
+        Circular circle = new Circular();
+        Group root = circle.show(150.0f,300.0f,70.0f,56.0f);
+        circle.move(root,360);
+        pane.getChildren().add(root);
 
         Star star = new Star();
         Group starImage = star.show();
-        starImage.relocate(40,40);
+        starImage.relocate(132,285);
         star.blink(starImage);
+        pane.getChildren().add(starImage);
+
+        ColorChanger colorChanger = new ColorChanger();
+        Group changer = colorChanger.show(10,10);
+        changer.relocate(137,180);
+        pane.getChildren().add(changer);
+
+        HorizontalLine horizontalLine = new HorizontalLine();
+        Group horizontal = horizontalLine.show(130.0f,75.0f);
+        horizontalLine.moveLeft(horizontal);
+        pane.getChildren().add(horizontal);
 
         Diamond diamond = new Diamond();
         Group dia = diamond.show();
-        dia.relocate(40,80);
+        dia.relocate(135,70);
         diamond.blink(dia);
+        pane.getChildren().add(dia);
 
-        Pane pane = new Pane();
-        pane.getChildren().addAll(root,starImage,dia);
+        HorizontalLine horizontalLine2 = new HorizontalLine();
+        Group horizontal2 = horizontalLine2.show(30.0f,75.0f);
+        horizontalLine2.moveRight(horizontal2);
+        pane.getChildren().add(horizontal2);
+
+//        ColorChanger colorChanger2 = new ColorChanger();
+//        Group changer2 = colorChanger2.show(10,10);
+//        changer2.relocate(137,0);
+//        pane.getChildren().add(changer2);
+
         pane.setStyle("-fx-background-color: #282828");
         Scene startScene = new Scene(pane,300,500);
         primaryStage.setScene(startScene);
@@ -388,7 +409,7 @@ class Linear extends Obstacles{
     public void moveLeft(Group root){
         TranslateTransition translate = new TranslateTransition();
         translate.setByX(-300);
-        translate.setDuration(Duration.millis(3000));
+        translate.setDuration(Duration.millis(2000));
         translate.setCycleCount(500);
         translate.setAutoReverse(true);
         translate.setNode(root);
@@ -398,7 +419,7 @@ class Linear extends Obstacles{
     public  void moveRight(Group root){
         TranslateTransition translate = new TranslateTransition();
         translate.setByX(300);
-        translate.setDuration(Duration.millis(3000));
+        translate.setDuration(Duration.millis(2000));
         translate.setCycleCount(500);
         translate.setAutoReverse(true);
         translate.setNode(root);
