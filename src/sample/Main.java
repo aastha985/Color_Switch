@@ -48,18 +48,9 @@ class Player{
 }
 
 class Game extends Main{
-    public void start (Stage primaryStage)throws IOException
-    {
-        this.play(primaryStage);
-    }
-    private void resume(){
-        //show saved games
-        //choose saved game
-        //savedGame.start()
-    }
-    private void play(Stage primaryStage) throws IOException{
+    public void start(Stage primaryStage) throws IOException{
         //start new game
-        Scene menu,game,titleScreen,splashScreen,mainMenu,enterName,startGame,resumeScreen;
+        Scene menu,game,titleScreen,splashScreen,mainMenu,enterName,play,resumeScreen;
         //Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         Label label1 = new Label("COLOR GAME");
         Button start = new Button("Start");
@@ -102,10 +93,9 @@ class Game extends Main{
         game = new Scene(layout2,300,500);
         start.setOnAction(e->primaryStage.setScene(game));
 
-        startGame = startGame();
+        play(primaryStage);
 
-        resumeScreen = resumeGame();
-        mainMenu = mainMenu(resumeScreen, startGame,primaryStage);
+        mainMenu = mainMenu(primaryStage);
 
         enterName = enterName(mainMenu, primaryStage);
 
@@ -122,7 +112,7 @@ class Game extends Main{
         primaryStage.show();
     }
 
-    private Scene resumeGame(){
+    private void resume(Stage primaryStage){
         Line line = new Line(0,0,300,0);
         line.setStrokeWidth(140);
         line.setStroke(Color.valueOf("#e53e7b"));
@@ -139,25 +129,30 @@ class Game extends Main{
         pane.setStyle("-fx-background-color: #282828");
         pane.getChildren().add(headerText);
         hbox.relocate(0,60);
-        return new Scene(pane,300,500);
+        Scene resumeScene =  new Scene(pane,300,500);
+        primaryStage.setScene(resumeScene);
     }
 
-    private Scene startGame() throws IOException{
+    private void play(Stage primaryStage) throws IOException{
         ColorChanger colorChanger = new ColorChanger();
         Group root = colorChanger.show(10,10);
+        root.relocate(40,120);
 
         Star star = new Star();
         Group starImage = star.show();
+        starImage.relocate(40,40);
         star.blink(starImage);
 
         Diamond diamond = new Diamond();
         Group dia = diamond.show();
+        dia.relocate(40,80);
         diamond.blink(dia);
 
-        VBox stackPane = new VBox();
-        stackPane.getChildren().addAll(root,starImage,dia);
-        stackPane.setStyle("-fx-background-color: #282828");
-        return new Scene(stackPane,300,500);
+        Pane pane = new Pane();
+        pane.getChildren().addAll(root,starImage,dia);
+        pane.setStyle("-fx-background-color: #282828");
+        Scene startScene = new Scene(pane,300,500);
+        primaryStage.setScene(startScene);
     }
 
     private Scene enterName(Scene mainMenu, Stage primaryStage) throws IOException{
@@ -192,8 +187,8 @@ class Game extends Main{
         return scene;
     }
 
-    private Scene mainMenu(Scene resumeScreen, Scene startScreen ,Stage primaryStage) throws IOException{
-        Group root = circleAnimation(startScreen, primaryStage);
+    private Scene mainMenu(Stage primaryStage) throws IOException{
+        Group root = circleAnimation(primaryStage);
         Button start = new Button("START");
         Button resume = new Button("RESUME");
         Button exit = new Button("EXIT");
@@ -213,16 +208,23 @@ class Game extends Main{
         grid.setHalignment(exit,HPos.CENTER);
         Scene scene = new Scene(grid,300,500);
         start.getStyleClass().add("button");
-        start.setOnAction(e->primaryStage.setScene(startScreen));
+//        start.setOnAction(e->primaryStage.setScene(startScreen));
+        start.setOnAction(e-> {
+            try {
+                this.play(primaryStage);
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        });
         resume.getStyleClass().add("button");
-        resume.setOnAction(e->primaryStage.setScene(resumeScreen));
+        resume.setOnAction(e-> this.resume(primaryStage));
         exit.getStyleClass().add("button");
         exit.setOnAction(e->System.exit(1));
         scene.getStylesheets().add("Theme.css");
         return scene;
     }
 
-    private Group circleAnimation(Scene startScreen, Stage primaryStage) throws FileNotFoundException,IOException {
+    private Group circleAnimation(Stage primaryStage) throws FileNotFoundException,IOException {
         Circular outer = new Circular();
         Group root = outer.show(300.0f,100.0f,120.0f,100.0f);
         outer.move(root,360);
@@ -238,19 +240,19 @@ class Game extends Main{
         triangleImage.setX(270);
         triangleImage.setY(64);
         triangleImage.setPreserveRatio(true);
-        triangleImage.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent mouseEvent) {
-                primaryStage.setScene(startScreen);
-            }
-        });
+//        triangleImage.setOnMouseClicked(new EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent mouseEvent) {
+//                primaryStage.setScene(startScreen);
+//            }
+//        });
         Circle circle = new Circle(300.0f,100.0f,55.f,Color.valueOf("#585858"));
-        circle.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent mouseEvent) {
-                primaryStage.setScene(startScreen);
-            }
-        });
+//        circle.setOnMouseClicked(new EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent mouseEvent) {
+//                primaryStage.setScene(startScreen);
+//            }
+//        });
         return new Group(root,root2,root3,circle,triangleImage);
     }
 
