@@ -2,6 +2,7 @@ package sample;
 
 import javafx.animation.*;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -136,6 +137,17 @@ class Game extends Main{
         Pane pane = new Pane();
         pane.getChildren().add(b);
 
+        Text pause = new Text("II");
+        pause.relocate(10,480);
+        pane.getChildren().add(pause);
+        pause.setStyle("-fx-fill:white; -fx-font-size: 35px");
+        pause.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                System.out.println("paused game");
+            }
+        });
+
         Circular circle = new Circular();
         Group root = circle.show(150,300,70.0f,56.0f);
         circle.move(root,360);
@@ -199,7 +211,7 @@ class Game extends Main{
             PathTransition pathTransition1 = new PathTransition();
             pathTransition1.setPath(path1);
             pathTransition1.setNode(root);
-            pathTransition1.play();
+//            pathTransition1.play();
         });
 
         pane.setStyle("-fx-background-color: #282828");
