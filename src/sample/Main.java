@@ -2,7 +2,6 @@ package sample;
 
 import javafx.animation.*;
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -28,6 +27,7 @@ import javafx.util.Duration;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Main extends Application{
     @Override
@@ -127,15 +127,17 @@ class Game extends Main{
 
     private void play(Stage primaryStage) throws IOException{
 
+        double ballx = 150;
+        AtomicReference<Double> bally = new AtomicReference<>((double) 450);
         Ball ball = new Ball();
         Circle b = ball.show();
-        b.setCenterX(150);
-        b.setCenterY(450);
+        b.setCenterX(ballx);
+        b.setCenterY(bally.get());
         Pane pane = new Pane();
         pane.getChildren().add(b);
 
         Circular circle = new Circular();
-        Group root = circle.show(150.0f,300.0f,70.0f,56.0f);
+        Group root = circle.show(150,300,70.0f,56.0f);
         circle.move(root,360);
         pane.getChildren().add(root);
 
@@ -170,6 +172,35 @@ class Game extends Main{
 //        Group changer2 = colorChanger2.show(10,10);
 //        changer2.relocate(137,0);
 //        pane.getChildren().add(changer2);
+//        Group root = root;
+        Group obstacle2 = horizontal;
+
+        pane.addEventHandler(MouseEvent.MOUSE_RELEASED,e->{
+            System.out.println("hello");
+            double change = bally.get();
+            Path path = new Path();
+            path.getElements().add(new MoveTo(b.getCenterX(), b.getCenterY()));
+            path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), change-100, b.getCenterX(), change-45));
+            bally.set((change-45));
+            PathTransition pathTransition = new PathTransition();
+            pathTransition.setDuration(Duration.millis(300));
+            pathTransition.setPath(path);
+            pathTransition.setNode(b);
+            pathTransition.play();
+            b.setCenterY(bally.get());
+            change = root.getLayoutY();
+            Path path1 = new Path();
+            path1.getElements().add(new MoveTo(root.getLayoutX(), root.getLayoutY()));
+            path1.getElements().add(new CubicCurveTo(root.getLayoutX(), root.getLayoutY(), root.getLayoutX(), change+20, root.getLayoutX(), change+20));
+            System.out.println(root.getLayoutY());
+            root.relocate(150, change+20);
+//            root.setLayoutY(change+20);
+//            root.setLayoutX(150);
+            PathTransition pathTransition1 = new PathTransition();
+            pathTransition1.setPath(path1);
+            pathTransition1.setNode(root);
+            pathTransition1.play();
+        });
 
         pane.setStyle("-fx-background-color: #282828");
         Scene startScene = new Scene(pane,300,500);
