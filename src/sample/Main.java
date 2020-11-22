@@ -141,12 +141,12 @@ class Game extends Main{
         dia.relocate(135,70);
         diamond.blink(dia);
 
-        Image image = new Image(new FileInputStream("src/trophy.png"));
+        Image image = new Image(new FileInputStream("src/images/trophy.png"));
         ImageView Image = new ImageView(image);
         Image.setFitWidth(40);
         Image.setPreserveRatio(true);
 
-        Image iconImage = new Image(new FileInputStream("src/staricon.png"));
+        Image iconImage = new Image(new FileInputStream("src/images/staricon.png"));
         ImageView icon = new ImageView(iconImage);
         icon.setFitWidth(38);
         icon.setPreserveRatio(true);
@@ -195,7 +195,7 @@ class Game extends Main{
     }
 
     private Scene prize ()throws IOException{
-        Image image = new Image(new FileInputStream("src/gift.png"));
+        Image image = new Image(new FileInputStream("src/images/gift.png"));
         ImageView Image = new ImageView(image);
         Image.setFitWidth(250);
         Image.setPreserveRatio(true);
@@ -372,7 +372,7 @@ class Game extends Main{
         Button next = new Button("NEXT");
         next.setId("nextBtn");
         next.setOnAction(e->primaryStage.setScene(mainMenu));
-        Image image = new Image(new FileInputStream("src/ShortTitleImage.jpg"));
+        Image image = new Image(new FileInputStream("src/images/ShortTitleImage.jpg"));
         ImageView titleImage = new ImageView(image);
         titleImage.setFitWidth(250);
         titleImage.setPreserveRatio(true);
@@ -407,13 +407,13 @@ class Game extends Main{
                     e.printStackTrace();
                 }
             });
-            Image iconImage = new Image(new FileInputStream("src/staricon2.png"));
+            Image iconImage = new Image(new FileInputStream("src/images/staricon2.png"));
             ImageView icon = new ImageView(iconImage);
             icon.setFitWidth(38);
             icon.setPreserveRatio(true);
             icon.setOnMouseClicked(mouseEvent -> primaryStage.setScene(playerDetails));
 
-            Image giftImage = new Image(new FileInputStream("src/gifticon.png"));
+            Image giftImage = new Image(new FileInputStream("src/images/gifticon.png"));
             ImageView icon2 = new ImageView(giftImage);
             icon2.setFitWidth(46);
             icon2.setPreserveRatio(true);
@@ -468,7 +468,7 @@ class Game extends Main{
         Circular inner = new Circular();
         Group root3 = inner.show(300.0f,100.0f,75.0f,60.0f);
         inner.move(root3,360);
-        Image image = new Image(new FileInputStream("src/Triangle.jpg"));
+        Image image = new Image(new FileInputStream("src/images/Triangle.jpg"));
         ImageView triangleImage = new ImageView(image);
         triangleImage.setFitWidth(70);
         triangleImage.setX(270);
@@ -515,7 +515,7 @@ class Game extends Main{
     }
 
     private Scene titleImage() throws IOException{
-        Image image = new Image(new FileInputStream("src/TitleImage.jpg"));
+        Image image = new Image(new FileInputStream("src/images/TitleImage.jpg"));
         ImageView titleImage = new ImageView(image);
         titleImage.setFitWidth(300);
         titleImage.setPreserveRatio(true);
@@ -549,7 +549,7 @@ class Reward extends Game{
 
 class Star extends Reward{
     public Group show() throws IOException{
-        Image image = new Image(new FileInputStream("src/star.jpg"));
+        Image image = new Image(new FileInputStream("src/images/star.jpg"));
         ImageView star = new ImageView(image);
         star.setFitWidth(35);
         star.setPreserveRatio(true);
