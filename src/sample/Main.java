@@ -2,6 +2,7 @@ package sample;
 
 import javafx.animation.*;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -73,6 +74,11 @@ class Game extends Main{
 //        StackPane stack = new StackPane(root5[0],root5[1]);
 //        HBox hbox = new HBox(root5[0],root5[1]);
 
+        Arrow backButton = new Arrow();
+        Group button = backButton.show();
+        StackPane testPane = new StackPane(button);
+        testPane.setStyle("-fx-background-color: #282828");
+        Scene test = new Scene(testPane);
 
         VBox layout1 = new VBox(50);
         layout1.getChildren().addAll(label1,start,root);
@@ -88,21 +94,158 @@ class Game extends Main{
         game = new Scene(layout2,300,500);
         start.setOnAction(e->primaryStage.setScene(game));
 
-        mainMenu = mainMenu(primaryStage);
+//        mainMenu = mainMenu(primaryStage);
+//
+//        enterName = enterName(mainMenu, primaryStage);
+//
+//        splashScreen = splashScreen();
+//
+//        pauseTransition(primaryStage,enterName,6);
+//
+//        titleScreen = titleImage();
+//        pauseTransition(primaryStage,splashScreen,2);
 
-        enterName = enterName(mainMenu, primaryStage);
+        Scene prizes = prize();
 
-        splashScreen = splashScreen();
+        Scene playerDetails = playerDetails();
 
-        pauseTransition(primaryStage,enterName,6);
-
-        titleScreen = titleImage();
-        pauseTransition(primaryStage,splashScreen,2);
-
-
-        primaryStage.setScene(titleScreen);
+        primaryStage.setScene(playerDetails);
         primaryStage.setTitle("Color Switch");
         primaryStage.show();
+    }
+
+    private Scene playerDetails() throws IOException{
+        Text name = new Text("Agrim Chopra");
+        Text highScore = new Text("High Score:");
+        Text highScoreNo = new Text("51");
+        Text stars = new Text("Stars");
+        Text starsno = new Text("100");
+        Text diamonds = new Text("Diamonds");
+        Text diamondsno = new Text("40");
+
+        name.getStyleClass().add("title-text");
+        highScore.getStyleClass().add("white-text");
+        stars.getStyleClass().add("white-text");
+        diamonds.getStyleClass().add("white-text");
+        starsno.getStyleClass().add("white-text");
+        diamondsno.getStyleClass().add("white-text");
+        highScoreNo.getStyleClass().add("white-text");
+
+        Star star = new Star();
+        Group starImage = star.show();
+        starImage.relocate(132,285);
+        star.blink(starImage);
+
+        Diamond diamond = new Diamond();
+        Group dia = diamond.show();
+        dia.relocate(135,70);
+        diamond.blink(dia);
+
+        Image image = new Image(new FileInputStream("src/trophy.png"));
+        ImageView Image = new ImageView(image);
+        Image.setFitWidth(40);
+        Image.setPreserveRatio(true);
+
+        Image iconImage = new Image(new FileInputStream("src/st.png"));
+        ImageView icon = new ImageView(iconImage);
+        icon.setFitWidth(38);
+        icon.setPreserveRatio(true);
+
+        Circle circle = new Circle(150.0f, 150.0f, 20.f);
+        Circle circle2 = new Circle(150.0f,150.0f,18.0f);
+        Shape ring =Shape.subtract(circle,circle2);
+        ring.setFill(Color.valueOf("#fff"));
+        circle2.setFill(null);
+        Group ringg = new Group(ring);
+
+        Line line = new Line(0,0,300,0);
+        line.setStrokeWidth(140);
+        line.setStroke(Color.valueOf("#ff3333"));
+        HBox hbox = new HBox();
+        for(int i=0;i<18;i++){
+            hbox.getChildren().add(new Circle(300.0f,100.0f,10.f,Color.valueOf("#ff3333")));
+        }
+
+        Text headerText = new Text("STATS");
+        headerText.setFont(new Font(27));
+        headerText.setStyle("-fx-fill: #f7f7f7");
+        headerText.relocate(20,22);
+        Pane pane = new Pane(line,hbox,name,highScore,stars,diamonds,starImage,dia,starsno,diamondsno,Image,highScoreNo,ringg,icon);
+        pane.setStyle("-fx-background-color: #282828");
+        pane.getChildren().add(headerText);
+        hbox.relocate(0,60);
+
+        ringg.relocate(115,20);
+        icon.relocate(115,20);
+        name.relocate(63,115);
+        highScore.relocate(100,200);
+        highScoreNo.relocate(200,200);
+        Image.relocate(50,180);
+        stars.relocate(40,330);
+        diamonds.relocate(180,330);
+        starImage.relocate(40,280);
+        dia.relocate(210,280);
+        starsno.relocate(42,360);
+        diamondsno.relocate(210,360);
+
+
+        Scene scene = new Scene(pane,300,500);
+        scene.getStylesheets().add("Theme.css");
+        return scene;
+    }
+
+    private Scene prize ()throws IOException{
+        Image image = new Image(new FileInputStream("src/gift.png"));
+        ImageView Image = new ImageView(image);
+        Image.setFitWidth(250);
+        Image.setPreserveRatio(true);
+
+        Text text = new Text("Click on the gift image to \nunlock today's prize.");
+        text.setFill(Color.valueOf("#fff"));
+        text.setFont(Font.font ("Verdana", 18));
+        Image.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                System.out.println("image clicked");
+
+                RotateTransition rotate = new RotateTransition();
+                rotate.setAxis(Rotate.Z_AXIS);
+                rotate.setByAngle(360);
+                rotate.setCycleCount(1);
+                rotate.setDuration(Duration.millis(2000));
+                rotate.setInterpolator(Interpolator.LINEAR);
+                rotate.setNode(Image);
+                rotate.play();
+
+//                rotate.setOnFinished(new EventHandler<ActionEvent>() {
+//                    @Override public void handle(ActionEvent event) {
+//                        Image.setVisible(false);
+//                    }
+//                });
+
+                ScaleTransition scaleTransition = new ScaleTransition();
+                scaleTransition.setDuration(Duration.millis(2000));
+                scaleTransition.setByY(-1);
+                scaleTransition.setByX(-1);
+                scaleTransition.setNode(Image);
+                scaleTransition.setCycleCount(1);
+                scaleTransition.setAutoReverse(false);
+                scaleTransition.play();
+
+            }
+        });
+
+        GridPane grid = new GridPane();
+        grid.setMinSize(300, 500);
+        grid.setPadding(new Insets(10, 10, 10, 10));
+        grid.setVgap(5);
+        grid.setHgap(20);
+        grid.add(text,0,0);
+        grid.add(Image, 0, 7);
+        grid.setAlignment(Pos.CENTER);
+        grid.setStyle("-fx-background-color: #282828");
+
+        return new Scene(grid,300,500);
     }
 
     private void resume(Stage primaryStage){
@@ -410,6 +553,26 @@ class Diamond extends Reward{
         shear.setX(0.3);
         dia.getTransforms().addAll(rotate,shear);
         Group group = new Group(dia);
+        return group;
+    }
+}
+
+class Arrow extends Game{
+    private final int strokeWidth;
+    Arrow(){
+        this.strokeWidth = 3;
+    }
+    public Group show(){
+        Line line = new Line(10, 20, 50, 20);
+        Line line2 = new Line(10,20,20,10);
+        Line line3 = new Line(10,20,20,30);
+        line.setStrokeWidth(strokeWidth);
+        line.setStroke(Color.valueOf("#fff"));
+        line2.setStrokeWidth(strokeWidth);
+        line2.setStroke(Color.valueOf("#fff"));
+        line3.setStrokeWidth(strokeWidth);
+        line3.setStroke(Color.valueOf("#fff"));
+        Group group = new Group(line,line2,line3);
         return group;
     }
 }
