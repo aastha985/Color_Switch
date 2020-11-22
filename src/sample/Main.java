@@ -93,7 +93,12 @@ class Game extends Main{
         game = new Scene(layout2,300,500);
         start.setOnAction(e->primaryStage.setScene(game));
 
-        mainMenu = mainMenu(primaryStage);
+
+        Scene prizes = prize();
+
+        Scene playerDetails = playerDetails();
+
+        mainMenu = mainMenu(primaryStage, prizes, playerDetails);
 
         enterName = enterName(mainMenu, primaryStage);
 
@@ -103,10 +108,6 @@ class Game extends Main{
 
         titleScreen = titleImage();
         pauseTransition(primaryStage,splashScreen,2);
-
-        Scene prizes = prize();
-
-        Scene playerDetails = playerDetails();
 
         primaryStage.setScene(titleScreen);
         primaryStage.setTitle("Color Switch");
@@ -393,57 +394,68 @@ class Game extends Main{
         return scene;
     }
 
-    private Scene mainMenu(Stage primaryStage) throws IOException{
-        Group root = circleAnimation(primaryStage);
-        Button start = new Button("START");
-        Button resume = new Button("RESUME");
-        Button exit = new Button("EXIT");
+    private Scene mainMenu(Stage primaryStage, Scene prizes, Scene playerDetails) throws IOException{
+            Group root = circleAnimation(primaryStage);
+            Button start = new Button("START");
+            Button resume = new Button("RESUME");
+            Button exit = new Button("EXIT");
 
-        Image iconImage = new Image(new FileInputStream("src/staricon2.png"));
-        ImageView icon = new ImageView(iconImage);
-        icon.setFitWidth(38);
-        icon.setPreserveRatio(true);
+            root.setOnMouseClicked(mouseEvent -> {
+                try {
+                    this.play(primaryStage);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+            Image iconImage = new Image(new FileInputStream("src/staricon2.png"));
+            ImageView icon = new ImageView(iconImage);
+            icon.setFitWidth(38);
+            icon.setPreserveRatio(true);
+            icon.setOnMouseClicked(mouseEvent -> primaryStage.setScene(playerDetails));
 
-        Image giftImage = new Image(new FileInputStream("src/gifticon.png"));
-        ImageView icon2 = new ImageView(giftImage);
-        icon2.setFitWidth(46);
-        icon2.setPreserveRatio(true);
+            Image giftImage = new Image(new FileInputStream("src/gifticon.png"));
+            ImageView icon2 = new ImageView(giftImage);
+            icon2.setFitWidth(46);
+            icon2.setPreserveRatio(true);
+            icon2.setOnMouseClicked(mouseEvent -> primaryStage.setScene(prizes));
+            Circle circle = new Circle(150.0f, 150.0f, 23.f);
+            circle.setFill(Color.valueOf("#fff"));
+            circle.setOnMouseClicked(mouseEvent -> primaryStage.setScene(prizes));
+            circle.setId("circle-yellow");
 
-        Circle circle = new Circle(150.0f, 150.0f, 23.f);
-        circle.setFill(Color.valueOf("#fff"));
-        circle.setId("circle-yellow");
+            Circle circle2 = new Circle(150.0f, 150.0f, 23.f);
+            circle2.setFill(Color.valueOf("#fff"));
+            circle2.setId("circle-pink");
+            icon.setOnMouseClicked(mouseEvent -> primaryStage.setScene(playerDetails));
 
-        Circle circle2 = new Circle(150.0f, 150.0f, 23.f);
-        circle2.setFill(Color.valueOf("#fff"));
-        circle2.setId("circle-pink");
+            Pane pane = new Pane(root,start,resume,exit,circle,icon,circle2,icon2);
+            pane.setStyle("-fx-background-color: #282828");
+            root.relocate(30,40);
+            start.relocate(80,300);
+            resume.relocate(80,350);
+            exit.relocate(80,400);
+            circle.relocate(240,350);
+            icon.relocate(243,353);
+            circle2.relocate(20,350);
+            icon2.relocate(20,350);
 
-        Pane pane = new Pane(root,start,resume,exit,circle,icon,circle2,icon2);
-        pane.setStyle("-fx-background-color: #282828");
-        root.relocate(30,40);
-        start.relocate(80,300);
-        resume.relocate(80,350);
-        exit.relocate(80,400);
-        circle.relocate(240,350);
-        icon.relocate(243,353);
-        circle2.relocate(20,350);
-        icon2.relocate(20,350);
 
-        Scene scene = new Scene(pane,300,500);
-        start.getStyleClass().add("button");
-//        start.setOnAction(e->primaryStage.setScene(startScreen));
-        start.setOnAction(e-> {
-            try {
-                this.play(primaryStage);
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-        });
-        resume.getStyleClass().add("button");
-        resume.setOnAction(e-> this.resume(primaryStage));
-        exit.getStyleClass().add("button");
-        exit.setOnAction(e->System.exit(1));
-        scene.getStylesheets().add("Theme.css");
-        return scene;
+            Scene scene = new Scene(pane,300,500);
+            start.getStyleClass().add("button");
+    //        start.setOnAction(e->primaryStage.setScene(startScreen));
+            start.setOnAction(e-> {
+                try {
+                    this.play(primaryStage);
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+            });
+            resume.getStyleClass().add("button");
+            resume.setOnAction(e-> this.resume(primaryStage));
+            exit.getStyleClass().add("button");
+            exit.setOnAction(e->System.exit(1));
+            scene.getStylesheets().add("Theme.css");
+            return scene;
     }
 
     private Group circleAnimation(Stage primaryStage) throws FileNotFoundException,IOException {
