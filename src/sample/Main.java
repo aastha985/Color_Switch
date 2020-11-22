@@ -2,6 +2,7 @@ package sample;
 
 import javafx.animation.*;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -104,10 +105,65 @@ class Game extends Main{
 //        titleScreen = titleImage();
 //        pauseTransition(primaryStage,splashScreen,2);
 
+        Scene prizes = prize();
 
-        primaryStage.setScene(test);
+        primaryStage.setScene(prizes);
         primaryStage.setTitle("Color Switch");
         primaryStage.show();
+    }
+
+    private Scene prize ()throws IOException{
+        Image image = new Image(new FileInputStream("src/gift.png"));
+        ImageView Image = new ImageView(image);
+        Image.setFitWidth(250);
+        Image.setPreserveRatio(true);
+
+        Text text = new Text("Click on the gift image to \nunlock today's prize.");
+        text.setFill(Color.valueOf("#fff"));
+        text.setFont(Font.font ("Verdana", 18));
+        Image.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                System.out.println("image clicked");
+
+                RotateTransition rotate = new RotateTransition();
+                rotate.setAxis(Rotate.Z_AXIS);
+                rotate.setByAngle(360);
+                rotate.setCycleCount(1);
+                rotate.setDuration(Duration.millis(2000));
+                rotate.setInterpolator(Interpolator.LINEAR);
+                rotate.setNode(Image);
+                rotate.play();
+
+//                rotate.setOnFinished(new EventHandler<ActionEvent>() {
+//                    @Override public void handle(ActionEvent event) {
+//                        Image.setVisible(false);
+//                    }
+//                });
+
+                ScaleTransition scaleTransition = new ScaleTransition();
+                scaleTransition.setDuration(Duration.millis(2000));
+                scaleTransition.setByY(-1);
+                scaleTransition.setByX(-1);
+                scaleTransition.setNode(Image);
+                scaleTransition.setCycleCount(1);
+                scaleTransition.setAutoReverse(false);
+                scaleTransition.play();
+
+            }
+        });
+
+        GridPane grid = new GridPane();
+        grid.setMinSize(300, 500);
+        grid.setPadding(new Insets(10, 10, 10, 10));
+        grid.setVgap(5);
+        grid.setHgap(20);
+        grid.add(text,0,0);
+        grid.add(Image, 0, 7);
+        grid.setAlignment(Pos.CENTER);
+        grid.setStyle("-fx-background-color: #282828");
+
+        return new Scene(grid,300,500);
     }
 
     private void resume(Stage primaryStage){
