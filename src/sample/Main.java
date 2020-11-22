@@ -97,20 +97,20 @@ class Game extends Main{
 
         Scene prizes = prize();
 
-//        Scene playerDetails = playerDetails();
-//
-//        mainMenu = mainMenu(primaryStage, prizes, playerDetails);
-//
-//        enterName = enterName(mainMenu, primaryStage);
-//
-//        splashScreen = splashScreen();
-//
-//        pauseTransition(primaryStage,enterName,6);
-//
-//        titleScreen = titleImage();
-//        pauseTransition(primaryStage,splashScreen,2);
+        Scene playerDetails = playerDetails();
 
-        primaryStage.setScene(prizes);
+        mainMenu = mainMenu(primaryStage, prizes, playerDetails);
+
+        enterName = enterName(mainMenu, primaryStage);
+
+        splashScreen = splashScreen();
+
+        pauseTransition(primaryStage,enterName,6);
+
+        titleScreen = titleImage();
+        pauseTransition(primaryStage,splashScreen,2);
+
+        primaryStage.setScene(titleScreen);
         primaryStage.setTitle("Color Switch");
         primaryStage.show();
     }
