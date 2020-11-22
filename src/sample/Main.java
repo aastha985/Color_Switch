@@ -2,7 +2,6 @@ package sample;
 
 import javafx.animation.*;
 import javafx.application.Application;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -94,22 +93,22 @@ class Game extends Main{
         game = new Scene(layout2,300,500);
         start.setOnAction(e->primaryStage.setScene(game));
 
-//        mainMenu = mainMenu(primaryStage);
-//
-//        enterName = enterName(mainMenu, primaryStage);
-//
-//        splashScreen = splashScreen();
-//
-//        pauseTransition(primaryStage,enterName,6);
-//
-//        titleScreen = titleImage();
-//        pauseTransition(primaryStage,splashScreen,2);
+        mainMenu = mainMenu(primaryStage);
+
+        enterName = enterName(mainMenu, primaryStage);
+
+        splashScreen = splashScreen();
+
+        pauseTransition(primaryStage,enterName,6);
+
+        titleScreen = titleImage();
+        pauseTransition(primaryStage,splashScreen,2);
 
         Scene prizes = prize();
 
         Scene playerDetails = playerDetails();
 
-        primaryStage.setScene(playerDetails);
+        primaryStage.setScene(titleScreen);
         primaryStage.setTitle("Color Switch");
         primaryStage.show();
     }
@@ -146,7 +145,7 @@ class Game extends Main{
         Image.setFitWidth(40);
         Image.setPreserveRatio(true);
 
-        Image iconImage = new Image(new FileInputStream("src/st.png"));
+        Image iconImage = new Image(new FileInputStream("src/staricon.png"));
         ImageView icon = new ImageView(iconImage);
         icon.setFitWidth(38);
         icon.setPreserveRatio(true);
@@ -399,21 +398,37 @@ class Game extends Main{
         Button start = new Button("START");
         Button resume = new Button("RESUME");
         Button exit = new Button("EXIT");
-        GridPane grid = new GridPane();
-        grid.setMinSize(300, 500);
-        grid.setPadding(new Insets(10, 10, 10, 10));
-        grid.setVgap(5);
-        grid.setHgap(5);
-        grid.setAlignment(Pos.CENTER);
-        grid.add(root, 1, 2);
-        grid.add(start, 1, 8);
-        grid.add(resume,1,10);
-        grid.add(exit,1,12);
-        grid.setStyle("-fx-background-color: #282828");
-        grid.setHalignment(start, HPos.CENTER);
-        grid.setHalignment(resume,HPos.CENTER);
-        grid.setHalignment(exit,HPos.CENTER);
-        Scene scene = new Scene(grid,300,500);
+
+        Image iconImage = new Image(new FileInputStream("src/staricon2.png"));
+        ImageView icon = new ImageView(iconImage);
+        icon.setFitWidth(38);
+        icon.setPreserveRatio(true);
+
+        Image giftImage = new Image(new FileInputStream("src/gifticon.png"));
+        ImageView icon2 = new ImageView(giftImage);
+        icon2.setFitWidth(46);
+        icon2.setPreserveRatio(true);
+
+        Circle circle = new Circle(150.0f, 150.0f, 23.f);
+        circle.setFill(Color.valueOf("#fff"));
+        circle.setId("circle-yellow");
+
+        Circle circle2 = new Circle(150.0f, 150.0f, 23.f);
+        circle2.setFill(Color.valueOf("#fff"));
+        circle2.setId("circle-pink");
+
+        Pane pane = new Pane(root,start,resume,exit,circle,icon,circle2,icon2);
+        pane.setStyle("-fx-background-color: #282828");
+        root.relocate(30,40);
+        start.relocate(80,300);
+        resume.relocate(80,350);
+        exit.relocate(80,400);
+        circle.relocate(240,350);
+        icon.relocate(243,353);
+        circle2.relocate(20,350);
+        icon2.relocate(20,350);
+
+        Scene scene = new Scene(pane,300,500);
         start.getStyleClass().add("button");
 //        start.setOnAction(e->primaryStage.setScene(startScreen));
         start.setOnAction(e-> {
@@ -450,7 +465,7 @@ class Game extends Main{
 //        triangleImage.setOnMouseClicked(new EventHandler<MouseEvent>() {
 //            @Override
 //            public void handle(MouseEvent mouseEvent) {
-//                primaryStage.setScene(startScreen);
+////                primaryStage.setScene(startScreen);
 //            }
 //        });
         Circle circle = new Circle(300.0f,100.0f,55.f,Color.valueOf("#585858"));
