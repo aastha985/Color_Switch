@@ -107,9 +107,76 @@ class Game extends Main{
 
         Scene prizes = prize();
 
-        primaryStage.setScene(prizes);
+        Scene playerDetails = playerDetails();
+
+        primaryStage.setScene(playerDetails);
         primaryStage.setTitle("Color Switch");
         primaryStage.show();
+    }
+
+    private Scene playerDetails() throws IOException{
+        Text name = new Text("Agrim Chopra");
+        Text highScore = new Text("High Score:");
+        Text highScoreNo = new Text("51");
+        Text stars = new Text("Stars");
+        Text starsno = new Text("100");
+        Text diamonds = new Text("Diamonds");
+        Text diamondsno = new Text("40");
+
+        name.getStyleClass().add("title-text");
+        highScore.getStyleClass().add("white-text");
+        stars.getStyleClass().add("white-text");
+        diamonds.getStyleClass().add("white-text");
+        starsno.getStyleClass().add("white-text");
+        diamondsno.getStyleClass().add("white-text");
+        highScoreNo.getStyleClass().add("white-text");
+
+        Star star = new Star();
+        Group starImage = star.show();
+        starImage.relocate(132,285);
+        star.blink(starImage);
+
+        Diamond diamond = new Diamond();
+        Group dia = diamond.show();
+        dia.relocate(135,70);
+        diamond.blink(dia);
+
+        Image image = new Image(new FileInputStream("src/trophy.png"));
+        ImageView Image = new ImageView(image);
+        Image.setFitWidth(40);
+        Image.setPreserveRatio(true);
+
+
+        Line line = new Line(0,0,300,0);
+        line.setStrokeWidth(140);
+        line.setStroke(Color.valueOf("#ff3333"));
+        HBox hbox = new HBox();
+        for(int i=0;i<18;i++){
+            hbox.getChildren().add(new Circle(300.0f,100.0f,10.f,Color.valueOf("#ff3333")));
+        }
+
+        Text headerText = new Text("STATS");
+        headerText.setFont(new Font(27));
+        headerText.setStyle("-fx-fill: #f7f7f7");
+        headerText.relocate(20,22);
+        Pane pane = new Pane(line,hbox,name,highScore,stars,diamonds,starImage,dia,starsno,diamondsno,Image,highScoreNo);
+        pane.setStyle("-fx-background-color: #282828");
+        pane.getChildren().add(headerText);
+        hbox.relocate(0,60);
+        name.relocate(63,115);
+        highScore.relocate(100,200);
+        highScoreNo.relocate(200,200);
+        Image.relocate(50,180);
+        stars.relocate(40,330);
+        diamonds.relocate(180,330);
+        starImage.relocate(40,280);
+        dia.relocate(210,280);
+        starsno.relocate(42,360);
+        diamondsno.relocate(210,360);
+
+        Scene scene = new Scene(pane,300,500);
+        scene.getStylesheets().add("Theme.css");
+        return scene;
     }
 
     private Scene prize ()throws IOException{
