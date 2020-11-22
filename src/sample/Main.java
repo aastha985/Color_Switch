@@ -474,19 +474,7 @@ class Game extends Main{
         triangleImage.setX(270);
         triangleImage.setY(64);
         triangleImage.setPreserveRatio(true);
-//        triangleImage.setOnMouseClicked(new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent mouseEvent) {
-////                primaryStage.setScene(startScreen);
-//            }
-//        });
         Circle circle = new Circle(300.0f,100.0f,55.f,Color.valueOf("#585858"));
-//        circle.setOnMouseClicked(new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent mouseEvent) {
-//                primaryStage.setScene(startScreen);
-//            }
-//        });
         return new Group(root,root2,root3,circle,triangleImage);
     }
 
