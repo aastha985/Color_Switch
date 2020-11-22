@@ -2,6 +2,7 @@ package sample;
 
 import javafx.animation.*;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -96,20 +97,20 @@ class Game extends Main{
 
         Scene prizes = prize();
 
-        Scene playerDetails = playerDetails();
+//        Scene playerDetails = playerDetails();
+//
+//        mainMenu = mainMenu(primaryStage, prizes, playerDetails);
+//
+//        enterName = enterName(mainMenu, primaryStage);
+//
+//        splashScreen = splashScreen();
+//
+//        pauseTransition(primaryStage,enterName,6);
+//
+//        titleScreen = titleImage();
+//        pauseTransition(primaryStage,splashScreen,2);
 
-        mainMenu = mainMenu(primaryStage, prizes, playerDetails);
-
-        enterName = enterName(mainMenu, primaryStage);
-
-        splashScreen = splashScreen();
-
-        pauseTransition(primaryStage,enterName,6);
-
-        titleScreen = titleImage();
-        pauseTransition(primaryStage,splashScreen,2);
-
-        primaryStage.setScene(titleScreen);
+        primaryStage.setScene(prizes);
         primaryStage.setTitle("Color Switch");
         primaryStage.show();
     }
@@ -195,6 +196,20 @@ class Game extends Main{
     }
 
     private Scene prize ()throws IOException{
+        Line line = new Line(0,0,300,0);
+        line.setStrokeWidth(140);
+        line.setStroke(Color.valueOf("#8d13fc"));
+        HBox hbox = new HBox();
+        for(int i=0;i<18;i++){
+            hbox.getChildren().add(new Circle(300.0f,100.0f,10.f,Color.valueOf("#8d13fc")));
+        }
+
+        Text headerText = new Text("PRIZES");
+        headerText.setFont(new Font(27));
+        headerText.setStyle("-fx-fill: #f7f7f7");
+        headerText.relocate(20,22);
+        hbox.relocate(0,60);
+
         Image image = new Image(new FileInputStream("src/images/gift.png"));
         ImageView Image = new ImageView(image);
         Image.setFitWidth(250);
@@ -203,6 +218,12 @@ class Game extends Main{
         Text text = new Text("Click on the gift image to \nunlock today's prize.");
         text.setFill(Color.valueOf("#fff"));
         text.setFont(Font.font ("Verdana", 18));
+
+        Text text2 = new Text("Congrats!\nYou won 10 Stars.");
+        text2.setFill(Color.valueOf("#fff"));
+        text2.setFont(Font.font("Verdana",18));
+        text2.setVisible(false);
+
         Image.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
@@ -217,11 +238,12 @@ class Game extends Main{
                 rotate.setNode(Image);
                 rotate.play();
 
-//                rotate.setOnFinished(new EventHandler<ActionEvent>() {
-//                    @Override public void handle(ActionEvent event) {
-//                        Image.setVisible(false);
-//                    }
-//                });
+                rotate.setOnFinished(new EventHandler<ActionEvent>() {
+                    @Override public void handle(ActionEvent event) {
+                        text2.setVisible(true);
+                        text.setVisible(false);
+                    }
+                });
 
                 ScaleTransition scaleTransition = new ScaleTransition();
                 scaleTransition.setDuration(Duration.millis(2000));
@@ -235,17 +257,13 @@ class Game extends Main{
             }
         });
 
-        GridPane grid = new GridPane();
-        grid.setMinSize(300, 500);
-        grid.setPadding(new Insets(10, 10, 10, 10));
-        grid.setVgap(5);
-        grid.setHgap(20);
-        grid.add(text,0,0);
-        grid.add(Image, 0, 7);
-        grid.setAlignment(Pos.CENTER);
-        grid.setStyle("-fx-background-color: #282828");
+        Pane pane = new Pane(line,hbox,headerText,text,Image,text2);
+        pane.setStyle("-fx-background-color: #282828");
+        text.relocate(30,100);
+        text2.relocate(30,100);
+        Image.relocate(20,200);
 
-        return new Scene(grid,300,500);
+        return new Scene(pane,300,500);
     }
 
     private void resume(Stage primaryStage){
