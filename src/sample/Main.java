@@ -73,6 +73,11 @@ class Game extends Main{
 //        StackPane stack = new StackPane(root5[0],root5[1]);
 //        HBox hbox = new HBox(root5[0],root5[1]);
 
+        Arrow backButton = new Arrow();
+        Group button = backButton.show();
+        StackPane testPane = new StackPane(button);
+        testPane.setStyle("-fx-background-color: #282828");
+        Scene test = new Scene(testPane);
 
         VBox layout1 = new VBox(50);
         layout1.getChildren().addAll(label1,start,root);
@@ -88,19 +93,19 @@ class Game extends Main{
         game = new Scene(layout2,300,500);
         start.setOnAction(e->primaryStage.setScene(game));
 
-        mainMenu = mainMenu(primaryStage);
+//        mainMenu = mainMenu(primaryStage);
+//
+//        enterName = enterName(mainMenu, primaryStage);
+//
+//        splashScreen = splashScreen();
+//
+//        pauseTransition(primaryStage,enterName,6);
+//
+//        titleScreen = titleImage();
+//        pauseTransition(primaryStage,splashScreen,2);
 
-        enterName = enterName(mainMenu, primaryStage);
 
-        splashScreen = splashScreen();
-
-        pauseTransition(primaryStage,enterName,6);
-
-        titleScreen = titleImage();
-        pauseTransition(primaryStage,splashScreen,2);
-
-
-        primaryStage.setScene(titleScreen);
+        primaryStage.setScene(test);
         primaryStage.setTitle("Color Switch");
         primaryStage.show();
     }
@@ -410,6 +415,26 @@ class Diamond extends Reward{
         shear.setX(0.3);
         dia.getTransforms().addAll(rotate,shear);
         Group group = new Group(dia);
+        return group;
+    }
+}
+
+class Arrow extends Game{
+    private final int strokeWidth;
+    Arrow(){
+        this.strokeWidth = 3;
+    }
+    public Group show(){
+        Line line = new Line(10, 20, 50, 20);
+        Line line2 = new Line(10,20,20,10);
+        Line line3 = new Line(10,20,20,30);
+        line.setStrokeWidth(strokeWidth);
+        line.setStroke(Color.valueOf("#fff"));
+        line2.setStrokeWidth(strokeWidth);
+        line2.setStroke(Color.valueOf("#fff"));
+        line3.setStrokeWidth(strokeWidth);
+        line3.setStroke(Color.valueOf("#fff"));
+        Group group = new Group(line,line2,line3);
         return group;
     }
 }
