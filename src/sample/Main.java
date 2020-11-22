@@ -215,7 +215,7 @@ class Game extends Main{
         Image.setFitWidth(250);
         Image.setPreserveRatio(true);
 
-        Image image2 = new Image(new FileInputStream("src/images/yay2.png"));
+        Image image2 = new Image(new FileInputStream("src/images/yay.png"));
         ImageView Image2 = new ImageView(image2);
         Image2.setFitWidth(150);
         Image2.setPreserveRatio(true);
