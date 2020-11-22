@@ -198,10 +198,10 @@ class Game extends Main{
     private Scene prize ()throws IOException{
         Line line = new Line(0,0,300,0);
         line.setStrokeWidth(140);
-        line.setStroke(Color.valueOf("#8d13fc"));
+        line.setStroke(Color.valueOf("#ff9900"));
         HBox hbox = new HBox();
         for(int i=0;i<18;i++){
-            hbox.getChildren().add(new Circle(300.0f,100.0f,10.f,Color.valueOf("#8d13fc")));
+            hbox.getChildren().add(new Circle(300.0f,100.0f,10.f,Color.valueOf("#ff9900")));
         }
 
         Text headerText = new Text("PRIZES");
@@ -215,14 +215,32 @@ class Game extends Main{
         Image.setFitWidth(250);
         Image.setPreserveRatio(true);
 
+        Image image2 = new Image(new FileInputStream("src/images/yay2.png"));
+        ImageView Image2 = new ImageView(image2);
+        Image2.setFitWidth(150);
+        Image2.setPreserveRatio(true);
+        Image2.setVisible(false);
+
         Text text = new Text("Click on the gift image to \nunlock today's prize.");
         text.setFill(Color.valueOf("#fff"));
         text.setFont(Font.font ("Verdana", 18));
 
         Text text2 = new Text("Congrats!\nYou won 10 Stars.");
         text2.setFill(Color.valueOf("#fff"));
-        text2.setFont(Font.font("Verdana",18));
+        text2.setFont(Font.font("Verdana",17));
         text2.setVisible(false);
+
+        Image iconImage = new Image(new FileInputStream("src/images/gifticon.png"));
+        ImageView icon = new ImageView(iconImage);
+        icon.setFitWidth(38);
+        icon.setPreserveRatio(true);
+
+        Circle circle = new Circle(150.0f, 150.0f, 20.f);
+        Circle circle2 = new Circle(150.0f,150.0f,18.0f);
+        Shape ring =Shape.subtract(circle,circle2);
+        ring.setFill(Color.valueOf("#fff"));
+        circle2.setFill(null);
+        Group ringg = new Group(ring);
 
         Image.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
@@ -242,6 +260,7 @@ class Game extends Main{
                     @Override public void handle(ActionEvent event) {
                         text2.setVisible(true);
                         text.setVisible(false);
+                        Image2.setVisible(true);
                     }
                 });
 
@@ -257,11 +276,14 @@ class Game extends Main{
             }
         });
 
-        Pane pane = new Pane(line,hbox,headerText,text,Image,text2);
+        Pane pane = new Pane(line,hbox,headerText,text,Image,text2,ringg,icon,Image2);
         pane.setStyle("-fx-background-color: #282828");
         text.relocate(30,100);
-        text2.relocate(30,100);
+        text2.relocate(20,260);
         Image.relocate(20,200);
+        ringg.relocate(115,20);
+        icon.relocate(115,20);
+        Image2.relocate(140,170);
 
         return new Scene(pane,300,500);
     }
