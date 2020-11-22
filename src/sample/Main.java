@@ -205,7 +205,7 @@ class Game extends Main{
             path1.getElements().add(new MoveTo(root.getLayoutX(), root.getLayoutY()));
             path1.getElements().add(new CubicCurveTo(root.getLayoutX(), root.getLayoutY(), root.getLayoutX(), change+20, root.getLayoutX(), change+20));
             System.out.println(root.getLayoutY());
-            root.relocate(150, change+20);
+            //root.relocate(150, change+20);
 //            root.setLayoutY(change+20);
 //            root.setLayoutX(150);
             PathTransition pathTransition1 = new PathTransition();
