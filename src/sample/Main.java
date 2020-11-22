@@ -146,6 +146,17 @@ class Game extends Main{
         Image.setFitWidth(40);
         Image.setPreserveRatio(true);
 
+        Image iconImage = new Image(new FileInputStream("src/st.png"));
+        ImageView icon = new ImageView(iconImage);
+        icon.setFitWidth(38);
+        icon.setPreserveRatio(true);
+
+        Circle circle = new Circle(150.0f, 150.0f, 20.f);
+        Circle circle2 = new Circle(150.0f,150.0f,18.0f);
+        Shape ring =Shape.subtract(circle,circle2);
+        ring.setFill(Color.valueOf("#fff"));
+        circle2.setFill(null);
+        Group ringg = new Group(ring);
 
         Line line = new Line(0,0,300,0);
         line.setStrokeWidth(140);
@@ -159,10 +170,13 @@ class Game extends Main{
         headerText.setFont(new Font(27));
         headerText.setStyle("-fx-fill: #f7f7f7");
         headerText.relocate(20,22);
-        Pane pane = new Pane(line,hbox,name,highScore,stars,diamonds,starImage,dia,starsno,diamondsno,Image,highScoreNo);
+        Pane pane = new Pane(line,hbox,name,highScore,stars,diamonds,starImage,dia,starsno,diamondsno,Image,highScoreNo,ringg,icon);
         pane.setStyle("-fx-background-color: #282828");
         pane.getChildren().add(headerText);
         hbox.relocate(0,60);
+
+        ringg.relocate(115,20);
+        icon.relocate(115,20);
         name.relocate(63,115);
         highScore.relocate(100,200);
         highScoreNo.relocate(200,200);
@@ -173,6 +187,7 @@ class Game extends Main{
         dia.relocate(210,280);
         starsno.relocate(42,360);
         diamondsno.relocate(210,360);
+
 
         Scene scene = new Scene(pane,300,500);
         scene.getStylesheets().add("Theme.css");
