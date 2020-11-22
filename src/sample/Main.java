@@ -420,13 +420,13 @@ class Game extends Main{
             icon2.setOnMouseClicked(mouseEvent -> primaryStage.setScene(prizes));
             Circle circle = new Circle(150.0f, 150.0f, 23.f);
             circle.setFill(Color.valueOf("#fff"));
-            circle.setOnMouseClicked(mouseEvent -> primaryStage.setScene(prizes));
+            circle.setOnMouseClicked(mouseEvent -> primaryStage.setScene(playerDetails));
             circle.setId("circle-yellow");
 
             Circle circle2 = new Circle(150.0f, 150.0f, 23.f);
             circle2.setFill(Color.valueOf("#fff"));
             circle2.setId("circle-pink");
-            icon.setOnMouseClicked(mouseEvent -> primaryStage.setScene(playerDetails));
+            circle2.setOnMouseClicked(mouseEvent -> primaryStage.setScene(prizes));
 
             Pane pane = new Pane(root,start,resume,exit,circle,icon,circle2,icon2);
             pane.setStyle("-fx-background-color: #282828");
