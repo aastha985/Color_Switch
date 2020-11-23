@@ -630,12 +630,12 @@ class Diamond extends Reward{
 class Arrow extends Game{
     private final int strokeWidth;
     Arrow(){
-        this.strokeWidth = 3;
+        this.strokeWidth = 2;
     }
     public Group show(){
-        Line line = new Line(10, 8, 40, 8);
-        Line line2 = new Line(10,8,18,2);
-        Line line3 = new Line(10,8,18,14);
+        Line line = new Line(10, 8, 30, 8);
+        Line line2 = new Line(10,8,15,4);
+        Line line3 = new Line(10,8,15,12);
         line.setStrokeWidth(strokeWidth);
         line.setStroke(Color.valueOf("#fff"));
         line2.setStrokeWidth(strokeWidth);
