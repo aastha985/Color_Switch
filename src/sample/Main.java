@@ -4,6 +4,7 @@ import javafx.animation.*;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Bounds;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -29,6 +30,7 @@ import javafx.util.Duration;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Main extends Application{
@@ -57,11 +59,7 @@ class Game extends Main{
         Label label1 = new Label("COLOR GAME");
         Button start = new Button("Start");
 
-//
-//
-//        Square square = new Square();
-//        Group root = square.show(100.0f,150.0f,110.0f,110.0f);
-//        square.move(root,360);
+
 //
         Plus plus = new Plus();
         Group root = plus.show(200.0f,300.0f,70.0f);
@@ -334,18 +332,21 @@ class Game extends Main{
         Circular circle = new Circular();
         Group root = circle.show(150,300,70.0f,56.0f);
         circle.move(root,360);
+        root.setLayoutX(80);
+        root.setLayoutY(235);
+        root.relocate(root.getLayoutX(),root.getLayoutY());
         pane.getChildren().add(root);
 
         Star star = new Star();
         Group starImage = star.show();
         starImage.relocate(132,285);
         star.blink(starImage);
-        pane.getChildren().add(starImage);
+//        pane.getChildren().add(starImage);
 
         ColorChanger colorChanger = new ColorChanger();
         Group changer = colorChanger.show(10,10);
         changer.relocate(137,180);
-        pane.getChildren().add(changer);
+//        pane.getChildren().add(changer);
 
         HorizontalLine horizontalLine = new HorizontalLine();
         Group horizontal = horizontalLine.show(130.0f,75.0f);
@@ -356,45 +357,88 @@ class Game extends Main{
         Group dia = diamond.show();
         dia.relocate(135,70);
         diamond.blink(dia);
-        pane.getChildren().add(dia);
+//        pane.getChildren().add(dia);
 
-        HorizontalLine horizontalLine2 = new HorizontalLine();
-        Group horizontal2 = horizontalLine2.show(30.0f,75.0f);
-        horizontalLine2.moveRight(horizontal2);
-        pane.getChildren().add(horizontal2);
 
-//        ColorChanger colorChanger2 = new ColorChanger();
-//        Group changer2 = colorChanger2.show(10,10);
-//        changer2.relocate(137,0);
-//        pane.getChildren().add(changer2);
-//        Group root = root;
-        Group obstacle2 = horizontal;
+        Square square = new Square();
+        Group squareRoot = square.show(100.0f,150.0f,110.0f,110.0f);
+        square.move(root,360);
 
+        AtomicReference<Group> obstacle1 = new AtomicReference<>(root);
+        AtomicReference<Group> obstacle2 = new AtomicReference<>(horizontal);
+        AtomicReference<Group> obstacle3 = new AtomicReference<>((Group) null);
+        AtomicBoolean flag= new AtomicBoolean(true);
+        AtomicReference<Group> memory = new AtomicReference<>(squareRoot);
         pane.addEventHandler(MouseEvent.MOUSE_RELEASED,e->{
-            System.out.println("hello");
-            double change = bally.get();
-            Path path = new Path();
-            path.getElements().add(new MoveTo(b.getCenterX(), b.getCenterY()));
-            path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), change-100, b.getCenterX(), change-45));
-            bally.set((change-45));
-            PathTransition pathTransition = new PathTransition();
-            pathTransition.setDuration(Duration.millis(300));
-            pathTransition.setPath(path);
-            pathTransition.setNode(b);
-            pathTransition.play();
-            b.setCenterY(bally.get());
-            change = root.getLayoutY();
-            Path path1 = new Path();
-            path1.getElements().add(new MoveTo(root.getLayoutX(), root.getLayoutY()));
-            path1.getElements().add(new CubicCurveTo(root.getLayoutX(), root.getLayoutY(), root.getLayoutX(), change+20, root.getLayoutX(), change+20));
-            System.out.println(root.getLayoutY());
-            //root.relocate(150, change+20);
-//            root.setLayoutY(change+20);
-//            root.setLayoutX(150);
-            PathTransition pathTransition1 = new PathTransition();
-            pathTransition1.setPath(path1);
-            pathTransition1.setNode(root);
-//            pathTransition1.play();
+            if(bally.get()>350){
+                //move ball
+                double change = bally.get();
+                Path path = new Path();
+                path.getElements().add(new MoveTo(b.getCenterX(), b.getCenterY()));
+                path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), change-100, b.getCenterX(), change-45));
+                bally.set((change-45));
+                PathTransition pathTransition = new PathTransition();
+                pathTransition.setDuration(Duration.millis(300));
+                pathTransition.setPath(path);
+                pathTransition.setNode(b);
+                pathTransition.play();
+                b.setCenterY(bally.get());
+            }
+            else{
+                //move ball
+                double change = bally.get();
+                Path path = new Path();
+                path.getElements().add(new MoveTo(b.getCenterX(), b.getCenterY()));
+                path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), change-100, b.getCenterX(), change));
+                bally.set(change);
+                PathTransition pathTransition = new PathTransition();
+                pathTransition.setDuration(Duration.millis(300));
+                pathTransition.setPath(path);
+                pathTransition.setNode(b);
+                pathTransition.play();
+                b.setCenterY(bally.get());
+
+                //move circle
+                TranslateTransition translate = new TranslateTransition();
+                translate.setByY(40);
+                translate.setDuration(Duration.millis(300));
+                translate.setNode(obstacle1.get());
+                translate.play();
+                //move horizontal lines
+                TranslateTransition translate1 = new TranslateTransition();
+                translate1.setByY(40);
+                translate1.setDuration(Duration.millis(300));
+                translate1.setNode(obstacle2.get());
+                translate1.play();
+
+
+                Bounds boundsInScreen = obstacle1.get().localToScreen(obstacle1.get().getBoundsInLocal());
+                if(boundsInScreen.getMaxY()>=550 && flag.get()){
+                    flag.set(false);
+                    obstacle3.set(memory.get());
+                    obstacle3.get().setTranslateY(-50);
+                    obstacle3.get().relocate(90, -80);
+                    pane.getChildren().add(obstacle3.get());
+                }
+                if(boundsInScreen.getMinY()>=650 && !flag.get()){
+//                    if(obstacle3.get()!=null){
+                        flag.set(true);
+                        pane.getChildren().remove(obstacle1.get());
+                        memory.set(obstacle1.get());
+                        obstacle1.set(obstacle2.get());
+                        obstacle2.set(obstacle3.get());
+                        obstacle3.set(null);
+//                    }
+                }
+                if(obstacle3.get()!=null){
+                    //move square
+                    TranslateTransition translate2 = new TranslateTransition();
+                    translate2.setByY(40);
+                    translate2.setDuration(Duration.millis(300));
+                    translate2.setNode(obstacle3.get());
+                    translate2.play();
+                }
+            }
         });
 
         pane.setStyle("-fx-background-color: #282828");
