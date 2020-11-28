@@ -52,9 +52,9 @@ class Player{
 }
 
 class Game extends Main{
+    private Scene playerDetails,menu,game,titleScreen,splashScreen,mainMenu,enterName,play,resumeScreen,prizes;
     public void start(Stage primaryStage) throws IOException{
         //start new game
-        Scene menu,game,titleScreen,splashScreen,mainMenu,enterName,play,resumeScreen;
         //Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         Label label1 = new Label("COLOR GAME");
         Button start = new Button("Start");
@@ -93,9 +93,10 @@ class Game extends Main{
         start.setOnAction(e->primaryStage.setScene(game));
 
 
-        Scene prizes = prize();
+        prizes = prize(primaryStage);
 
-        Scene playerDetails = playerDetails();
+
+        playerDetails = playerDetails(primaryStage);
 
         mainMenu = mainMenu(primaryStage, prizes, playerDetails);
 
@@ -113,7 +114,7 @@ class Game extends Main{
         primaryStage.show();
     }
 
-    private Scene playerDetails() throws IOException{
+    private Scene playerDetails(Stage primaryStage) throws IOException{
         Text name = new Text("Agrim Chopra");
         Text highScore = new Text("High Score:");
         Text highScoreNo = new Text("51");
@@ -139,6 +140,10 @@ class Game extends Main{
         Group dia = diamond.show();
         dia.relocate(135,70);
         diamond.blink(dia);
+
+        Arrow backButton = new Arrow();
+        Group backbtn = backButton.show();
+        backbtn.setOnMouseClicked(mouseEvent -> primaryStage.setScene(mainMenu));
 
         Image image = new Image(new FileInputStream("src/images/trophy.png"));
         ImageView Image = new ImageView(image);
@@ -169,7 +174,7 @@ class Game extends Main{
         headerText.setFont(new Font(27));
         headerText.setStyle("-fx-fill: #f7f7f7");
         headerText.relocate(20,22);
-        Pane pane = new Pane(line,hbox,name,highScore,stars,diamonds,starImage,dia,starsno,diamondsno,Image,highScoreNo,ringg,icon);
+        Pane pane = new Pane(line,hbox,name,highScore,stars,diamonds,starImage,dia,starsno,diamondsno,Image,highScoreNo,ringg,icon,backbtn);
         pane.setStyle("-fx-background-color: #282828");
         pane.getChildren().add(headerText);
         hbox.relocate(0,60);
@@ -186,14 +191,14 @@ class Game extends Main{
         dia.relocate(210,280);
         starsno.relocate(42,360);
         diamondsno.relocate(210,360);
-
+        backbtn.relocate(5,5);
 
         Scene scene = new Scene(pane,300,500);
         scene.getStylesheets().add("Theme.css");
         return scene;
     }
 
-    private Scene prize ()throws IOException{
+    private Scene prize (Stage primaryStage)throws IOException{
         Line line = new Line(0,0,300,0);
         line.setStrokeWidth(140);
         line.setStroke(Color.valueOf("#ff9900"));
@@ -218,6 +223,10 @@ class Game extends Main{
         Image2.setFitWidth(150);
         Image2.setPreserveRatio(true);
         Image2.setVisible(false);
+
+        Arrow backButton = new Arrow();
+        Group backbtn = backButton.show();
+        backbtn.setOnMouseClicked(mouseEvent -> primaryStage.setScene(mainMenu));
 
         Text text = new Text("Click on the gift image to \nunlock today's prize.");
         text.setFill(Color.valueOf("#fff"));
@@ -274,7 +283,7 @@ class Game extends Main{
             }
         });
 
-        Pane pane = new Pane(line,hbox,headerText,text,Image,text2,ringg,icon,Image2);
+        Pane pane = new Pane(line,hbox,headerText,text,Image,text2,ringg,icon,Image2,backbtn);
         pane.setStyle("-fx-background-color: #282828");
         text.relocate(30,100);
         text2.relocate(20,260);
@@ -282,6 +291,7 @@ class Game extends Main{
         ringg.relocate(115,20);
         icon.relocate(115,20);
         Image2.relocate(140,170);
+        backbtn.relocate(5,5);
 
         return new Scene(pane,300,500);
     }
@@ -299,10 +309,15 @@ class Game extends Main{
         headerText.setFont(new Font(27));
         headerText.setStyle("-fx-fill: #f7f7f7");
         headerText.relocate(20,22);
-        Pane pane = new Pane(line,hbox);
+
+        Arrow backButton = new Arrow();
+        Group backbtn = backButton.show();
+        backbtn.setOnMouseClicked(mouseEvent -> primaryStage.setScene(mainMenu));
+
+        Pane pane = new Pane(line,hbox,headerText,backbtn);
         pane.setStyle("-fx-background-color: #282828");
-        pane.getChildren().add(headerText);
         hbox.relocate(0,60);
+        backbtn.relocate(5,5);
         Scene resumeScene =  new Scene(pane,300,500);
         primaryStage.setScene(resumeScene);
     }
@@ -659,12 +674,12 @@ class Diamond extends Reward{
 class Arrow extends Game{
     private final int strokeWidth;
     Arrow(){
-        this.strokeWidth = 3;
+        this.strokeWidth = 2;
     }
     public Group show(){
-        Line line = new Line(10, 20, 50, 20);
-        Line line2 = new Line(10,20,20,10);
-        Line line3 = new Line(10,20,20,30);
+        Line line = new Line(10, 8, 30, 8);
+        Line line2 = new Line(10,8,15,4);
+        Line line3 = new Line(10,8,15,12);
         line.setStrokeWidth(strokeWidth);
         line.setStroke(Color.valueOf("#fff"));
         line2.setStrokeWidth(strokeWidth);
