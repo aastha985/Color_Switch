@@ -402,7 +402,29 @@ class Game extends Main{
         obstacles[2] = squareRoot;
         obstacles[3] = plusRoot;
         obstacles[4] = verticalRoot;
+
+        int[] obstaclex = new int[5];
+        int[] obstacley = new int[5];
+
+        obstaclex[0] = 85;
+        obstacley[0] = -150;
+
+        obstaclex[1] = 0;
+        obstacley[1] = -10;
+
+        obstaclex[2] = 90;
+        obstacley[2] = -80;
+
+        obstaclex[3] = 90;
+        obstacley[3] = -60;
+
+        obstaclex[4] = 0;
+        obstacley[4] = -110;
+
         AtomicInteger obstacleCounter = new AtomicInteger(3);
+        AtomicInteger nextObstacleX = new AtomicInteger(obstaclex[2]);
+        AtomicInteger nextObstacleY = new AtomicInteger(obstacley[2]);
+
         AtomicBoolean firstMouse = new AtomicBoolean(true);
         AnimationTimer gravity = new GravityTimer();
         AnimationTimer moveBall = new MoveBall();
@@ -445,12 +467,14 @@ class Game extends Main{
                     flag.set(false);
                     obstacle3.set(memory.get());
                     obstacle3.get().setTranslateY(-50);
-                    obstacle3.get().relocate(90, -80);
+                    obstacle3.get().relocate(nextObstacleX.get(), nextObstacleY.get());
                     pane.getChildren().add(obstacle3.get());
                 }
                 if(boundsInScreen.getMinY()>=650 && !flag.get()){
                         flag.set(true);
                         pane.getChildren().remove(obstacle1.get());
+                        nextObstacleX.set(obstaclex[obstacleCounter.get()]);
+                        nextObstacleY.set(obstacley[obstacleCounter.get()]);
                         memory.set(obstacles[obstacleCounter.get()]);
                         obstacleCounter.set((obstacleCounter.get() + 1) % 5);
                         obstacle1.set(obstacle2.get());
