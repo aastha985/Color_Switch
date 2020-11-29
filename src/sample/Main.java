@@ -31,7 +31,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static java.lang.Thread.sleep;
 
 public class Main extends Application{
     @Override
@@ -59,27 +62,13 @@ class Game extends Main{
         Label label1 = new Label("COLOR GAME");
         Button start = new Button("Start");
 
-
-//
-        Plus plus = new Plus();
-        Group root = plus.show(200.0f,300.0f,70.0f);
-        plus.move(root,360);
-
-//        VerticalLine verticalLine = new VerticalLine();
-//        Group root5[] = verticalLine.show();
-//        verticalLine.moveRight(root5[0]);
-//        verticalLine.moveLeft(root5[1]);
-//        StackPane stack = new StackPane(root5[0],root5[1]);
-//        HBox hbox = new HBox(root5[0],root5[1]);
-
         Arrow backButton = new Arrow();
         Group button = backButton.show();
         StackPane testPane = new StackPane(button);
         testPane.setStyle("-fx-background-color: #282828");
-        Scene test = new Scene(testPane);
 
         VBox layout1 = new VBox(50);
-        layout1.getChildren().addAll(label1,start,root);
+        layout1.getChildren().addAll(label1,start);
         layout1.setStyle("-fx-background-color: #282828");
         menu = new Scene(layout1,300,500);
 
@@ -185,8 +174,8 @@ class Game extends Main{
         highScore.relocate(100,200);
         highScoreNo.relocate(200,200);
         Image.relocate(50,180);
-        stars.relocate(40,330);
-        diamonds.relocate(180,330);
+        stars.relocate(40,334);
+        diamonds.relocate(180,334);
         starImage.relocate(40,280);
         dia.relocate(210,280);
         starsno.relocate(42,360);
@@ -249,38 +238,33 @@ class Game extends Main{
         circle2.setFill(null);
         Group ringg = new Group(ring);
 
-        Image.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent mouseEvent) {
-                System.out.println("image clicked");
+        Image.setOnMouseClicked(mouseEvent -> {
+            System.out.println("image clicked");
 
-                RotateTransition rotate = new RotateTransition();
-                rotate.setAxis(Rotate.Z_AXIS);
-                rotate.setByAngle(360);
-                rotate.setCycleCount(1);
-                rotate.setDuration(Duration.millis(2000));
-                rotate.setInterpolator(Interpolator.LINEAR);
-                rotate.setNode(Image);
-                rotate.play();
+            RotateTransition rotate = new RotateTransition();
+            rotate.setAxis(Rotate.Z_AXIS);
+            rotate.setByAngle(360);
+            rotate.setCycleCount(1);
+            rotate.setDuration(Duration.millis(2000));
+            rotate.setInterpolator(Interpolator.LINEAR);
+            rotate.setNode(Image);
+            rotate.play();
 
-                rotate.setOnFinished(new EventHandler<ActionEvent>() {
-                    @Override public void handle(ActionEvent event) {
-                        text2.setVisible(true);
-                        text.setVisible(false);
-                        Image2.setVisible(true);
-                    }
-                });
+            rotate.setOnFinished(event -> {
+                text2.setVisible(true);
+                text.setVisible(false);
+                Image2.setVisible(true);
+            });
 
-                ScaleTransition scaleTransition = new ScaleTransition();
-                scaleTransition.setDuration(Duration.millis(2000));
-                scaleTransition.setByY(-1);
-                scaleTransition.setByX(-1);
-                scaleTransition.setNode(Image);
-                scaleTransition.setCycleCount(1);
-                scaleTransition.setAutoReverse(false);
-                scaleTransition.play();
+            ScaleTransition scaleTransition = new ScaleTransition();
+            scaleTransition.setDuration(Duration.millis(2000));
+            scaleTransition.setByY(-1);
+            scaleTransition.setByX(-1);
+            scaleTransition.setNode(Image);
+            scaleTransition.setCycleCount(1);
+            scaleTransition.setAutoReverse(false);
+            scaleTransition.play();
 
-            }
         });
 
         Pane pane = new Pane(line,hbox,headerText,text,Image,text2,ringg,icon,Image2,backbtn);
@@ -324,6 +308,7 @@ class Game extends Main{
 
     private void play(Stage primaryStage) throws IOException{
 
+
         double ballx = 150;
         AtomicReference<Double> bally = new AtomicReference<>((double) 450);
         Ball ball = new Ball();
@@ -333,16 +318,31 @@ class Game extends Main{
         Pane pane = new Pane();
         pane.getChildren().add(b);
 
+        class GravityTimer extends AnimationTimer{
+            @Override
+            public void handle(long now){
+                b.setCenterY(b.getCenterY()+1.5);
+                bally.set(b.getCenterY());
+            }
+        }
+
+        AtomicInteger ballMemory = new AtomicInteger(0);
+        class MoveBall extends AnimationTimer{
+            @Override
+            public void handle(long now){
+                b.setCenterY(b.getCenterY()-6);
+                if(b.getCenterY()<=ballMemory.get()-35){
+                    bally.set(b.getCenterY());
+                    this.stop();
+                }
+            }
+        }
+
         Text pause = new Text("II");
         pause.relocate(10,480);
         pane.getChildren().add(pause);
         pause.setStyle("-fx-fill:white; -fx-font-size: 35px");
-        pause.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent mouseEvent) {
-                System.out.println("paused game");
-            }
-        });
+        pause.setOnMouseClicked(mouseEvent -> System.out.println("paused game"));
 
         Circular circle = new Circular();
         Group root = circle.show(150,300,70.0f,56.0f);
@@ -351,6 +351,10 @@ class Game extends Main{
         root.setLayoutY(235);
         root.relocate(root.getLayoutX(),root.getLayoutY());
         pane.getChildren().add(root);
+
+        Plus plus = new Plus();
+        Group plusRoot = plus.show(200.0f,300.0f,70.0f);
+        plus.move(plusRoot,360);
 
         Star star = new Star();
         Group starImage = star.show();
@@ -375,58 +379,67 @@ class Game extends Main{
 //        pane.getChildren().add(dia);
 
 
+        VerticalLine verticalLine = new VerticalLine();
+        Group root5[] = verticalLine.show();
+        verticalLine.moveRight(root5[0]);
+        verticalLine.moveLeft(root5[1]);
+        HBox hbox = new HBox(root5[0],root5[1]);
+        Group verticalRoot = new Group(hbox);
+
         Square square = new Square();
         Group squareRoot = square.show(100.0f,150.0f,110.0f,110.0f);
-        square.move(root,360);
+        square.move(squareRoot,360);
 
         AtomicReference<Group> obstacle1 = new AtomicReference<>(root);
         AtomicReference<Group> obstacle2 = new AtomicReference<>(horizontal);
         AtomicReference<Group> obstacle3 = new AtomicReference<>((Group) null);
         AtomicBoolean flag= new AtomicBoolean(true);
         AtomicReference<Group> memory = new AtomicReference<>(squareRoot);
+
+        Group[] obstacles = new Group[5];
+        obstacles[0] = root;
+        obstacles[1] = horizontal;
+        obstacles[2] = squareRoot;
+        obstacles[3] = plusRoot;
+        obstacles[4] = verticalRoot;
+        AtomicInteger obstacleCounter = new AtomicInteger(3);
+        AtomicBoolean firstMouse = new AtomicBoolean(true);
+        AnimationTimer gravity = new GravityTimer();
+        AnimationTimer moveBall = new MoveBall();
+
+        //handle click
         pane.addEventHandler(MouseEvent.MOUSE_RELEASED,e->{
-            if(bally.get()>350){
+            if(firstMouse.get()){
+                firstMouse.set(false);
+                gravity.start();
+            }
+            gravity.stop();
+            if(bally.get()>300){
                 //move ball
-                double change = bally.get();
-                Path path = new Path();
-                path.getElements().add(new MoveTo(b.getCenterX(), b.getCenterY()));
-                path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), change-100, b.getCenterX(), change-45));
-                bally.set((change-45));
-                PathTransition pathTransition = new PathTransition();
-                pathTransition.setDuration(Duration.millis(300));
-                pathTransition.setPath(path);
-                pathTransition.setNode(b);
-                pathTransition.play();
-                b.setCenterY(bally.get());
+                  ballMemory.set((int)b.getCenterY());
+                  moveBall.start();
+//                TODO: remove gravity on page close or pause.
             }
             else{
                 //move ball
-                double change = bally.get();
-                Path path = new Path();
-                path.getElements().add(new MoveTo(b.getCenterX(), b.getCenterY()));
-                path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), change-100, b.getCenterX(), change));
-                bally.set(change);
-                PathTransition pathTransition = new PathTransition();
-                pathTransition.setDuration(Duration.millis(300));
-                pathTransition.setPath(path);
-                pathTransition.setNode(b);
-                pathTransition.play();
-                b.setCenterY(bally.get());
+                ballMemory.set((int)b.getCenterY());
+                moveBall.start();
 
-                //move circle
+                //move lowermost obstacle
                 TranslateTransition translate = new TranslateTransition();
                 translate.setByY(40);
                 translate.setDuration(Duration.millis(300));
                 translate.setNode(obstacle1.get());
                 translate.play();
-                //move horizontal lines
+
+                //move middle obstacle
                 TranslateTransition translate1 = new TranslateTransition();
                 translate1.setByY(40);
                 translate1.setDuration(Duration.millis(300));
                 translate1.setNode(obstacle2.get());
                 translate1.play();
 
-
+                //check for updates in obstacles
                 Bounds boundsInScreen = obstacle1.get().localToScreen(obstacle1.get().getBoundsInLocal());
                 if(boundsInScreen.getMaxY()>=550 && flag.get()){
                     flag.set(false);
@@ -436,17 +449,16 @@ class Game extends Main{
                     pane.getChildren().add(obstacle3.get());
                 }
                 if(boundsInScreen.getMinY()>=650 && !flag.get()){
-//                    if(obstacle3.get()!=null){
                         flag.set(true);
                         pane.getChildren().remove(obstacle1.get());
-                        memory.set(obstacle1.get());
+                        memory.set(obstacles[obstacleCounter.get()]);
+                        obstacleCounter.set((obstacleCounter.get() + 1) % 5);
                         obstacle1.set(obstacle2.get());
                         obstacle2.set(obstacle3.get());
                         obstacle3.set(null);
-//                    }
                 }
                 if(obstacle3.get()!=null){
-                    //move square
+                    //move topmost obstacle
                     TranslateTransition translate2 = new TranslateTransition();
                     translate2.setByY(40);
                     translate2.setDuration(Duration.millis(300));
@@ -454,6 +466,7 @@ class Game extends Main{
                     translate2.play();
                 }
             }
+            gravity.start();
         });
 
         pane.setStyle("-fx-background-color: #282828");
