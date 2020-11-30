@@ -311,6 +311,8 @@ class Game extends Main{
 
         double ballx = 150;
         AtomicReference<Double> bally = new AtomicReference<>((double) 450);
+        AtomicInteger ballSpeed = new AtomicInteger(6);
+        AtomicInteger ballDistance = new AtomicInteger(35);
         Ball ball = new Ball();
         Circle b = ball.show();
         b.setCenterX(ballx);
@@ -330,8 +332,8 @@ class Game extends Main{
         class MoveBall extends AnimationTimer{
             @Override
             public void handle(long now){
-                b.setCenterY(b.getCenterY()-6);
-                if(b.getCenterY()<=ballMemory.get()-35){
+                b.setCenterY(b.getCenterY()-ballSpeed.get());
+                if(b.getCenterY()<=ballMemory.get()-ballDistance.get()){
                     bally.set(b.getCenterY());
                     this.stop();
                 }
@@ -368,7 +370,7 @@ class Game extends Main{
 //        pane.getChildren().add(changer);
 
         HorizontalLine horizontalLine = new HorizontalLine();
-        Group horizontal = horizontalLine.show(130.0f,75.0f);
+        Group horizontal = horizontalLine.show(130.0f,85.0f);
         horizontalLine.moveLeft(horizontal);
         pane.getChildren().add(horizontal);
 
@@ -415,7 +417,7 @@ class Game extends Main{
         obstaclex[2] = 90;
         obstacley[2] = -80;
 
-        obstaclex[3] = 90;
+        obstaclex[3] = 100;
         obstacley[3] = -60;
 
         obstaclex[4] = 0;
@@ -436,15 +438,19 @@ class Game extends Main{
                 gravity.start();
             }
             gravity.stop();
-            if(bally.get()>300){
+            if(bally.get()>350){
                 //move ball
                   ballMemory.set((int)b.getCenterY());
+                  ballDistance.set(35);
+                  ballSpeed.set(6);
                   moveBall.start();
 //                TODO: remove gravity on page close or pause.
             }
             else{
                 //move ball
                 ballMemory.set((int)b.getCenterY());
+                ballDistance.set(15);
+                ballSpeed.set(4);
                 moveBall.start();
 
                 //move lowermost obstacle
