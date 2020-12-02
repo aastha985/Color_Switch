@@ -28,11 +28,10 @@ import javafx.util.Duration;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -41,24 +40,36 @@ import java.util.concurrent.atomic.AtomicReference;
 public class Main extends Application{
     @Override
     public void start(Stage primaryStage) throws Exception{
-        Player P = new Player();
-        P.start(primaryStage);
+//        Player P = new Player();
+//        P.start(primaryStage);
+        Game G = new Game();
+        G.start(primaryStage);
     }
     public static void main(String[] args) {
         launch(args);
     }
 }
 
-class Player{
-    public void start(Stage primaryStage) throws IOException{
+class Player implements Serializable{
+    private String name;
+    Player(String name){
+        this.name = name;
+    }
+    public void start(Stage primaryStage) throws IOException,ClassNotFoundException{
         Game G = new Game();
         G.start(primaryStage);
     }
+
+    public String getName(){
+        return this.name;
+    }
 }
 
-class Game extends Main{
+class Game extends Main implements Serializable {
     private Scene playerDetails,menu,game,titleScreen,splashScreen,mainMenu,enterName,play,resumeScreen,prizes;
-    public void start(Stage primaryStage) throws IOException{
+    private HashMap<String,Player> players;
+    private Player player;
+    public void start(Stage primaryStage) throws IOException,ClassNotFoundException{
         //start new game
         //Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         Label label1 = new Label("COLOR GAME");
@@ -565,7 +576,47 @@ class Game extends Main{
         primaryStage.setScene(startScene);
     }
 
-    private Scene enterName(Scene mainMenu, Stage primaryStage) throws IOException{
+    private void serialize() throws IOException{
+        ObjectOutputStream out = null;
+        try{
+            out = new ObjectOutputStream(new FileOutputStream("users.txt"));
+            out.writeObject(players);
+
+        }catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+        finally {
+            try {
+                out.close();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        }
+    }
+
+    private void deserialize(String name) throws IOException,ClassNotFoundException{
+        ObjectInputStream in = null;
+        File file = new File("users.txt");
+        if(file.length()==0) players = new HashMap<>();
+        else{
+            try{
+                in = new ObjectInputStream(new FileInputStream("users.txt"));
+                players = (HashMap<String,Player>) in.readObject();
+            }
+            finally {
+                in.close();
+            }
+        }
+        if(players.containsKey(name)) player = players.get(name);
+        else{
+            player = new Player(name);
+            players.put(name,player);
+            serialize();
+        }
+
+    }
+
+    private Scene enterName(Scene mainMenu, Stage primaryStage) throws IOException,ClassNotFoundException{
         Text text = new Text("Enter Name");
         text.setId("text");
         TextField name = new TextField();
@@ -574,7 +625,19 @@ class Game extends Main{
         name.setAlignment(Pos.CENTER);
         Button next = new Button("NEXT");
         next.setId("nextBtn");
-        next.setOnAction(e->primaryStage.setScene(mainMenu));
+        next.setOnAction(e->{
+            if(!name.getText().trim().equals("")){
+                try {
+                    deserialize(name.getText().trim());
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                } catch (ClassNotFoundException classNotFoundException) {
+                    classNotFoundException.printStackTrace();
+                }
+                primaryStage.setScene(mainMenu);
+            }
+        }
+        );
         Image image = new Image(new FileInputStream("src/images/ShortTitleImage.jpg"));
         ImageView titleImage = new ImageView(image);
         titleImage.setFitWidth(250);
