@@ -14,6 +14,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
@@ -24,6 +25,10 @@ import javafx.scene.transform.Shear;
 import javafx.stage.Stage;
 import javafx.scene.control.Button;
 import javafx.util.Duration;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -98,6 +103,16 @@ class Game extends Main{
         primaryStage.setScene(titleScreen);
         primaryStage.setTitle("Color Switch");
         primaryStage.show();
+    }
+
+    private MediaView playSound(String filename){
+        Media media = new Media(new File(filename).toURI().toString());
+        MediaPlayer mediaPlayer = new MediaPlayer(media);
+        MediaView mediaView = new MediaView(mediaPlayer);
+
+        mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+        mediaPlayer.play();
+        return mediaView;
     }
 
     private Scene playerDetails(Stage primaryStage) throws IOException{
@@ -708,7 +723,7 @@ class Game extends Main{
         titleImage.setFitWidth(300);
         titleImage.setPreserveRatio(true);
         StackPane layout = new StackPane();
-        layout.getChildren().add(titleImage);
+        layout.getChildren().addAll(titleImage,playSound("mainMenuSound.mp3"));
         layout.setStyle("-fx-background-color: #292929");
         return new Scene(layout,300,500);
     }
