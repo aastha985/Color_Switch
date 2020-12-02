@@ -2,8 +2,6 @@ package sample;
 
 import javafx.animation.*;
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -26,15 +24,14 @@ import javafx.scene.transform.Shear;
 import javafx.stage.Stage;
 import javafx.scene.control.Button;
 import javafx.util.Duration;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static java.lang.Thread.sleep;
 
 public class Main extends Application{
     @Override
@@ -307,8 +304,6 @@ class Game extends Main{
     }
 
     private void play(Stage primaryStage) throws IOException{
-
-
         double ballx = 150;
         AtomicReference<Double> bally = new AtomicReference<>((double) 450);
         AtomicInteger ballSpeed = new AtomicInteger(6);
@@ -318,7 +313,6 @@ class Game extends Main{
         b.setCenterX(ballx);
         b.setCenterY(bally.get());
         Pane pane = new Pane();
-        pane.getChildren().add(b);
 
         class GravityTimer extends AnimationTimer{
             @Override
@@ -328,13 +322,47 @@ class Game extends Main{
             }
         }
 
+        ColorChanger colorChanger = new ColorChanger();
+        Group changer = colorChanger.show(150,0);
+
+        ColorChanger colorChanger2 = new ColorChanger();
+        Group changer2 = colorChanger2.show(150,0);
+
+        ColorChanger colorChanger3 = new ColorChanger();
+        Group changer3 = colorChanger3.show(150,0);
+
+        ArrayList<Group> changers = new ArrayList<Group>();
+        changers.add(changer);
+        changers.add(changer2);
+
+        changer.setTranslateY(180);
+        changer2.setTranslateY(30);
+        pane.getChildren().addAll(changer,changer2);
+
+        AtomicInteger nextChanger = new AtomicInteger(2);
         AtomicInteger ballMemory = new AtomicInteger(0);
+        AtomicInteger changerMemory = new AtomicInteger(0);
+
         class MoveBall extends AnimationTimer{
             @Override
             public void handle(long now){
                 b.setCenterY(b.getCenterY()-ballSpeed.get());
                 if(b.getCenterY()<=ballMemory.get()-ballDistance.get()){
                     bally.set(b.getCenterY());
+                    this.stop();
+                }
+            }
+        }
+
+        class MoveChangers extends AnimationTimer{
+            @Override
+            public void handle(long now){
+                changerMemory.set(changerMemory.get()+4);
+                for(int i=0;i<changers.size();++i){
+                    changers.get(i).setTranslateY(changers.get(i).getTranslateY()+4);
+                }
+                if(changerMemory.get()>=40){
+                    changerMemory.set(0);
                     this.stop();
                 }
             }
@@ -364,10 +392,6 @@ class Game extends Main{
         star.blink(starImage);
 //        pane.getChildren().add(starImage);
 
-        ColorChanger colorChanger = new ColorChanger();
-        Group changer = colorChanger.show(10,10);
-        changer.relocate(137,180);
-//        pane.getChildren().add(changer);
 
         HorizontalLine horizontalLine = new HorizontalLine();
         Group horizontal = horizontalLine.show(130.0f,85.0f);
@@ -398,6 +422,25 @@ class Game extends Main{
         AtomicBoolean flag= new AtomicBoolean(true);
         AtomicReference<Group> memory = new AtomicReference<>(squareRoot);
 
+        AtomicInteger obstacleMemory = new AtomicInteger(0);
+
+        class MoveObstacles extends AnimationTimer{
+            @Override
+            public void handle(long now){
+                obstacleMemory.set(obstacleMemory.get()+4);
+                obstacle1.get().setTranslateY(obstacle1.get().getTranslateY()+4);
+                obstacle2.get().setTranslateY(obstacle2.get().getTranslateY()+4);
+                if(obstacle3.get()!=null)
+                    obstacle3.get().setTranslateY(obstacle3.get().getTranslateY()+4);
+                if(obstacleMemory.get()>=40){
+                    obstacleMemory.set(0);
+                    this.stop();
+                }
+            }
+        }
+
+        AnimationTimer moveObstacles = new MoveObstacles();
+
         Group[] obstacles = new Group[5];
         obstacles[0] = root;
         obstacles[1] = horizontal;
@@ -409,19 +452,19 @@ class Game extends Main{
         int[] obstacley = new int[5];
 
         obstaclex[0] = 85;
-        obstacley[0] = -150;
+        obstacley[0] = -180;
 
         obstaclex[1] = 0;
-        obstacley[1] = -10;
+        obstacley[1] = -60;
 
         obstaclex[2] = 90;
-        obstacley[2] = -80;
+        obstacley[2] = -130;
 
         obstaclex[3] = 100;
-        obstacley[3] = -60;
+        obstacley[3] = -110;
 
         obstaclex[4] = 0;
-        obstacley[4] = -110;
+        obstacley[4] = -160;
 
         AtomicInteger obstacleCounter = new AtomicInteger(3);
         AtomicInteger nextObstacleX = new AtomicInteger(obstaclex[2]);
@@ -430,13 +473,17 @@ class Game extends Main{
         AtomicBoolean firstMouse = new AtomicBoolean(true);
         AnimationTimer gravity = new GravityTimer();
         AnimationTimer moveBall = new MoveBall();
+        AnimationTimer moveChangers = new MoveChangers();
 
+        pane.getChildren().add(b);
+        AtomicBoolean addChanger = new AtomicBoolean(true);
         //handle click
         pane.addEventHandler(MouseEvent.MOUSE_RELEASED,e->{
             if(firstMouse.get()){
                 firstMouse.set(false);
                 gravity.start();
             }
+            Bounds boundsInScreen = obstacle1.get().localToScreen(obstacle1.get().getBoundsInLocal());
             gravity.stop();
             if(bally.get()>350){
                 //move ball
@@ -453,28 +500,23 @@ class Game extends Main{
                 ballSpeed.set(4);
                 moveBall.start();
 
-                //move lowermost obstacle
-                TranslateTransition translate = new TranslateTransition();
-                translate.setByY(40);
-                translate.setDuration(Duration.millis(300));
-                translate.setNode(obstacle1.get());
-                translate.play();
-
-                //move middle obstacle
-                TranslateTransition translate1 = new TranslateTransition();
-                translate1.setByY(40);
-                translate1.setDuration(Duration.millis(300));
-                translate1.setNode(obstacle2.get());
-                translate1.play();
-
-                //check for updates in obstacles
-                Bounds boundsInScreen = obstacle1.get().localToScreen(obstacle1.get().getBoundsInLocal());
-                if(boundsInScreen.getMaxY()>=550 && flag.get()){
+                moveChangers.start();
+                moveObstacles.start();
+                double check = boundsInScreen.getMaxY();
+                if(boundsInScreen.getHeight()<20){
+                    check+=50;
+                }
+                if(check>=550 && flag.get()){
                     flag.set(false);
                     obstacle3.set(memory.get());
-                    obstacle3.get().setTranslateY(-50);
+                    obstacle3.get().setTranslateY(0);
                     obstacle3.get().relocate(nextObstacleX.get(), nextObstacleY.get());
                     pane.getChildren().add(obstacle3.get());
+                    ColorChanger colorChangerPer = new ColorChanger();
+                    Group Changer = colorChangerPer.show(150,0);
+                    Changer.setTranslateY(nextObstacleY.get()-30);
+                    changers.add(Changer);
+                    pane.getChildren().add(Changer);
                 }
                 if(boundsInScreen.getMinY()>=650 && !flag.get()){
                         flag.set(true);
@@ -487,13 +529,17 @@ class Game extends Main{
                         obstacle2.set(obstacle3.get());
                         obstacle3.set(null);
                 }
-                if(obstacle3.get()!=null){
-                    //move topmost obstacle
-                    TranslateTransition translate2 = new TranslateTransition();
-                    translate2.setByY(40);
-                    translate2.setDuration(Duration.millis(300));
-                    translate2.setNode(obstacle3.get());
-                    translate2.play();
+            }
+            for(int i=0;i<changers.size();++i){
+                if(b.intersects(changers.get(i).getBoundsInParent())){
+                    pane.getChildren().remove(changers.get(i));
+                    changers.remove(i);
+                    String color;
+                    do{
+                        color = ColorChanger.generateRandomColor();
+                    }while(Color.valueOf(color).equals(b.getFill()));
+                    b.setFill(Color.valueOf(color));
+                    break;
                 }
             }
             gravity.start();
@@ -736,8 +782,10 @@ class Arrow extends Game{
 
 class ColorChanger extends Game{
     private final float radius;
+    private static String[] possibleColors;
     ColorChanger(){
         this.radius = 13;
+        ColorChanger.possibleColors = new String[]{"#e53e7b", "#8a49ef", "eed948", "5edcea"};
     }
     public Group show(float x,float y){
         float angle = 0.0f;
@@ -753,6 +801,11 @@ class ColorChanger extends Game{
         }
         Group root = new Group(arcs[0],arcs[1],arcs[2],arcs[3]);
         return root;
+    }
+    public static String generateRandomColor(){
+        Random rand = new Random();
+        int index = rand.nextInt(4);
+        return ColorChanger.possibleColors[index];
     }
 }
 
