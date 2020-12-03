@@ -91,27 +91,29 @@ class Game extends Main implements Serializable {
         StackPane layout2 = new StackPane();
         layout2.getChildren().add(exit);
         layout1.setStyle("-fx-background-color: #282828");
-        game = new Scene(layout2,300,500);
-        start.setOnAction(e->primaryStage.setScene(game));
-
-
+//        game = new Scene(layout2,300,500);
+//        start.setOnAction(e->primaryStage.setScene(game));
+//
+//
         prizes = prize(primaryStage);
-
-
+//
+//
         playerDetails = playerDetails(primaryStage);
-
+//
         mainMenu = mainMenu(primaryStage, prizes, playerDetails);
+//
+//        enterName = enterName(mainMenu, primaryStage);
+//
+//        splashScreen = splashScreen();
+//
+//        pauseTransition(primaryStage,enterName,6);
+//
+//        titleScreen = titleImage();
+//        pauseTransition(primaryStage,splashScreen,2);
 
-        enterName = enterName(mainMenu, primaryStage);
 
-        splashScreen = splashScreen();
 
-        pauseTransition(primaryStage,enterName,6);
-
-        titleScreen = titleImage();
-        pauseTransition(primaryStage,splashScreen,2);
-
-        primaryStage.setScene(titleScreen);
+        primaryStage.setScene(mainMenu);
         primaryStage.setTitle("Color Switch");
         primaryStage.show();
     }
@@ -362,13 +364,11 @@ class Game extends Main implements Serializable {
         changers.add(changer2);
 
         changer.setTranslateY(180);
-        changer2.setTranslateY(30);
+        changer2.setTranslateY(-100);
         pane.getChildren().addAll(changer,changer2);
 
         AtomicInteger ballMemory = new AtomicInteger(0);
         AtomicInteger changerMemory = new AtomicInteger(0);
-
-
 
         class MoveChangers extends AnimationTimer{
             @Override
@@ -399,7 +399,7 @@ class Game extends Main implements Serializable {
         pane.getChildren().add(root);
 
         Plus plus = new Plus();
-        Group plusRoot = plus.show(200.0f,300.0f,70.0f);
+        Group plusRoot = plus.show(200.0f,300.0f,75.0f);
         plus.move(plusRoot,360);
 
         Star star = new Star();
@@ -410,9 +410,15 @@ class Game extends Main implements Serializable {
 
 
         HorizontalLine horizontalLine = new HorizontalLine();
+        HorizontalLine horizontalLine2 = new HorizontalLine();
         Group horizontal = horizontalLine.show(130.0f,85.0f);
         horizontalLine.moveLeft(horizontal);
-        pane.getChildren().add(horizontal);
+        Group horizontal2 = horizontalLine2.show(250.0f,85.0f);
+        horizontalLine2.moveRight(horizontal2);
+        Group horizontalObstacle = new Group(horizontal,horizontal2);
+        horizontalObstacle.relocate(-800,-10);
+        pane.getChildren().add(horizontalObstacle);
+
 
         Diamond diamond = new Diamond();
         Group dia = diamond.show();
@@ -420,22 +426,16 @@ class Game extends Main implements Serializable {
         diamond.blink(dia);
 //        pane.getChildren().add(dia);
 
-
-        VerticalLine verticalLine = new VerticalLine();
-        Group root5[] = verticalLine.show();
-        verticalLine.moveRight(root5[0]);
-        verticalLine.moveLeft(root5[1]);
-        HBox hbox = new HBox(root5[0],root5[1]);
-
         Square rectangle = new Square();
-        Group rectangleRoot = rectangle.show(100.0f,150.0f,110.0f,110.0f);
+        Group rectangleRoot = rectangle.show(100.0f,150.0f,120.0f,135.0f);
+        rectangle.move(rectangleRoot,360);
 
         Square square = new Square();
-        Group squareRoot = square.show(100.0f,150.0f,110.0f,110.0f);
+        Group squareRoot = square.show(100.0f,150.0f,120.0f,120.0f);
         square.move(squareRoot,360);
 
         AtomicReference<Group> obstacle1 = new AtomicReference<>(root);
-        AtomicReference<Group> obstacle2 = new AtomicReference<>(horizontal);
+        AtomicReference<Group> obstacle2 = new AtomicReference<>(horizontalObstacle);
         AtomicReference<Group> obstacle3 = new AtomicReference<>((Group) null);
         AtomicBoolean flag= new AtomicBoolean(true);
         AtomicReference<Group> memory = new AtomicReference<>(squareRoot);
@@ -461,7 +461,7 @@ class Game extends Main implements Serializable {
 
         Group[] obstacles = new Group[5];
         obstacles[0] = root;
-        obstacles[1] = horizontal;
+        obstacles[1] = horizontalObstacle;
         obstacles[2] = squareRoot;
         obstacles[3] = plusRoot;
         obstacles[4] = rectangleRoot;
@@ -470,19 +470,19 @@ class Game extends Main implements Serializable {
         int[] obstacley = new int[5];
 
         obstaclex[0] = 85;
-        obstacley[0] = -180;
+        obstacley[0] = -300;
 
-        obstaclex[1] = 0;
-        obstacley[1] = -60;
+        obstaclex[1] = -800;
+        obstacley[1] = -240;
 
         obstaclex[2] = 90;
-        obstacley[2] = -130;
+        obstacley[2] = -240;
 
         obstaclex[3] = 100;
-        obstacley[3] = -110;
+        obstacley[3] = -260;
 
-        obstaclex[4] = 0;
-        obstacley[4] = -160;
+        obstaclex[4] = 90;
+        obstacley[4] = -310;
 
         AtomicInteger obstacleCounter = new AtomicInteger(3);
         AtomicInteger nextObstacleX = new AtomicInteger(obstaclex[2]);
@@ -503,13 +503,27 @@ class Game extends Main implements Serializable {
                     ObservableList obs =obstacles[i].getChildren();
                     obs.forEach((o ->
                     {
-                        Shape shape = (Shape)o;
-                        if(b.intersects(shape.getBoundsInParent())){
-                            System.out.println(b.getFill()+" "+shape.getFill());
-                            if(!b.getFill().equals(shape.getFill())) {
-                                System.out.println("different color, game over");
+                        try{
+                            Shape shape = (Shape)o;
+                            if(b.intersects(shape.getBoundsInParent())){
+                                if(!b.getFill().equals(shape.getFill())) {
+                                    System.out.println("different color, game over");
+                                }
                             }
                         }
+                        catch (Exception e){
+                            Group grp = (Group)o;
+                            ObservableList obs2 = grp.getChildren();
+                            obs2.forEach((o1 ->{
+                                Shape shape = (Shape)o1;
+                                if(b.intersects(shape.getBoundsInParent())){
+                                    if(!b.getFill().equals(shape.getFill())) {
+                                        System.out.println("different color, game over");
+                                    }
+                                }
+                            }));
+                        }
+
                     }));
                 }
             }
@@ -520,8 +534,6 @@ class Game extends Main implements Serializable {
 
         pane.getChildren().add(b);
         AtomicBoolean addChanger = new AtomicBoolean(true);
-
-
 
         //handle click
         pane.addEventHandler(MouseEvent.MOUSE_RELEASED,e->{
@@ -560,7 +572,7 @@ class Game extends Main implements Serializable {
                     pane.getChildren().add(obstacle3.get());
                     ColorChanger colorChangerPer = new ColorChanger();
                     Group Changer = colorChangerPer.show(150,0);
-                    Changer.setTranslateY(nextObstacleY.get()-30);
+                    Changer.setTranslateY(nextObstacleY.get()-75);
                     changers.add(Changer);
                     pane.getChildren().add(Changer);
                 }
@@ -1005,16 +1017,20 @@ class HorizontalLine extends Linear{
 
     public Group show(float y,float len){
 
-        Line lines[] = new Line[12];
+        Line lines[] = new Line[38];
         Paint paint[] = {Color.valueOf("#e53e7b"),Color.valueOf("#8a49ef"),Color.valueOf("#eed948"),Color.valueOf("#5edcea")};
 
-        for(int i=-4;i<8;i++){
-            lines[i+4] = new Line(i*len,y,(i+1)*len,y);
-            lines[i+4].setStrokeWidth(strokeWidth);
-            lines[i+4].setStroke(paint[Math.abs(i%4)]);
+        for(int i=-12;i<16;i++){
+            lines[i+12] = new Line(i*len,y,(i+1)*len,y);
+            lines[i+12].setStrokeWidth(strokeWidth);
+            lines[i+12].setStroke(paint[Math.abs(i%4)]);
         }
 
-        Group root = new Group(lines[0],lines[1],lines[2],lines[3],lines[4],lines[5],lines[6],lines[7],lines[8],lines[9],lines[10],lines[11]);
+        Group root = new Group();
+        for(int i=-12;i<16;i++){
+            root.getChildren().add(lines[i+12]);
+        }
+//        Group root = new Group(lines[0],lines[1],lines[2],lines[3],lines[4],lines[5],lines[6],lines[7],lines[8],lines[9],lines[10],lines[11]);
         return root;
     }
 }
