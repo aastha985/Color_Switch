@@ -2,6 +2,7 @@ package sample;
 
 import javafx.animation.*;
 import javafx.application.Application;
+import javafx.collections.ObservableList;
 import javafx.geometry.Bounds;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -31,7 +32,6 @@ import javafx.scene.media.MediaPlayer;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -365,20 +365,10 @@ class Game extends Main implements Serializable {
         changer2.setTranslateY(30);
         pane.getChildren().addAll(changer,changer2);
 
-        AtomicInteger nextChanger = new AtomicInteger(2);
         AtomicInteger ballMemory = new AtomicInteger(0);
         AtomicInteger changerMemory = new AtomicInteger(0);
 
-        class MoveBall extends AnimationTimer{
-            @Override
-            public void handle(long now){
-                b.setCenterY(b.getCenterY()-ballSpeed.get());
-                if(b.getCenterY()<=ballMemory.get()-ballDistance.get()){
-                    bally.set(b.getCenterY());
-                    this.stop();
-                }
-            }
-        }
+
 
         class MoveChangers extends AnimationTimer{
             @Override
@@ -436,7 +426,9 @@ class Game extends Main implements Serializable {
         verticalLine.moveRight(root5[0]);
         verticalLine.moveLeft(root5[1]);
         HBox hbox = new HBox(root5[0],root5[1]);
-        Group verticalRoot = new Group(hbox);
+
+        Square rectangle = new Square();
+        Group rectangleRoot = rectangle.show(100.0f,150.0f,110.0f,110.0f);
 
         Square square = new Square();
         Group squareRoot = square.show(100.0f,150.0f,110.0f,110.0f);
@@ -472,7 +464,7 @@ class Game extends Main implements Serializable {
         obstacles[1] = horizontal;
         obstacles[2] = squareRoot;
         obstacles[3] = plusRoot;
-        obstacles[4] = verticalRoot;
+        obstacles[4] = rectangleRoot;
 
         int[] obstaclex = new int[5];
         int[] obstacley = new int[5];
@@ -498,11 +490,39 @@ class Game extends Main implements Serializable {
 
         AtomicBoolean firstMouse = new AtomicBoolean(true);
         AnimationTimer gravity = new GravityTimer();
+
+        class MoveBall extends AnimationTimer{
+            @Override
+            public void handle(long now){
+                b.setCenterY(b.getCenterY()-ballSpeed.get());
+                if(b.getCenterY()<=ballMemory.get()-ballDistance.get()){
+                    bally.set(b.getCenterY());
+                    this.stop();
+                }
+                for(int i = 0;i<obstacles.length;i++){
+                    ObservableList obs =obstacles[i].getChildren();
+                    obs.forEach((o ->
+                    {
+                        Shape shape = (Shape)o;
+                        if(b.intersects(shape.getBoundsInParent())){
+                            System.out.println(b.getFill()+" "+shape.getFill());
+                            if(!b.getFill().equals(shape.getFill())) {
+                                System.out.println("different color, game over");
+                            }
+                        }
+                    }));
+                }
+            }
+        }
+
         AnimationTimer moveBall = new MoveBall();
         AnimationTimer moveChangers = new MoveChangers();
 
         pane.getChildren().add(b);
         AtomicBoolean addChanger = new AtomicBoolean(true);
+
+
+
         //handle click
         pane.addEventHandler(MouseEvent.MOUSE_RELEASED,e->{
             if(firstMouse.get()){
