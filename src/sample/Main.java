@@ -356,9 +356,6 @@ class Game extends Main implements Serializable {
         ColorChanger colorChanger2 = new ColorChanger();
         Group changer2 = colorChanger2.show(150,0);
 
-        ColorChanger colorChanger3 = new ColorChanger();
-        Group changer3 = colorChanger3.show(150,0);
-
         ArrayList<Group> changers = new ArrayList<Group>();
         changers.add(changer);
         changers.add(changer2);
@@ -367,8 +364,27 @@ class Game extends Main implements Serializable {
         changer2.setTranslateY(-100);
         pane.getChildren().addAll(changer,changer2);
 
+        Reward reward1 = new Star();
+        Group starReward = reward1.show();
+        reward1.blink(starReward);
+
+        Reward reward2 = new Diamond();
+        Group diamondReward = reward2.show();
+        reward2.blink(diamondReward);
+
+        ArrayList<Group> rewards = new ArrayList<>();
+        rewards.add(starReward);
+        rewards.add(diamondReward);
+
+        starReward.relocate(135,0);
+        diamondReward.relocate(135,0);
+        starReward.setTranslateY(283);
+        diamondReward.setTranslateY(40);
+        pane.getChildren().addAll(starReward,diamondReward);
+
         AtomicInteger ballMemory = new AtomicInteger(0);
         AtomicInteger changerMemory = new AtomicInteger(0);
+        AtomicInteger rewardMemory = new AtomicInteger(0);
 
         class MoveChangers extends AnimationTimer{
             @Override
@@ -379,6 +395,20 @@ class Game extends Main implements Serializable {
                 }
                 if(changerMemory.get()>=40){
                     changerMemory.set(0);
+                    this.stop();
+                }
+            }
+        }
+
+        class MoveRewards extends AnimationTimer{
+            @Override
+            public void handle(long now){
+                rewardMemory.set(rewardMemory.get()+4);
+                for(int i=0;i<rewards.size();i++){
+                    rewards.get(i).setTranslateY(rewards.get(i).getTranslateY()+4);
+                }
+                if(rewardMemory.get()>=40){
+                    rewardMemory.set(0);
                     this.stop();
                 }
             }
@@ -402,13 +432,6 @@ class Game extends Main implements Serializable {
         Group plusRoot = plus.show(200.0f,300.0f,75.0f);
         plus.move(plusRoot,360);
 
-        Star star = new Star();
-        Group starImage = star.show();
-        starImage.relocate(132,285);
-        star.blink(starImage);
-//        pane.getChildren().add(starImage);
-
-
         HorizontalLine horizontalLine = new HorizontalLine();
         HorizontalLine horizontalLine2 = new HorizontalLine();
         Group horizontal = horizontalLine.show(130.0f,85.0f);
@@ -418,13 +441,6 @@ class Game extends Main implements Serializable {
         Group horizontalObstacle = new Group(horizontal,horizontal2);
         horizontalObstacle.relocate(-800,-10);
         pane.getChildren().add(horizontalObstacle);
-
-
-        Diamond diamond = new Diamond();
-        Group dia = diamond.show();
-        dia.relocate(135,70);
-        diamond.blink(dia);
-//        pane.getChildren().add(dia);
 
         Square rectangle = new Square();
         Group rectangleRoot = rectangle.show(100.0f,150.0f,120.0f,135.0f);
@@ -499,41 +515,43 @@ class Game extends Main implements Serializable {
                     bally.set(b.getCenterY());
                     this.stop();
                 }
-                for(int i = 0;i<obstacles.length;i++){
-                    ObservableList obs =obstacles[i].getChildren();
-                    obs.forEach((o ->
-                    {
-                        try{
-                            Shape shape = (Shape)o;
-                            if(b.intersects(shape.getBoundsInParent())){
-                                if(!b.getFill().equals(shape.getFill())) {
-                                    System.out.println("different color, game over");
-                                }
-                            }
-                        }
-                        catch (Exception e){
-                            Group grp = (Group)o;
-                            ObservableList obs2 = grp.getChildren();
-                            obs2.forEach((o1 ->{
-                                Shape shape = (Shape)o1;
-                                if(b.intersects(shape.getBoundsInParent())){
-                                    if(!b.getFill().equals(shape.getFill())) {
-                                        System.out.println("different color, game over");
-                                    }
-                                }
-                            }));
-                        }
-
-                    }));
-                }
+//                for(int i = 0;i<obstacles.length;i++){
+//                    ObservableList obs =obstacles[i].getChildren();
+//                    obs.forEach((o ->
+//                    {
+//                        try{
+//                            Shape shape = (Shape)o;
+//                            if(b.intersects(shape.getBoundsInParent())){
+//                                if(!b.getFill().equals(shape.getFill())) {
+//                                    System.out.println("different color, game over");
+//                                }
+//                            }
+//                        }
+//                        catch (Exception e){
+//                            Group grp = (Group)o;
+//                            ObservableList obs2 = grp.getChildren();
+//                            obs2.forEach((o1 ->{
+//                                Shape shape = (Shape)o1;
+//                                if(b.intersects(shape.getBoundsInParent())){
+//                                    if(!b.getFill().equals(shape.getFill())) {
+//                                        System.out.println("different color, game over");
+//                                    }
+//                                }
+//                            }));
+//                        }
+//
+//                    }));
+//                }
             }
         }
 
         AnimationTimer moveBall = new MoveBall();
         AnimationTimer moveChangers = new MoveChangers();
+        AnimationTimer moveRewards = new MoveRewards();
 
         pane.getChildren().add(b);
-        AtomicBoolean addChanger = new AtomicBoolean(true);
+
+        AtomicInteger count = new AtomicInteger(0);
 
         //handle click
         pane.addEventHandler(MouseEvent.MOUSE_RELEASED,e->{
@@ -560,6 +578,7 @@ class Game extends Main implements Serializable {
 
                 moveChangers.start();
                 moveObstacles.start();
+                moveRewards.start();
                 double check = boundsInScreen.getMaxY();
                 if(boundsInScreen.getHeight()<20){
                     check+=50;
@@ -570,6 +589,24 @@ class Game extends Main implements Serializable {
                     obstacle3.get().setTranslateY(0);
                     obstacle3.get().relocate(nextObstacleX.get(), nextObstacleY.get());
                     pane.getChildren().add(obstacle3.get());
+                    Reward reward=null;
+                    if(count.get()%2==0)
+                        reward = new Star();
+                    else
+                       reward = new Diamond();
+                    count.set(count.get()+1);
+                    Group rewardgrp = null;
+                    try {
+                        rewardgrp = reward.show();
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
+                    rewardgrp.relocate(140,0);
+                    rewardgrp.setTranslateY(nextObstacleY.get()+50);
+                    rewardgrp.setTranslateX(0);
+                    reward.blink(rewardgrp);
+                    rewards.add(rewardgrp);
+                    pane.getChildren().add(rewardgrp);
                     ColorChanger colorChangerPer = new ColorChanger();
                     Group Changer = colorChangerPer.show(150,0);
                     Changer.setTranslateY(nextObstacleY.get()-75);
@@ -598,6 +635,12 @@ class Game extends Main implements Serializable {
                     }while(Color.valueOf(color).equals(b.getFill()));
                     b.setFill(Color.valueOf(color));
                     break;
+                }
+            }
+            for(int i=0;i<rewards.size();i++){
+                if(b.intersects(rewards.get(i).getBoundsInParent())){
+                    pane.getChildren().remove(rewards.get(i));
+                    rewards.remove(i);
                 }
             }
             gravity.start();
@@ -834,7 +877,7 @@ class Ball extends Game{
     }
 }
 
-class Reward extends Game{
+abstract class Reward extends Game{
     public void blink(Group root){
         ScaleTransition st = new ScaleTransition(Duration.millis(1000),root);
          st.setByX(0.15f);
@@ -843,11 +886,14 @@ class Reward extends Game{
          st.setAutoReverse(true);
          st.play();
     }
+
+    public abstract Group show() throws IOException;
 }
 
 class Star extends Reward{
+    @Override
     public Group show() throws IOException{
-        Image image = new Image(new FileInputStream("src/images/star.jpg"));
+        Image image = new Image(new FileInputStream("src/images/staricon.png"));
         ImageView star = new ImageView(image);
         star.setFitWidth(35);
         star.setPreserveRatio(true);
@@ -856,6 +902,7 @@ class Star extends Reward{
 }
 
 class Diamond extends Reward{
+    @Override
     public Group show(){
         Rectangle dia = new Rectangle(50,50,20,20);
         dia.setArcWidth(3);
@@ -1030,7 +1077,6 @@ class HorizontalLine extends Linear{
         for(int i=-12;i<16;i++){
             root.getChildren().add(lines[i+12]);
         }
-//        Group root = new Group(lines[0],lines[1],lines[2],lines[3],lines[4],lines[5],lines[6],lines[7],lines[8],lines[9],lines[10],lines[11]);
         return root;
     }
 }
