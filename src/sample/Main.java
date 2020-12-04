@@ -678,39 +678,6 @@ class Game extends Main implements Serializable {
         scoreText.relocate(10,10);
         pane.getChildren().add(scoreText);
 
-        Image resumebtn = new Image(new FileInputStream("src/images/play.png"));
-        ImageView resumeBtn = new ImageView(resumebtn);
-        resumeBtn.setFitWidth(35);
-        resumeBtn.setPreserveRatio(true);
-
-        Image pausebtn = new Image(new FileInputStream("src/images/pause.png"));
-        ImageView pauseBtn = new ImageView(pausebtn);
-        pauseBtn.setFitWidth(35);
-        pauseBtn.setPreserveRatio(true);
-        pane.getChildren().add(pauseBtn);
-        pauseBtn.relocate(10,450);
-        pauseBtn.setOnMouseClicked(mouseEvent -> {
-            pane.getChildren().add(resumeBtn);
-            pane.getChildren().remove(pauseBtn);
-            resumeBtn.relocate(10,450);
-        });
-
-        Image exitbtn = new Image(new FileInputStream("src/images/stop.png"));
-        ImageView exitBtn = new ImageView(exitbtn);
-        exitBtn.setFitWidth(35);
-        exitBtn.setPreserveRatio(true);
-        pane.getChildren().add(exitBtn);
-        exitBtn.relocate(10,400);
-        exitBtn.setOnMouseClicked(mouseEvent ->{
-            try {
-                prizes = prize(primaryStage);
-                mainMenu = mainMenu(primaryStage, prizes,player);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            primaryStage.setScene(mainMenu);
-        });
-
         Circular circle = new Circular();
         Group root = circle.show(150,300,70.0f,56.0f);
         circle.move(root,360);
@@ -839,6 +806,7 @@ class Game extends Main implements Serializable {
         AnimationTimer moveBall = new MoveBall();
         AnimationTimer moveChangers = new MoveChangers();
         AnimationTimer moveRewards = new MoveRewards();
+        AtomicBoolean gamePaused = new AtomicBoolean(false);
 
         pane.getChildren().add(b);
 
@@ -846,69 +814,70 @@ class Game extends Main implements Serializable {
 
         //handle click
         pane.addEventHandler(MouseEvent.MOUSE_RELEASED,e->{
-            if(firstMouse.get()){
-                firstMouse.set(false);
-                gravity.start();
-            }
-            Bounds boundsInScreen = obstacle1.get().localToScreen(obstacle1.get().getBoundsInLocal());
-            gravity.stop();
-            if(bally.get()>350){
-                //move ball
-                  ballMemory.set((int)b.getCenterY());
-                  ballDistance.set(35);
-                  ballSpeed.set(6);
-                  moveBall.start();
+            if(!gamePaused.get()){
+                if(firstMouse.get()){
+                    firstMouse.set(false);
+                    gravity.start();
+                }
+                Bounds boundsInScreen = obstacle1.get().localToScreen(obstacle1.get().getBoundsInLocal());
+                gravity.stop();
+                if(bally.get()>350){
+                    //move ball
+                    ballMemory.set((int)b.getCenterY());
+                    ballDistance.set(35);
+                    ballSpeed.set(6);
+                    moveBall.start();
 //                TODO: remove gravity on page close or pause.
-            }
-            else{
-                //move ball
-                ballMemory.set((int)b.getCenterY());
-                ballDistance.set(15);
-                ballSpeed.set(4);
-                moveBall.start();
+                }
+                else{
+                    //move ball
+                    ballMemory.set((int)b.getCenterY());
+                    ballDistance.set(15);
+                    ballSpeed.set(4);
+                    moveBall.start();
 
-                moveChangers.start();
-                moveObstacles.start();
-                moveRewards.start();
-                double check = boundsInScreen.getMaxY();
-                if(boundsInScreen.getHeight()<20){
-                    check+=50;
-                }
-                if(check>=550 && flag.get()){
-                    flag.set(false);
-                    obstacle3.set(memory.get());
-                    obstacle3.get().setTranslateY(0);
-                    obstacle3.get().relocate(nextObstacleX.get(), nextObstacleY.get());
-                    pane.getChildren().add(obstacle3.get());
-                    Reward reward=null;
-                    if(count.get()%2==0) {
-                        reward = new Star();
-                        rewardsType.add(true);
+                    moveChangers.start();
+                    moveObstacles.start();
+                    moveRewards.start();
+                    double check = boundsInScreen.getMaxY();
+                    if(boundsInScreen.getHeight()<20){
+                        check+=50;
                     }
-                    else{
-                        reward = new Diamond();
-                        rewardsType.add(false);
+                    if(check>=550 && flag.get()){
+                        flag.set(false);
+                        obstacle3.set(memory.get());
+                        obstacle3.get().setTranslateY(0);
+                        obstacle3.get().relocate(nextObstacleX.get(), nextObstacleY.get());
+                        pane.getChildren().add(obstacle3.get());
+                        Reward reward=null;
+                        if(count.get()%2==0) {
+                            reward = new Star();
+                            rewardsType.add(true);
+                        }
+                        else{
+                            reward = new Diamond();
+                            rewardsType.add(false);
+                        }
+                        count.set(count.get()+1);
+                        Group rewardgrp = null;
+                        try {
+                            rewardgrp = reward.show();
+                        } catch (IOException ioException) {
+                            ioException.printStackTrace();
+                        }
+                        rewardgrp.relocate(135,0);
+                        rewardgrp.setTranslateY(nextObstacleY.get()+50);
+                        rewardgrp.setTranslateX(0);
+                        reward.blink(rewardgrp);
+                        rewards.add(rewardgrp);
+                        pane.getChildren().add(rewardgrp);
+                        ColorChanger colorChangerPer = new ColorChanger();
+                        Group Changer = colorChangerPer.show(150,0);
+                        Changer.setTranslateY(nextObstacleY.get()-75);
+                        changers.add(Changer);
+                        pane.getChildren().add(Changer);
                     }
-                    count.set(count.get()+1);
-                    Group rewardgrp = null;
-                    try {
-                        rewardgrp = reward.show();
-                    } catch (IOException ioException) {
-                        ioException.printStackTrace();
-                    }
-                    rewardgrp.relocate(135,0);
-                    rewardgrp.setTranslateY(nextObstacleY.get()+50);
-                    rewardgrp.setTranslateX(0);
-                    reward.blink(rewardgrp);
-                    rewards.add(rewardgrp);
-                    pane.getChildren().add(rewardgrp);
-                    ColorChanger colorChangerPer = new ColorChanger();
-                    Group Changer = colorChangerPer.show(150,0);
-                    Changer.setTranslateY(nextObstacleY.get()-75);
-                    changers.add(Changer);
-                    pane.getChildren().add(Changer);
-                }
-                if(boundsInScreen.getMinY()>=650 && !flag.get()){
+                    if(boundsInScreen.getMinY()>=650 && !flag.get()){
                         flag.set(true);
                         pane.getChildren().remove(obstacle1.get());
                         nextObstacleX.set(obstaclex[obstacleCounter.get()]);
@@ -918,40 +887,84 @@ class Game extends Main implements Serializable {
                         obstacle1.set(obstacle2.get());
                         obstacle2.set(obstacle3.get());
                         obstacle3.set(null);
-                }
-            }
-            for(int i=0;i<changers.size();++i){
-                if(b.intersects(changers.get(i).getBoundsInParent())){
-                    pane.getChildren().remove(changers.get(i));
-                    changers.remove(i);
-                    String color;
-                    do{
-                        color = ColorChanger.generateRandomColor();
-                    }while(Color.valueOf(color).equals(b.getFill()));
-                    b.setFill(Color.valueOf(color));
-                    break;
-                }
-            }
-            for(int i=0;i<rewards.size();i++){
-                if(b.intersects(rewards.get(i).getBoundsInParent())){
-                    if(rewardsType.get(i)) {
-                        player.incrementStars(1);
-                        this.stars++;
-                        this.score+=5;
                     }
-                    else{
-                        player.incrementDiamonds(1);
-                        this.diamonds++;
-                        this.score+=10;
-                    }
-                    scoreText.setText("Score "+Integer.toString(this.score));
-                    pane.getChildren().remove(rewards.get(i));
-                    rewards.remove(i);
-                    rewardsType.remove(i);
-                    player.setHighScore(Math.max(player.getHighScore(),this.score));
                 }
+                for(int i=0;i<changers.size();++i){
+                    if(b.intersects(changers.get(i).getBoundsInParent())){
+                        pane.getChildren().remove(changers.get(i));
+                        changers.remove(i);
+                        String color;
+                        do{
+                            color = ColorChanger.generateRandomColor();
+                        }while(Color.valueOf(color).equals(b.getFill()));
+                        b.setFill(Color.valueOf(color));
+                        break;
+                    }
+                }
+                for(int i=0;i<rewards.size();i++){
+                    if(b.intersects(rewards.get(i).getBoundsInParent())){
+                        if(rewardsType.get(i)) {
+                            player.incrementStars(1);
+                            this.stars++;
+                            this.score+=5;
+                        }
+                        else{
+                            player.incrementDiamonds(1);
+                            this.diamonds++;
+                            this.score+=10;
+                        }
+                        scoreText.setText("Score "+Integer.toString(this.score));
+                        pane.getChildren().remove(rewards.get(i));
+                        rewards.remove(i);
+                        rewardsType.remove(i);
+                        player.setHighScore(Math.max(player.getHighScore(),this.score));
+                    }
+                }
+                gravity.start();
             }
+        });
+
+        Image resumebtn = new Image(new FileInputStream("src/images/play.png"));
+        ImageView resumeBtn = new ImageView(resumebtn);
+        resumeBtn.setFitWidth(35);
+        resumeBtn.setPreserveRatio(true);
+
+        Image pausebtn = new Image(new FileInputStream("src/images/pause.png"));
+        ImageView pauseBtn = new ImageView(pausebtn);
+        pauseBtn.setFitWidth(35);
+        pauseBtn.setPreserveRatio(true);
+        pane.getChildren().add(pauseBtn);
+        pauseBtn.relocate(10,450);
+        pauseBtn.setOnMouseClicked(mouseEvent -> {
+            pane.getChildren().add(resumeBtn);
+            pane.getChildren().remove(pauseBtn);
+            resumeBtn.relocate(10,450);
+            gravity.stop();
+            gamePaused.set(true);
+        });
+
+        resumeBtn.setOnMouseClicked(mouseEvent -> {
+            pane.getChildren().add(pauseBtn);
+            pane.getChildren().remove(resumeBtn);
+            pauseBtn.relocate(10,450);
             gravity.start();
+            gamePaused.set(false);
+        });
+
+        Image exitbtn = new Image(new FileInputStream("src/images/stop.png"));
+        ImageView exitBtn = new ImageView(exitbtn);
+        exitBtn.setFitWidth(35);
+        exitBtn.setPreserveRatio(true);
+        pane.getChildren().add(exitBtn);
+        exitBtn.relocate(10,400);
+        exitBtn.setOnMouseClicked(mouseEvent ->{
+            try {
+                prizes = prize(primaryStage);
+                mainMenu = mainMenu(primaryStage, prizes,player);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            primaryStage.setScene(mainMenu);
         });
 
         pane.setStyle("-fx-background-color: #282828");
