@@ -52,6 +52,7 @@ public class Main extends Application{
 
 class Player implements Serializable{
     private String name;
+
     Player(String name){
         this.name = name;
     }
@@ -69,6 +70,9 @@ class Game extends Main implements Serializable {
     private Scene playerDetails,menu,game,titleScreen,splashScreen,mainMenu,enterName,play,resumeScreen,prizes;
     private HashMap<String,Player> players;
     private Player player;
+    private int stars;
+    private int diamonds;
+
     public void start(Stage primaryStage) throws IOException,ClassNotFoundException{
         //start new game
         //Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
@@ -373,8 +377,11 @@ class Game extends Main implements Serializable {
         reward2.blink(diamondReward);
 
         ArrayList<Group> rewards = new ArrayList<>();
+        ArrayList<Boolean> rewardsType = new ArrayList<>();
         rewards.add(starReward);
+        rewardsType.add(true);
         rewards.add(diamondReward);
+        rewardsType.add(false);
 
         starReward.relocate(135,0);
         diamondReward.relocate(135,0);
@@ -523,7 +530,7 @@ class Game extends Main implements Serializable {
                             Shape shape = (Shape)o;
                             if(b.intersects(shape.getBoundsInParent())){
                                 if(!b.getFill().equals(shape.getFill())) {
-                                    System.out.println("different color, game over");
+//                                    System.out.println("different color, game over");
                                 }
                             }
                         }
@@ -534,7 +541,7 @@ class Game extends Main implements Serializable {
                                 Shape shape = (Shape)o1;
                                 if(b.intersects(shape.getBoundsInParent())){
                                     if(!b.getFill().equals(shape.getFill())) {
-                                        System.out.println("different color, game over");
+//                                        System.out.println("different color, game over");
                                     }
                                 }
                             }));
@@ -590,10 +597,14 @@ class Game extends Main implements Serializable {
                     obstacle3.get().relocate(nextObstacleX.get(), nextObstacleY.get());
                     pane.getChildren().add(obstacle3.get());
                     Reward reward=null;
-                    if(count.get()%2==0)
+                    if(count.get()%2==0) {
                         reward = new Star();
-                    else
-                       reward = new Diamond();
+                        rewardsType.add(true);
+                    }
+                    else{
+                        reward = new Diamond();
+                        rewardsType.add(false);
+                    }
                     count.set(count.get()+1);
                     Group rewardgrp = null;
                     try {
@@ -601,7 +612,7 @@ class Game extends Main implements Serializable {
                     } catch (IOException ioException) {
                         ioException.printStackTrace();
                     }
-                    rewardgrp.relocate(140,0);
+                    rewardgrp.relocate(135,0);
                     rewardgrp.setTranslateY(nextObstacleY.get()+50);
                     rewardgrp.setTranslateX(0);
                     reward.blink(rewardgrp);
@@ -639,8 +650,11 @@ class Game extends Main implements Serializable {
             }
             for(int i=0;i<rewards.size();i++){
                 if(b.intersects(rewards.get(i).getBoundsInParent())){
+                    if(rewardsType.get(i)) stars++;
+                    else diamonds++;
                     pane.getChildren().remove(rewards.get(i));
                     rewards.remove(i);
+                    rewardsType.remove(i);
                 }
             }
             gravity.start();
