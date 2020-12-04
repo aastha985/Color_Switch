@@ -37,101 +37,99 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class Main extends Application{
+public class Main extends Application implements Serializable{
+    private Scene playerDetails,titleScreen,splashScreen,mainMenu,enterName,prizes;
+    private Player player;
+    private HashMap<String,Player> players;
     @Override
     public void start(Stage primaryStage) throws Exception{
-//        Player P = new Player();
-//        P.start(primaryStage);
-        Game G = new Game();
-        G.start(primaryStage);
-    }
-    public static void main(String[] args) {
-        launch(args);
-    }
-}
-
-class Player implements Serializable{
-    private String name;
-
-    Player(String name){
-        this.name = name;
-    }
-    public void start(Stage primaryStage) throws IOException,ClassNotFoundException{
-        Game G = new Game();
-        G.start(primaryStage);
-    }
-
-    public String getName(){
-        return this.name;
-    }
-}
-
-class Game extends Main implements Serializable {
-    private Scene playerDetails,menu,game,titleScreen,splashScreen,mainMenu,enterName,play,resumeScreen,prizes;
-    private HashMap<String,Player> players;
-    private Player player;
-    private int stars;
-    private int diamonds;
-
-    public void start(Stage primaryStage) throws IOException,ClassNotFoundException{
-        //start new game
-        //Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
-        Label label1 = new Label("COLOR GAME");
-        Button start = new Button("Start");
-
-        Arrow backButton = new Arrow();
-        Group button = backButton.show();
-        StackPane testPane = new StackPane(button);
-        testPane.setStyle("-fx-background-color: #282828");
-
-        VBox layout1 = new VBox(50);
-        layout1.getChildren().addAll(label1,start);
-        layout1.setStyle("-fx-background-color: #282828");
-        menu = new Scene(layout1,300,500);
-
-        Button exit = new Button("Exit");
-        exit.setOnAction(e->primaryStage.setScene(menu));
-
-        StackPane layout2 = new StackPane();
-        layout2.getChildren().add(exit);
-        layout1.setStyle("-fx-background-color: #282828");
-//        game = new Scene(layout2,300,500);
-//        start.setOnAction(e->primaryStage.setScene(game));
-//
-//
         prizes = prize(primaryStage);
-//
-//
         playerDetails = playerDetails(primaryStage);
-//
         mainMenu = mainMenu(primaryStage, prizes, playerDetails);
-//
-//        enterName = enterName(mainMenu, primaryStage);
-//
-//        splashScreen = splashScreen();
-//
-//        pauseTransition(primaryStage,enterName,6);
-//
-//        titleScreen = titleImage();
-//        pauseTransition(primaryStage,splashScreen,2);
+        enterName = enterName(mainMenu, primaryStage);
 
+        splashScreen = splashScreen();
+        pauseTransition(primaryStage,enterName,6);
 
+        titleScreen = titleImage();
+        pauseTransition(primaryStage,splashScreen,2);
 
-        primaryStage.setScene(mainMenu);
+        primaryStage.setScene(titleScreen);
         primaryStage.setTitle("Color Switch");
         primaryStage.show();
     }
-
-    private MediaView playSound(String filename){
-        Media media = new Media(new File(filename).toURI().toString());
-        MediaPlayer mediaPlayer = new MediaPlayer(media);
-        MediaView mediaView = new MediaView(mediaPlayer);
-
-        mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
-        mediaPlayer.play();
-        return mediaView;
+    private void pauseTransition(Stage primaryStage,Scene nextScene,int time){
+        PauseTransition pauseTransition = new PauseTransition(Duration.seconds(time));
+        pauseTransition.setOnFinished( event -> primaryStage.setScene(nextScene) );
+        pauseTransition.play();
     }
+    private void serialize() throws IOException{
+        ObjectOutputStream out = null;
+        try{
+            out = new ObjectOutputStream(new FileOutputStream("users.txt"));
+            out.writeObject(players);
 
+        }catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+        finally {
+            try {
+                out.close();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        }
+    }
+    private void deserialize(String name) throws IOException,ClassNotFoundException{
+        ObjectInputStream in = null;
+        File file = new File("users.txt");
+        if(file.length()==0) players = new HashMap<>();
+        else{
+            try{
+                in = new ObjectInputStream(new FileInputStream("users.txt"));
+                players = (HashMap<String,Player>) in.readObject();
+            }
+            finally {
+                in.close();
+            }
+        }
+        if(players.containsKey(name)) player = players.get(name);
+        else{
+            player = new Player(name);
+            players.put(name,player);
+            serialize();
+        }
+
+    }
+    private Scene splashScreen(){
+        Circular circle = new Circular();
+        Group root = circle.show(30.0f,50.0f,70.0f,56.0f);
+        root.setLayoutX(121);
+        root.setLayoutY(140);
+        circle.move(root,360);
+        Ball ball = new Ball();
+        Circle b = ball.show();
+        b.setCenterX(150);
+        b.setCenterY(450);
+        Pane layout = new Pane();
+        layout.getChildren().add(root);
+        layout.getChildren().add(b);
+        layout.setStyle("-fx-background-color: #292929");
+        Path path = new Path();
+        path.getElements().add(new MoveTo(b.getCenterX(), b.getCenterY()));
+        path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 120, b.getCenterX(), 450));
+        path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 120, b.getCenterX(), 450));
+        path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 120, b.getCenterX(), 450));
+        path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 450, b.getCenterX(), 450));
+        path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 300, b.getCenterX(), 450));
+        path.getElements().add(new CubicCurveTo(b.getCenterX(), 450, b.getCenterX(), 187, b.getCenterX(), 187));
+        PathTransition pathTransition = new PathTransition();
+        pathTransition.setDuration(Duration.millis(4000));
+        pathTransition.setPath(path);
+        pathTransition.setNode(b);
+        pathTransition.play();
+        return new Scene(layout,300,500);
+    }
     private Scene playerDetails(Stage primaryStage) throws IOException{
         Text name = new Text("Agrim Chopra");
         Text highScore = new Text("High Score:");
@@ -212,6 +210,133 @@ class Game extends Main implements Serializable {
         backbtn.relocate(5,5);
 
         Scene scene = new Scene(pane,300,500);
+        scene.getStylesheets().add("Theme.css");
+        return scene;
+    }
+    private Scene enterName(Scene mainMenu, Stage primaryStage) throws IOException,ClassNotFoundException{
+        Text text = new Text("Enter Name");
+        text.setId("text");
+        TextField name = new TextField();
+        name.setId("textField");
+        name.setMinSize(180,40);
+        name.setAlignment(Pos.CENTER);
+        Button next = new Button("NEXT");
+        next.setId("nextBtn");
+        next.setOnAction(e->{
+                    if(!name.getText().trim().equals("")){
+                        try {
+                            deserialize(name.getText().trim());
+                        } catch (IOException ioException) {
+                            ioException.printStackTrace();
+                        } catch (ClassNotFoundException classNotFoundException) {
+                            classNotFoundException.printStackTrace();
+                        }
+                        primaryStage.setScene(mainMenu);
+                    }
+                }
+        );
+        Image image = new Image(new FileInputStream("src/images/ShortTitleImage.jpg"));
+        ImageView titleImage = new ImageView(image);
+        titleImage.setFitWidth(250);
+        titleImage.setPreserveRatio(true);
+
+        GridPane grid = new GridPane();
+        grid.setMinSize(300, 500);
+        grid.setPadding(new Insets(10, 10, 10, 10));
+        grid.setVgap(5);
+        grid.setHgap(20);
+        grid.setHalignment(text, HPos.CENTER);
+        grid.setHalignment(next, HPos.CENTER);
+        grid.add(titleImage,1,3);
+        grid.add(text, 1, 13);
+        grid.add(name, 1, 17);
+        grid.add(next,1,21);
+        grid.setStyle("-fx-background-color: #282828");
+        Scene scene =  new Scene(grid,300,500);
+        scene.getStylesheets().add("Theme.css");
+        return scene;
+    }
+    private Scene titleImage() throws IOException{
+        Image image = new Image(new FileInputStream("src/images/TitleImage.jpg"));
+        ImageView titleImage = new ImageView(image);
+        titleImage.setFitWidth(300);
+        titleImage.setPreserveRatio(true);
+        StackPane layout = new StackPane();
+        layout.getChildren().addAll(titleImage,playSound("mainMenuSound.mp3"));
+        layout.setStyle("-fx-background-color: #292929");
+        return new Scene(layout,300,500);
+    }
+    public static void main(String[] args) {
+        launch(args);
+    }
+    private MediaView playSound(String filename){
+        Media media = new Media(new File(filename).toURI().toString());
+        MediaPlayer mediaPlayer = new MediaPlayer(media);
+        MediaView mediaView = new MediaView(mediaPlayer);
+
+        mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+        mediaPlayer.play();
+        return mediaView;
+    }
+    private Scene mainMenu(Stage primaryStage, Scene prizes, Scene playerDetails) throws IOException{
+        Group root = circleAnimation(primaryStage);
+        Button start = new Button("START");
+        Button resume = new Button("RESUME");
+        Button exit = new Button("EXIT");
+
+        root.setOnMouseClicked(mouseEvent -> {
+            try {
+                player.start(primaryStage);
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
+        Image iconImage = new Image(new FileInputStream("src/images/staricon2.png"));
+        ImageView icon = new ImageView(iconImage);
+        icon.setFitWidth(38);
+        icon.setPreserveRatio(true);
+        icon.setOnMouseClicked(mouseEvent -> primaryStage.setScene(playerDetails));
+
+        Image giftImage = new Image(new FileInputStream("src/images/gifticon.png"));
+        ImageView icon2 = new ImageView(giftImage);
+        icon2.setFitWidth(46);
+        icon2.setPreserveRatio(true);
+        icon2.setOnMouseClicked(mouseEvent -> primaryStage.setScene(prizes));
+        Circle circle = new Circle(150.0f, 150.0f, 23.f);
+        circle.setFill(Color.valueOf("#fff"));
+        circle.setOnMouseClicked(mouseEvent -> primaryStage.setScene(playerDetails));
+        circle.setId("circle-yellow");
+
+        Circle circle2 = new Circle(150.0f, 150.0f, 23.f);
+        circle2.setFill(Color.valueOf("#fff"));
+        circle2.setId("circle-pink");
+        circle2.setOnMouseClicked(mouseEvent -> primaryStage.setScene(prizes));
+
+        Pane pane = new Pane(root,start,resume,exit,circle,icon,circle2,icon2);
+        pane.setStyle("-fx-background-color: #282828");
+        root.relocate(30,40);
+        start.relocate(80,300);
+        resume.relocate(80,350);
+        exit.relocate(80,400);
+        circle.relocate(240,350);
+        icon.relocate(243,353);
+        circle2.relocate(20,350);
+        icon2.relocate(20,350);
+
+
+        Scene scene = new Scene(pane,300,500);
+        start.getStyleClass().add("button");
+        start.setOnAction(e-> {
+            try {
+                player.start(primaryStage);
+            } catch (IOException | ClassNotFoundException ioException) {
+                ioException.printStackTrace();
+            }
+        });
+        resume.getStyleClass().add("button");
+        resume.setOnAction(e-> player.savedGames(primaryStage,mainMenu));
+        exit.getStyleClass().add("button");
+        exit.setOnAction(e->System.exit(1));
         scene.getStylesheets().add("Theme.css");
         return scene;
     }
@@ -309,7 +434,39 @@ class Game extends Main implements Serializable {
         return new Scene(pane,300,500);
     }
 
-    private void resume(Stage primaryStage){
+    private Group circleAnimation(Stage primaryStage) throws FileNotFoundException,IOException {
+        Circular outer = new Circular();
+        Group root = outer.show(300.0f,100.0f,120.0f,100.0f);
+        outer.move(root,360);
+        Circular middle = new Circular();
+        Group root2 = middle.show(300.0f,100.0f,95.0f,80.0f);
+        middle.move(root2,-360);
+        Circular inner = new Circular();
+        Group root3 = inner.show(300.0f,100.0f,75.0f,60.0f);
+        inner.move(root3,360);
+        Image image = new Image(new FileInputStream("src/images/Triangle.jpg"));
+        ImageView triangleImage = new ImageView(image);
+        triangleImage.setFitWidth(70);
+        triangleImage.setX(270);
+        triangleImage.setY(64);
+        triangleImage.setPreserveRatio(true);
+        Circle circle = new Circle(300.0f,100.0f,55.f,Color.valueOf("#585858"));
+        return new Group(root,root2,root3,circle,triangleImage);
+    }
+}
+
+class Player extends Main implements Serializable{
+    private String name;
+
+    Player(String name){
+        this.name = name;
+    }
+    public void start(Stage primaryStage) throws IOException,ClassNotFoundException{
+        Game G = new Game();
+        G.start(primaryStage);
+    }
+
+    public void savedGames(Stage primaryStage,Scene mainMenu){
         Line line = new Line(0,0,300,0);
         line.setStrokeWidth(140);
         line.setStroke(Color.valueOf("#e53e7b"));
@@ -323,19 +480,32 @@ class Game extends Main implements Serializable {
         headerText.setStyle("-fx-fill: #f7f7f7");
         headerText.relocate(20,22);
 
-        Arrow backButton = new Arrow();
-        Group backbtn = backButton.show();
-        backbtn.setOnMouseClicked(mouseEvent -> primaryStage.setScene(mainMenu));
 
-        Pane pane = new Pane(line,hbox,headerText,backbtn);
+
+        Pane pane = new Pane(line,hbox,headerText);
         pane.setStyle("-fx-background-color: #282828");
         hbox.relocate(0,60);
-        backbtn.relocate(5,5);
+
         Scene resumeScene =  new Scene(pane,300,500);
         primaryStage.setScene(resumeScene);
+
+        Arrow backButton = new Arrow();
+        Group backbtn = backButton.show();
+        backbtn.relocate(5,5);
+        pane.getChildren().add(backbtn);
+        backbtn.setOnMouseClicked(mouseEvent -> primaryStage.setScene(mainMenu));
     }
 
-    private void play(Stage primaryStage) throws IOException{
+    public String getName(){
+        return this.name;
+    }
+}
+
+class Game extends Main implements Serializable {
+    private int stars;
+    private int diamonds;
+
+    public void start(Stage primaryStage) throws IOException{
         double ballx = 150;
         AtomicReference<Double> bally = new AtomicReference<>((double) 450);
         AtomicInteger ballSpeed = new AtomicInteger(6);
@@ -663,221 +833,6 @@ class Game extends Main implements Serializable {
         pane.setStyle("-fx-background-color: #282828");
         Scene startScene = new Scene(pane,300,500);
         primaryStage.setScene(startScene);
-    }
-
-    private void serialize() throws IOException{
-        ObjectOutputStream out = null;
-        try{
-            out = new ObjectOutputStream(new FileOutputStream("users.txt"));
-            out.writeObject(players);
-
-        }catch (IOException ioException) {
-            ioException.printStackTrace();
-        }
-        finally {
-            try {
-                out.close();
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-        }
-    }
-
-    private void deserialize(String name) throws IOException,ClassNotFoundException{
-        ObjectInputStream in = null;
-        File file = new File("users.txt");
-        if(file.length()==0) players = new HashMap<>();
-        else{
-            try{
-                in = new ObjectInputStream(new FileInputStream("users.txt"));
-                players = (HashMap<String,Player>) in.readObject();
-            }
-            finally {
-                in.close();
-            }
-        }
-        if(players.containsKey(name)) player = players.get(name);
-        else{
-            player = new Player(name);
-            players.put(name,player);
-            serialize();
-        }
-
-    }
-
-    private Scene enterName(Scene mainMenu, Stage primaryStage) throws IOException,ClassNotFoundException{
-        Text text = new Text("Enter Name");
-        text.setId("text");
-        TextField name = new TextField();
-        name.setId("textField");
-        name.setMinSize(180,40);
-        name.setAlignment(Pos.CENTER);
-        Button next = new Button("NEXT");
-        next.setId("nextBtn");
-        next.setOnAction(e->{
-            if(!name.getText().trim().equals("")){
-                try {
-                    deserialize(name.getText().trim());
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                } catch (ClassNotFoundException classNotFoundException) {
-                    classNotFoundException.printStackTrace();
-                }
-                primaryStage.setScene(mainMenu);
-            }
-        }
-        );
-        Image image = new Image(new FileInputStream("src/images/ShortTitleImage.jpg"));
-        ImageView titleImage = new ImageView(image);
-        titleImage.setFitWidth(250);
-        titleImage.setPreserveRatio(true);
-
-        GridPane grid = new GridPane();
-        grid.setMinSize(300, 500);
-        grid.setPadding(new Insets(10, 10, 10, 10));
-        grid.setVgap(5);
-        grid.setHgap(20);
-        grid.setHalignment(text, HPos.CENTER);
-        grid.setHalignment(next, HPos.CENTER);
-        grid.add(titleImage,1,3);
-        grid.add(text, 1, 13);
-        grid.add(name, 1, 17);
-        grid.add(next,1,21);
-        grid.setStyle("-fx-background-color: #282828");
-        Scene scene =  new Scene(grid,300,500);
-        scene.getStylesheets().add("Theme.css");
-        return scene;
-    }
-
-    private Scene mainMenu(Stage primaryStage, Scene prizes, Scene playerDetails) throws IOException{
-            Group root = circleAnimation(primaryStage);
-            Button start = new Button("START");
-            Button resume = new Button("RESUME");
-            Button exit = new Button("EXIT");
-
-            root.setOnMouseClicked(mouseEvent -> {
-                try {
-                    this.play(primaryStage);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-            Image iconImage = new Image(new FileInputStream("src/images/staricon2.png"));
-            ImageView icon = new ImageView(iconImage);
-            icon.setFitWidth(38);
-            icon.setPreserveRatio(true);
-            icon.setOnMouseClicked(mouseEvent -> primaryStage.setScene(playerDetails));
-
-            Image giftImage = new Image(new FileInputStream("src/images/gifticon.png"));
-            ImageView icon2 = new ImageView(giftImage);
-            icon2.setFitWidth(46);
-            icon2.setPreserveRatio(true);
-            icon2.setOnMouseClicked(mouseEvent -> primaryStage.setScene(prizes));
-            Circle circle = new Circle(150.0f, 150.0f, 23.f);
-            circle.setFill(Color.valueOf("#fff"));
-            circle.setOnMouseClicked(mouseEvent -> primaryStage.setScene(playerDetails));
-            circle.setId("circle-yellow");
-
-            Circle circle2 = new Circle(150.0f, 150.0f, 23.f);
-            circle2.setFill(Color.valueOf("#fff"));
-            circle2.setId("circle-pink");
-            circle2.setOnMouseClicked(mouseEvent -> primaryStage.setScene(prizes));
-
-            Pane pane = new Pane(root,start,resume,exit,circle,icon,circle2,icon2);
-            pane.setStyle("-fx-background-color: #282828");
-            root.relocate(30,40);
-            start.relocate(80,300);
-            resume.relocate(80,350);
-            exit.relocate(80,400);
-            circle.relocate(240,350);
-            icon.relocate(243,353);
-            circle2.relocate(20,350);
-            icon2.relocate(20,350);
-
-
-            Scene scene = new Scene(pane,300,500);
-            start.getStyleClass().add("button");
-    //        start.setOnAction(e->primaryStage.setScene(startScreen));
-            start.setOnAction(e-> {
-                try {
-                    this.play(primaryStage);
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                }
-            });
-            resume.getStyleClass().add("button");
-            resume.setOnAction(e-> this.resume(primaryStage));
-            exit.getStyleClass().add("button");
-            exit.setOnAction(e->System.exit(1));
-            scene.getStylesheets().add("Theme.css");
-            return scene;
-    }
-
-    private Group circleAnimation(Stage primaryStage) throws FileNotFoundException,IOException {
-        Circular outer = new Circular();
-        Group root = outer.show(300.0f,100.0f,120.0f,100.0f);
-        outer.move(root,360);
-        Circular middle = new Circular();
-        Group root2 = middle.show(300.0f,100.0f,95.0f,80.0f);
-        middle.move(root2,-360);
-        Circular inner = new Circular();
-        Group root3 = inner.show(300.0f,100.0f,75.0f,60.0f);
-        inner.move(root3,360);
-        Image image = new Image(new FileInputStream("src/images/Triangle.jpg"));
-        ImageView triangleImage = new ImageView(image);
-        triangleImage.setFitWidth(70);
-        triangleImage.setX(270);
-        triangleImage.setY(64);
-        triangleImage.setPreserveRatio(true);
-        Circle circle = new Circle(300.0f,100.0f,55.f,Color.valueOf("#585858"));
-        return new Group(root,root2,root3,circle,triangleImage);
-    }
-
-    private void pauseTransition(Stage primaryStage,Scene nextScene,int time){
-        PauseTransition pauseTransition = new PauseTransition(Duration.seconds(time));
-        pauseTransition.setOnFinished( event -> primaryStage.setScene(nextScene) );
-        pauseTransition.play();
-    }
-
-    private Scene splashScreen(){
-        Circular circle = new Circular();
-        Group root = circle.show(30.0f,50.0f,70.0f,56.0f);
-        root.setLayoutX(121);
-        root.setLayoutY(140);
-        circle.move(root,360);
-        Ball ball = new Ball();
-        Circle b = ball.show();
-        b.setCenterX(150);
-        b.setCenterY(450);
-        Pane layout = new Pane();
-        layout.getChildren().add(root);
-        layout.getChildren().add(b);
-        layout.setStyle("-fx-background-color: #292929");
-        Path path = new Path();
-        path.getElements().add(new MoveTo(b.getCenterX(), b.getCenterY()));
-        path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 120, b.getCenterX(), 450));
-        path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 120, b.getCenterX(), 450));
-        path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 120, b.getCenterX(), 450));
-        path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 450, b.getCenterX(), 450));
-        path.getElements().add(new CubicCurveTo(b.getCenterX(), b.getCenterY(), b.getCenterX(), 300, b.getCenterX(), 450));
-        path.getElements().add(new CubicCurveTo(b.getCenterX(), 450, b.getCenterX(), 187, b.getCenterX(), 187));
-        PathTransition pathTransition = new PathTransition();
-        pathTransition.setDuration(Duration.millis(4000));
-        pathTransition.setPath(path);
-        pathTransition.setNode(b);
-        pathTransition.play();
-        return new Scene(layout,300,500);
-    }
-
-    private Scene titleImage() throws IOException{
-        Image image = new Image(new FileInputStream("src/images/TitleImage.jpg"));
-        ImageView titleImage = new ImageView(image);
-        titleImage.setFitWidth(300);
-        titleImage.setPreserveRatio(true);
-        StackPane layout = new StackPane();
-        layout.getChildren().addAll(titleImage,playSound("mainMenuSound.mp3"));
-        layout.setStyle("-fx-background-color: #292929");
-        return new Scene(layout,300,500);
     }
 }
 
