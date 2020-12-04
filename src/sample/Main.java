@@ -9,7 +9,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -455,18 +454,36 @@ public class Main extends Application implements Serializable{
     }
 }
 
-class Player extends Main implements Serializable{
+class Player implements Serializable{
     private String name;
+    private int stars;
+    private int diamonds;
+    private int highScore; //TODO save high score of player
 
     Player(String name){
         this.name = name;
+        this.stars=0;
+        this.diamonds=0;
+        this.highScore=0;
     }
     public void start(Stage primaryStage) throws IOException,ClassNotFoundException{
-        Game G = new Game();
+        Game G = new Game(this);
         G.start(primaryStage);
     }
 
-    public void savedGames(Stage primaryStage,Scene mainMenu){
+    public void incrementStars(int val){
+        this.stars+=val;
+    }
+
+    public void incrementDiamonds(int val){
+        this.diamonds+=val;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void savedGames(Stage primaryStage, Scene mainMenu){
         Line line = new Line(0,0,300,0);
         line.setStrokeWidth(140);
         line.setStroke(Color.valueOf("#e53e7b"));
@@ -479,8 +496,6 @@ class Player extends Main implements Serializable{
         headerText.setFont(new Font(27));
         headerText.setStyle("-fx-fill: #f7f7f7");
         headerText.relocate(20,22);
-
-
 
         Pane pane = new Pane(line,hbox,headerText);
         pane.setStyle("-fx-background-color: #282828");
@@ -496,14 +511,20 @@ class Player extends Main implements Serializable{
         backbtn.setOnMouseClicked(mouseEvent -> primaryStage.setScene(mainMenu));
     }
 
-    public String getName(){
-        return this.name;
-    }
 }
 
-class Game extends Main implements Serializable {
+class Game implements Serializable {
     private int stars;
     private int diamonds;
+    private int score;
+    private Player player;
+
+    Game(Player p){
+        this.stars=0;
+        this.diamonds=0;
+        this.score = 0;
+        this.player=p;
+    }
 
     public void start(Stage primaryStage) throws IOException{
         double ballx = 150;
@@ -590,6 +611,11 @@ class Game extends Main implements Serializable {
                 }
             }
         }
+
+        Text scoreText = new Text("Score "+Integer.toString(this.score));
+        scoreText.getStyleClass().add("white-text");
+        scoreText.relocate(10,10);
+        pane.getChildren().add(scoreText);
 
         Text pause = new Text("II");
         pause.relocate(10,480);
@@ -820,8 +846,17 @@ class Game extends Main implements Serializable {
             }
             for(int i=0;i<rewards.size();i++){
                 if(b.intersects(rewards.get(i).getBoundsInParent())){
-                    if(rewardsType.get(i)) stars++;
-                    else diamonds++;
+                    if(rewardsType.get(i)) {
+                        player.incrementStars(1);
+                        stars++;
+                        score+=5;
+                    }
+                    else{
+                        player.incrementDiamonds(1);
+                        diamonds++;
+                        score+=10;
+                    }
+                    scoreText.setText("Score "+Integer.toString(this.score));
                     pane.getChildren().remove(rewards.get(i));
                     rewards.remove(i);
                     rewardsType.remove(i);
@@ -832,11 +867,12 @@ class Game extends Main implements Serializable {
 
         pane.setStyle("-fx-background-color: #282828");
         Scene startScene = new Scene(pane,300,500);
+        startScene.getStylesheets().add("Theme.css");
         primaryStage.setScene(startScene);
     }
 }
 
-class Ball extends Game{
+class Ball{
     Ball(){
 
     }
@@ -846,7 +882,7 @@ class Ball extends Game{
     }
 }
 
-abstract class Reward extends Game{
+abstract class Reward{
     public void blink(Group root){
         ScaleTransition st = new ScaleTransition(Duration.millis(1000),root);
          st.setByX(0.15f);
@@ -886,7 +922,7 @@ class Diamond extends Reward{
     }
 }
 
-class Arrow extends Game{
+class Arrow{
     private final int strokeWidth;
     Arrow(){
         this.strokeWidth = 2;
@@ -906,7 +942,7 @@ class Arrow extends Game{
     }
 }
 
-class ColorChanger extends Game{
+class ColorChanger{
     private final float radius;
     private static String[] possibleColors;
     ColorChanger(){
@@ -935,7 +971,7 @@ class ColorChanger extends Game{
     }
 }
 
-class Obstacles extends Game{}
+class Obstacles{}
 
 class Linear extends Obstacles{
     public void move(Group root){
