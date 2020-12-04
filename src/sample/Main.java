@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Main extends Application implements Serializable{
-    private Scene playerDetails,titleScreen,splashScreen,mainMenu,enterName,prizes;
+    protected Scene playerDetails,titleScreen,splashScreen,mainMenu,enterName,prizes;
     private Player player;
     private HashMap<String,Player> players;
 
@@ -237,7 +237,7 @@ public class Main extends Application implements Serializable{
                         }
                         try {
                             prizes = prize(primaryStage);
-                            mainMenu = mainMenu(primaryStage, prizes);
+                            mainMenu = mainMenu(primaryStage, prizes,player);
                         } catch (IOException ioException) {
                             ioException.printStackTrace();
                         }
@@ -292,7 +292,8 @@ public class Main extends Application implements Serializable{
         return mediaView;
     }
 
-    private Scene mainMenu(Stage primaryStage, Scene prizes) throws IOException{
+    protected Scene mainMenu(Stage primaryStage, Scene prizes,Player p) throws IOException{
+        this.player = p;
         Group root = circleAnimation(primaryStage);
         Button start = new Button("START");
         Button resume = new Button("RESUME");
@@ -382,7 +383,7 @@ public class Main extends Application implements Serializable{
         return scene;
     }
 
-    private Scene prize (Stage primaryStage)throws IOException{
+    protected Scene prize (Stage primaryStage)throws IOException{
         Line line = new Line(0,0,300,0);
         line.setStrokeWidth(140);
         line.setStroke(Color.valueOf("#ff9900"));
@@ -677,11 +678,38 @@ class Game extends Main implements Serializable {
         scoreText.relocate(10,10);
         pane.getChildren().add(scoreText);
 
-        Text pause = new Text("II");
-        pause.relocate(10,480);
-        pane.getChildren().add(pause);
-        pause.setStyle("-fx-fill:white; -fx-font-size: 35px");
-        pause.setOnMouseClicked(mouseEvent -> System.out.println("paused game"));
+        Image resumebtn = new Image(new FileInputStream("src/images/play.png"));
+        ImageView resumeBtn = new ImageView(resumebtn);
+        resumeBtn.setFitWidth(35);
+        resumeBtn.setPreserveRatio(true);
+
+        Image pausebtn = new Image(new FileInputStream("src/images/pause.png"));
+        ImageView pauseBtn = new ImageView(pausebtn);
+        pauseBtn.setFitWidth(35);
+        pauseBtn.setPreserveRatio(true);
+        pane.getChildren().add(pauseBtn);
+        pauseBtn.relocate(10,450);
+        pauseBtn.setOnMouseClicked(mouseEvent -> {
+            pane.getChildren().add(resumeBtn);
+            pane.getChildren().remove(pauseBtn);
+            resumeBtn.relocate(10,450);
+        });
+
+        Image exitbtn = new Image(new FileInputStream("src/images/stop.png"));
+        ImageView exitBtn = new ImageView(exitbtn);
+        exitBtn.setFitWidth(35);
+        exitBtn.setPreserveRatio(true);
+        pane.getChildren().add(exitBtn);
+        exitBtn.relocate(10,400);
+        exitBtn.setOnMouseClicked(mouseEvent ->{
+            try {
+                prizes = prize(primaryStage);
+                mainMenu = mainMenu(primaryStage, prizes,player);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            primaryStage.setScene(mainMenu);
+        });
 
         Circular circle = new Circular();
         Group root = circle.show(150,300,70.0f,56.0f);
