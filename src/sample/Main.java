@@ -38,14 +38,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class Main extends Application implements Serializable{
     private Scene playerDetails,titleScreen,splashScreen,mainMenu,enterName,prizes;
-    private Player player;
+    protected Player player;
     private HashMap<String,Player> players;
     @Override
     public void start(Stage primaryStage) throws Exception{
-        prizes = prize(primaryStage);
-        playerDetails = playerDetails(primaryStage);
-        mainMenu = mainMenu(primaryStage, prizes, playerDetails);
-        enterName = enterName(mainMenu, primaryStage);
+        enterName = enterName(primaryStage);
 
         splashScreen = splashScreen();
         pauseTransition(primaryStage,enterName,6);
@@ -92,13 +89,12 @@ public class Main extends Application implements Serializable{
                 in.close();
             }
         }
-        if(players.containsKey(name)) player = players.get(name);
+        if(players.containsKey(name)) this.player = players.get(name);
         else{
             player = new Player(name);
             players.put(name,player);
             serialize();
         }
-
     }
     private Scene splashScreen(){
         Circular circle = new Circular();
@@ -212,7 +208,7 @@ public class Main extends Application implements Serializable{
         scene.getStylesheets().add("Theme.css");
         return scene;
     }
-    private Scene enterName(Scene mainMenu, Stage primaryStage) throws IOException,ClassNotFoundException{
+    private Scene enterName(Stage primaryStage) throws IOException,ClassNotFoundException{
         Text text = new Text("Enter Name");
         text.setId("text");
         TextField name = new TextField();
@@ -229,6 +225,13 @@ public class Main extends Application implements Serializable{
                             ioException.printStackTrace();
                         } catch (ClassNotFoundException classNotFoundException) {
                             classNotFoundException.printStackTrace();
+                        }
+                        try {
+                            prizes = prize(primaryStage);
+                            playerDetails = playerDetails(primaryStage);
+                            mainMenu = mainMenu(primaryStage, prizes, playerDetails);
+                        } catch (IOException ioException) {
+                            ioException.printStackTrace();
                         }
                         primaryStage.setScene(mainMenu);
                     }
@@ -374,7 +377,10 @@ public class Main extends Application implements Serializable{
         text.setFill(Color.valueOf("#fff"));
         text.setFont(Font.font ("Verdana", 18));
 
-        Text text2 = new Text("Congrats!\nYou won 10 Stars.");
+        int prizes[] = new int[]{10,100,50,15,75};
+        int randomIndex =(int) (Math.random()*5);
+        Text text2 = new Text("Congrats!\nYou won "+prizes[randomIndex]+" Stars.");
+        player.incrementStars(prizes[randomIndex]);
         text2.setFill(Color.valueOf("#fff"));
         text2.setFont(Font.font("Verdana",17));
         text2.setVisible(false);
@@ -513,7 +519,7 @@ class Player implements Serializable{
 
 }
 
-class Game implements Serializable {
+class Game extends Main implements Serializable {
     private int stars;
     private int diamonds;
     private int score;
@@ -848,13 +854,13 @@ class Game implements Serializable {
                 if(b.intersects(rewards.get(i).getBoundsInParent())){
                     if(rewardsType.get(i)) {
                         player.incrementStars(1);
-                        stars++;
-                        score+=5;
+                        this.stars++;
+                        this.score+=5;
                     }
                     else{
                         player.incrementDiamonds(1);
-                        diamonds++;
-                        score+=10;
+                        this.diamonds++;
+                        this.score+=10;
                     }
                     scoreText.setText("Score "+Integer.toString(this.score));
                     pane.getChildren().remove(rewards.get(i));
