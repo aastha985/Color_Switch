@@ -10,6 +10,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -376,7 +377,13 @@ public class Main extends Application implements Serializable{
             }
         });
         resume.getStyleClass().add("button");
-        resume.setOnAction(e-> player.savedGames(primaryStage,mainMenu));
+        resume.setOnAction(e-> {
+            try {
+                player.savedGames(primaryStage,mainMenu);
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        });
         exit.getStyleClass().add("button");
         exit.setOnAction(e->System.exit(1));
         scene.getStylesheets().add("Theme.css");
@@ -504,12 +511,14 @@ class Player implements Serializable{
     private int stars;
     private int diamonds;
     private int highScore;
+    private ArrayList<Game> savedGames;
 
     Player(String name){
         this.name = name;
         this.stars=0;
         this.diamonds=0;
         this.highScore=0;
+        this.savedGames = new ArrayList<>();
     }
     public void start(Stage primaryStage) throws IOException,ClassNotFoundException{
         Game G = new Game(this);
@@ -544,7 +553,11 @@ class Player implements Serializable{
         return diamonds;
     }
 
-    public void savedGames(Stage primaryStage, Scene mainMenu){
+    public ArrayList<Game> getSavedGames() {
+        return savedGames;
+    }
+
+    public void savedGames(Stage primaryStage, Scene mainMenu)throws IOException{
         Line line = new Line(0,0,300,0);
         line.setStrokeWidth(140);
         line.setStroke(Color.valueOf("#e53e7b"));
@@ -561,15 +574,52 @@ class Player implements Serializable{
         Pane pane = new Pane(line,hbox,headerText);
         pane.setStyle("-fx-background-color: #282828");
         hbox.relocate(0,60);
+        ScrollPane scrollPane = new ScrollPane(pane);
+        scrollPane.setStyle("-fx-background-color: #282828");
 
-        Scene resumeScene =  new Scene(pane,300,500);
+        Scene resumeScene =  new Scene(scrollPane,300,500);
         primaryStage.setScene(resumeScene);
+        resumeScene.getStylesheets().add("Theme.css");
 
         Arrow backButton = new Arrow();
         Group backbtn = backButton.show();
         backbtn.relocate(5,5);
         pane.getChildren().add(backbtn);
         backbtn.setOnMouseClicked(mouseEvent -> primaryStage.setScene(mainMenu));
+
+        for(int i = 0;i<savedGames.size();i++){
+            Text stars = new Text(Integer.toString(savedGames.get(i).getStars()));
+            Text diamonds = new Text(Integer.toString(savedGames.get(i).getDiamonds()));
+            Text score = new Text("Score "+Integer.toString(savedGames.get(i).getScore()));
+
+            Image resumebtn = new Image(new FileInputStream("src/images/play.png"));
+            ImageView resumeBtn = new ImageView(resumebtn);
+            resumeBtn.setFitWidth(35);
+            resumeBtn.setPreserveRatio(true);
+
+            Star star = new Star();
+            Group starImage = star.show();
+            star.blink(starImage);
+
+            Diamond diamond = new Diamond();
+            Group dia = diamond.show();
+            diamond.blink(dia);
+
+            int y = 80*(i+2);
+
+            stars.relocate(25,y);
+            starImage.relocate(45,y-15);
+            diamonds.relocate(90,y);
+            dia.relocate(110,y-10);
+            score.relocate(160,y);
+            resumeBtn.relocate(240,y-10);
+            pane.getChildren().addAll(stars,diamonds,score,resumeBtn,starImage,dia);
+            stars.getStyleClass().add("white-text");
+            diamonds.getStyleClass().add("white-text");
+            score.getStyleClass().add("white-text");
+        }
+
+        //TODO add games in scroll pane
     }
 
 }
@@ -585,6 +635,18 @@ class Game extends Main implements Serializable {
         this.diamonds=0;
         this.score = 0;
         this.player=p;
+    }
+
+    public int getStars() {
+        return stars;
+    }
+
+    public int getDiamonds() {
+        return diamonds;
+    }
+
+    public int getScore() {
+        return score;
     }
 
     public void start(Stage primaryStage) throws IOException{
@@ -958,13 +1020,14 @@ class Game extends Main implements Serializable {
         pane.getChildren().add(exitBtn);
         exitBtn.relocate(10,400);
         exitBtn.setOnMouseClicked(mouseEvent ->{
-            try {
-                prizes = prize(primaryStage);
-                mainMenu = mainMenu(primaryStage, prizes,player);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            primaryStage.setScene(mainMenu);
+//            try {
+//                prizes = prize(primaryStage);
+//                mainMenu = mainMenu(primaryStage, prizes,player);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            primaryStage.setScene(mainMenu);
+            player.getSavedGames().add(this);
         });
 
         pane.setStyle("-fx-background-color: #282828");
