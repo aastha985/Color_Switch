@@ -3,6 +3,7 @@ package sample;
 import javafx.animation.*;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -24,6 +25,7 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Shear;
 import javafx.stage.Stage;
 import javafx.scene.control.Button;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -38,8 +40,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class Main extends Application implements Serializable{
     private Scene playerDetails,titleScreen,splashScreen,mainMenu,enterName,prizes;
-    protected Player player;
+    private Player player;
     private HashMap<String,Player> players;
+
     @Override
     public void start(Stage primaryStage) throws Exception{
         enterName = enterName(primaryStage);
@@ -54,11 +57,13 @@ public class Main extends Application implements Serializable{
         primaryStage.setTitle("Color Switch");
         primaryStage.show();
     }
+
     private void pauseTransition(Stage primaryStage,Scene nextScene,int time){
         PauseTransition pauseTransition = new PauseTransition(Duration.seconds(time));
         pauseTransition.setOnFinished( event -> primaryStage.setScene(nextScene) );
         pauseTransition.play();
     }
+
     private void serialize() throws IOException{
         ObjectOutputStream out = null;
         try{
@@ -76,6 +81,7 @@ public class Main extends Application implements Serializable{
             }
         }
     }
+
     private void deserialize(String name) throws IOException,ClassNotFoundException{
         ObjectInputStream in = null;
         File file = new File("users.txt");
@@ -96,6 +102,7 @@ public class Main extends Application implements Serializable{
             serialize();
         }
     }
+
     private Scene splashScreen(){
         Circular circle = new Circular();
         Group root = circle.show(30.0f,50.0f,70.0f,56.0f);
@@ -125,14 +132,15 @@ public class Main extends Application implements Serializable{
         pathTransition.play();
         return new Scene(layout,300,500);
     }
+
     private Scene playerDetails(Stage primaryStage) throws IOException{
-        Text name = new Text("Agrim Chopra");
+        Text name = new Text(this.player.getName());
         Text highScore = new Text("High Score:");
-        Text highScoreNo = new Text("51");
+        Text highScoreNo = new Text(Integer.toString(this.player.getHighScore())); //TODO update high score,stars and diamonds after game over
         Text stars = new Text("Stars");
-        Text starsno = new Text("100");
+        Text starsno = new Text(Integer.toString(this.player.getStars()));
         Text diamonds = new Text("Diamonds");
-        Text diamondsno = new Text("40");
+        Text diamondsno = new Text(Integer.toString(this.player.getDiamonds()));
 
         name.getStyleClass().add("title-text");
         highScore.getStyleClass().add("white-text");
@@ -208,6 +216,7 @@ public class Main extends Application implements Serializable{
         scene.getStylesheets().add("Theme.css");
         return scene;
     }
+
     private Scene enterName(Stage primaryStage) throws IOException,ClassNotFoundException{
         Text text = new Text("Enter Name");
         text.setId("text");
@@ -228,8 +237,7 @@ public class Main extends Application implements Serializable{
                         }
                         try {
                             prizes = prize(primaryStage);
-                            playerDetails = playerDetails(primaryStage);
-                            mainMenu = mainMenu(primaryStage, prizes, playerDetails);
+                            mainMenu = mainMenu(primaryStage, prizes);
                         } catch (IOException ioException) {
                             ioException.printStackTrace();
                         }
@@ -258,6 +266,7 @@ public class Main extends Application implements Serializable{
         scene.getStylesheets().add("Theme.css");
         return scene;
     }
+
     private Scene titleImage() throws IOException{
         Image image = new Image(new FileInputStream("src/images/TitleImage.jpg"));
         ImageView titleImage = new ImageView(image);
@@ -268,9 +277,11 @@ public class Main extends Application implements Serializable{
         layout.setStyle("-fx-background-color: #292929");
         return new Scene(layout,300,500);
     }
+
     public static void main(String[] args) {
         launch(args);
     }
+
     private MediaView playSound(String filename){
         Media media = new Media(new File(filename).toURI().toString());
         MediaPlayer mediaPlayer = new MediaPlayer(media);
@@ -280,7 +291,8 @@ public class Main extends Application implements Serializable{
         mediaPlayer.play();
         return mediaView;
     }
-    private Scene mainMenu(Stage primaryStage, Scene prizes, Scene playerDetails) throws IOException{
+
+    private Scene mainMenu(Stage primaryStage, Scene prizes) throws IOException{
         Group root = circleAnimation(primaryStage);
         Button start = new Button("START");
         Button resume = new Button("RESUME");
@@ -293,11 +305,31 @@ public class Main extends Application implements Serializable{
                 e.printStackTrace();
             }
         });
+
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent windowEvent) {
+                try {
+                    serialize();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
         Image iconImage = new Image(new FileInputStream("src/images/staricon2.png"));
         ImageView icon = new ImageView(iconImage);
         icon.setFitWidth(38);
         icon.setPreserveRatio(true);
-        icon.setOnMouseClicked(mouseEvent -> primaryStage.setScene(playerDetails));
+        icon.setOnMouseClicked(mouseEvent -> {
+            try {
+                playerDetails = playerDetails(primaryStage);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            primaryStage.setScene(playerDetails);
+
+        });
 
         Image giftImage = new Image(new FileInputStream("src/images/gifticon.png"));
         ImageView icon2 = new ImageView(giftImage);
@@ -306,7 +338,14 @@ public class Main extends Application implements Serializable{
         icon2.setOnMouseClicked(mouseEvent -> primaryStage.setScene(prizes));
         Circle circle = new Circle(150.0f, 150.0f, 23.f);
         circle.setFill(Color.valueOf("#fff"));
-        circle.setOnMouseClicked(mouseEvent -> primaryStage.setScene(playerDetails));
+        circle.setOnMouseClicked(mouseEvent ->{
+            try {
+                playerDetails = playerDetails(primaryStage);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            primaryStage.setScene(playerDetails);}
+        );
         circle.setId("circle-yellow");
 
         Circle circle2 = new Circle(150.0f, 150.0f, 23.f);
@@ -380,7 +419,6 @@ public class Main extends Application implements Serializable{
         int prizes[] = new int[]{10,100,50,15,75};
         int randomIndex =(int) (Math.random()*5);
         Text text2 = new Text("Congrats!\nYou won "+prizes[randomIndex]+" Stars.");
-        player.incrementStars(prizes[randomIndex]);
         text2.setFill(Color.valueOf("#fff"));
         text2.setFont(Font.font("Verdana",17));
         text2.setVisible(false);
@@ -398,7 +436,7 @@ public class Main extends Application implements Serializable{
         Group ringg = new Group(ring);
 
         Image.setOnMouseClicked(mouseEvent -> {
-            System.out.println("image clicked");
+            player.incrementStars(prizes[randomIndex]);
 
             RotateTransition rotate = new RotateTransition();
             rotate.setAxis(Rotate.Z_AXIS);
@@ -464,7 +502,7 @@ class Player implements Serializable{
     private String name;
     private int stars;
     private int diamonds;
-    private int highScore; //TODO save high score of player
+    private int highScore;
 
     Player(String name){
         this.name = name;
@@ -487,6 +525,22 @@ class Player implements Serializable{
 
     public String getName() {
         return name;
+    }
+
+    public int getHighScore() {
+        return highScore;
+    }
+
+    public void setHighScore(int highScore) {
+        this.highScore = highScore;
+    }
+
+    public int getStars() {
+        return stars;
+    }
+
+    public int getDiamonds() {
+        return diamonds;
     }
 
     public void savedGames(Stage primaryStage, Scene mainMenu){
@@ -866,6 +920,7 @@ class Game extends Main implements Serializable {
                     pane.getChildren().remove(rewards.get(i));
                     rewards.remove(i);
                     rewardsType.remove(i);
+                    player.setHighScore(Math.max(player.getHighScore(),this.score));
                 }
             }
             gravity.start();
