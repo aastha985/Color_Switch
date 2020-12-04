@@ -618,8 +618,6 @@ class Player implements Serializable{
             diamonds.getStyleClass().add("white-text");
             score.getStyleClass().add("white-text");
         }
-
-        //TODO add games in scroll pane
     }
 
 }
