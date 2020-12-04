@@ -515,33 +515,33 @@ class Game extends Main implements Serializable {
                     bally.set(b.getCenterY());
                     this.stop();
                 }
-//                for(int i = 0;i<obstacles.length;i++){
-//                    ObservableList obs =obstacles[i].getChildren();
-//                    obs.forEach((o ->
-//                    {
-//                        try{
-//                            Shape shape = (Shape)o;
-//                            if(b.intersects(shape.getBoundsInParent())){
-//                                if(!b.getFill().equals(shape.getFill())) {
-//                                    System.out.println("different color, game over");
-//                                }
-//                            }
-//                        }
-//                        catch (Exception e){
-//                            Group grp = (Group)o;
-//                            ObservableList obs2 = grp.getChildren();
-//                            obs2.forEach((o1 ->{
-//                                Shape shape = (Shape)o1;
-//                                if(b.intersects(shape.getBoundsInParent())){
-//                                    if(!b.getFill().equals(shape.getFill())) {
-//                                        System.out.println("different color, game over");
-//                                    }
-//                                }
-//                            }));
-//                        }
-//
-//                    }));
-//                }
+                for(int i = 0;i<obstacles.length;i++){
+                    ObservableList obs =obstacles[i].getChildren();
+                    obs.forEach((o ->
+                    {
+                        try{
+                            Shape shape = (Shape)o;
+                            if(b.intersects(shape.getBoundsInParent())){
+                                if(!b.getFill().equals(shape.getFill())) {
+                                    System.out.println("different color, game over");
+                                }
+                            }
+                        }
+                        catch (Exception e){
+                            Group grp = (Group)o;
+                            ObservableList obs2 = grp.getChildren();
+                            obs2.forEach((o1 ->{
+                                Shape shape = (Shape)o1;
+                                if(b.intersects(shape.getBoundsInParent())){
+                                    if(!b.getFill().equals(shape.getFill())) {
+                                        System.out.println("different color, game over");
+                                    }
+                                }
+                            }));
+                        }
+
+                    }));
+                }
             }
         }
 
