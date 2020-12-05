@@ -1114,6 +1114,26 @@ class Game extends Main implements Serializable {
         startScene.getStylesheets().add("Theme.css");
         primaryStage.setScene(startScene);
     }
+
+    public void bonusLevel(Stage primaryStage) throws IOException{
+        //TODO save games in player and show bonus scene after every 5th game is over
+        //TODO add moving ball and 10 stars
+        Text text = new Text("BONUS");
+        text.getStyleClass().add("title-text");
+        text.relocate(100,30);
+
+        DisplayImage displayImage = new DisplayImage();
+        ImageView bonus1 = displayImage.show("bonus.png",40);
+        ImageView bonus2 = displayImage.show("bonus.png",40);
+        bonus1.relocate(55,10);
+        bonus2.relocate(195,10);
+
+        Pane pane = new Pane(text,bonus1,bonus2);
+        pane.getStyleClass().add("background");
+        Scene bonusScene = new Scene(pane,300,500);
+        bonusScene.getStylesheets().add("Theme.css");
+        primaryStage.setScene(bonusScene);
+    }
 }
 
 class Ball{

@@ -58,3 +58,6 @@
     -fx-text-fill: white;
     -fx-background-color: red;
 }
+.background{
+    -fx-background-image: url("images/background.jpg");
+}

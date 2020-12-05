@@ -1,7 +1,6 @@
 .btn{
     -fx-background-color: transparent;
     -fx-background-radius: 9,8,5,4,3;
-    /*-fx-padding: 7 10 7 10;*/
     -fx-border-color: #f7f7f7;
     -fx-border-style: solid;
     -fx-border-width: 2px;
@@ -58,4 +57,7 @@
 .purchase-btn{
     -fx-text-fill: white;
     -fx-background-color: red;
+}
+.background{
+    -fx-background-image: url("images/background.jpg");
 }
