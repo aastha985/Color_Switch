@@ -1,4 +1,4 @@
-.button{
+.btn{
     -fx-background-color: transparent;
     -fx-background-radius: 9,8,5,4,3;
     /*-fx-padding: 7 10 7 10;*/
@@ -12,7 +12,7 @@
     -fx-alignment: center;
     -fx-pref-width: 140px;
 }
-.button:hover{
+.btn:hover{
     -fx-background-color: linear-gradient(to right, #eed948, #5edcea);
     -fx-text-fill:#282828;
 }
@@ -49,9 +49,13 @@
     -fx-fill: #fff;
     -fx-font-size: 28px;
 }
-#circle-yellow:hover{
+#circle-yellow{
     -fx-fill: yellow;
 }
-#circle-pink:hover{
+#circle-pink{
     -fx-fill:pink;
+}
+.purchase-btn{
+    -fx-text-fill: white;
+    -fx-background-color: red;
 }

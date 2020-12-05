@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Main extends Application implements Serializable{
-    protected Scene playerDetails,titleScreen,splashScreen,mainMenu,enterName,prizes;
+    protected Scene playerDetails,titleScreen,splashScreen,mainMenu,enterName,prizes,shop;
     private Player player;
     private HashMap<String,Player> players;
 
@@ -69,6 +69,7 @@ public class Main extends Application implements Serializable{
         ObjectOutputStream out = null;
         try{
             out = new ObjectOutputStream(new FileOutputStream("users.txt"));
+            if(players!=null)
             out.writeObject(players);
 
         }catch (IOException ioException) {
@@ -218,6 +219,73 @@ public class Main extends Application implements Serializable{
         return scene;
     }
 
+    private Scene shop(Stage primaryStage)throws IOException{
+        //TODO when gems are purchased, update in stats screen
+        //TODO when ball purchased, change ball in game
+        Text balls = new Text("Balls");
+        balls.getStyleClass().add("title-text");
+
+        Arrow backButton = new Arrow();
+        Group backbtn = backButton.show();
+        backbtn.setOnMouseClicked(mouseEvent -> primaryStage.setScene(mainMenu));
+
+        DisplayImage displayImage = new DisplayImage();
+        ImageView icon = displayImage.show("diamond.png",50);
+        ImageView recruit = displayImage.show("gem1.png",50);
+        ImageView corporal = displayImage.show("gem2.png",50);
+        ImageView general = displayImage.show("gem3.png",50);
+
+        Ball square = new Ball();
+        Rectangle squareBall = square.showRectangle();
+        Ball triangle = new Ball();
+        Polygon triangleBall = triangle.showTriangle();
+
+        Button generalBtn = new Button("Purchase for 50 Diamonds");
+        Button corporalBtn = new Button("Purchase for 25 Diamonds");
+        Button recruitBtn = new Button("Purchase for 10 Diamonds");
+        Button squareBallBtn = new Button("Purchase for 30 Diamonds");
+        Button triangleBallBtn = new Button("Purchase for 50 Diamonds");
+
+        Line line = new Line(0,0,300,0);
+        line.setStrokeWidth(140);
+        line.setStroke(Color.valueOf("#ff3333"));
+        HBox hbox = new HBox();
+        for(int i=0;i<18;i++){
+            hbox.getChildren().add(new Circle(300.0f,100.0f,10.f,Color.valueOf("#ff3333")));
+        }
+
+        Text headerText = new Text("SHOP");
+        headerText.setFont(new Font(27));
+        headerText.setStyle("-fx-fill: #f7f7f7");
+        headerText.relocate(20,22);
+        Pane pane = new Pane(line,hbox,icon,backbtn,headerText,recruit,corporal,general,generalBtn,corporalBtn,recruitBtn,squareBall,triangleBall,squareBallBtn,triangleBallBtn);
+        pane.setStyle("-fx-background-color: #282828");
+        hbox.relocate(0,60);
+
+        icon.relocate(100,12);
+        backbtn.relocate(5,5);
+        recruit.relocate(25,100);
+        corporal.relocate(25,160);
+        general.relocate(25,220);
+        generalBtn.relocate(100,120);
+        corporalBtn.relocate(100,180);
+        recruitBtn.relocate(100,240);
+        squareBall.relocate(40,310);
+        triangleBall.relocate(40,370);
+        squareBallBtn.relocate(100,300);
+        triangleBallBtn.relocate(100,360);
+
+        recruitBtn.getStyleClass().add("purchase-btn");
+        corporalBtn.getStyleClass().add("purchase-btn");
+        generalBtn.getStyleClass().add("purchase-btn");
+        squareBallBtn.getStyleClass().add("purchase-btn");
+        triangleBallBtn.getStyleClass().add("purchase-btn");
+
+        Scene scene = new Scene(pane,300,500);
+        scene.getStylesheets().add("Theme.css");
+        return scene;
+    }
+
     private Scene enterName(Stage primaryStage) throws IOException,ClassNotFoundException{
         Text text = new Text("Enter Name");
         text.setId("text");
@@ -350,12 +418,25 @@ public class Main extends Application implements Serializable{
         );
         circle.setId("circle-yellow");
 
+        Image cartImage = new Image(new FileInputStream("src/images/diamond.png"));
+        ImageView icon3 = new ImageView(cartImage);
+        icon3.setFitWidth(46);
+        icon3.setPreserveRatio(true);
+        icon3.setOnMouseClicked(mouseEvent ->{
+            try {
+                shop = shop(primaryStage);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            primaryStage.setScene(shop);}
+        );
+
         Circle circle2 = new Circle(150.0f, 150.0f, 23.f);
         circle2.setFill(Color.valueOf("#fff"));
         circle2.setId("circle-pink");
         circle2.setOnMouseClicked(mouseEvent -> primaryStage.setScene(prizes));
 
-        Pane pane = new Pane(root,start,resume,exit,circle,icon,circle2,icon2);
+        Pane pane = new Pane(root,start,resume,exit,circle,icon,circle2,icon2,icon3);
         pane.setStyle("-fx-background-color: #282828");
         root.relocate(30,40);
         start.relocate(80,300);
@@ -365,10 +446,10 @@ public class Main extends Application implements Serializable{
         icon.relocate(243,353);
         circle2.relocate(20,350);
         icon2.relocate(20,350);
-
+        icon3.relocate(20,400);
 
         Scene scene = new Scene(pane,300,500);
-        start.getStyleClass().add("button");
+        start.getStyleClass().add("btn");
         start.setOnAction(e-> {
             try {
                 player.start(primaryStage);
@@ -376,7 +457,7 @@ public class Main extends Application implements Serializable{
                 ioException.printStackTrace();
             }
         });
-        resume.getStyleClass().add("button");
+        resume.getStyleClass().add("btn");
         resume.setOnAction(e-> {
             try {
                 player.savedGames(primaryStage,mainMenu);
@@ -384,7 +465,7 @@ public class Main extends Application implements Serializable{
                 ioException.printStackTrace();
             }
         });
-        exit.getStyleClass().add("button");
+        exit.getStyleClass().add("btn");
         exit.setOnAction(e->System.exit(1));
         scene.getStylesheets().add("Theme.css");
         return scene;
@@ -575,7 +656,7 @@ class Player implements Serializable{
         pane.setStyle("-fx-background-color: #282828");
         hbox.relocate(0,60);
         ScrollPane scrollPane = new ScrollPane(pane);
-        scrollPane.setStyle("-fx-background-color: #282828");
+        scrollPane.setStyle("-fx-background: #282828");
 
         Scene resumeScene =  new Scene(scrollPane,300,500);
         primaryStage.setScene(resumeScene);
@@ -1040,8 +1121,21 @@ class Ball{
 
     }
     public Circle show(){
-        Circle circle = new Circle(10.f,Color.valueOf("#f7f7f7"));
-        return circle;
+        return new Circle(10.f,Color.valueOf("#f7f7f7"));
+    }
+
+    public Rectangle showRectangle(){
+        return new Rectangle(17.0f,17.0f,Color.valueOf("#f7f7f7"));
+    }
+
+    public Polygon showTriangle(){
+        Polygon triangle = new Polygon();
+        triangle.getPoints().addAll(new Double[]{
+                0.0, 0.0,
+                12.5, -15.0,
+                25.0, 0.0 });
+        triangle.setFill(Color.valueOf("#f7f7f7"));
+        return triangle;
     }
 }
 
@@ -1339,5 +1433,16 @@ class Circular extends Rotating{
         }
         Group root = new Group(arcs[0],arcs[1],arcs[2],arcs[3]);
         return root;
+    }
+}
+
+class DisplayImage{
+    //TODO use this class for all images
+    public ImageView show(String image,int width) throws IOException{
+        Image cartImage = new Image(new FileInputStream("src/images/"+image));
+        ImageView icon3 = new ImageView(cartImage);
+        icon3.setFitWidth(width);
+        icon3.setPreserveRatio(true);
+        return icon3;
     }
 }
