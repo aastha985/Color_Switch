@@ -603,6 +603,7 @@ class Player implements Serializable{
     }
     public void start(Stage primaryStage) throws IOException,ClassNotFoundException{
         Game G = new Game(this);
+        G.setMode(0);
         G.start(primaryStage);
     }
 
@@ -634,7 +635,7 @@ class Player implements Serializable{
         return diamonds;
     }
 
-    public ArrayList<Game> getSavedGames() {
+    public ArrayList<Game>  getSavedGames() {
         return savedGames;
     }
 
@@ -677,6 +678,15 @@ class Player implements Serializable{
             ImageView resumeBtn = new ImageView(resumebtn);
             resumeBtn.setFitWidth(35);
             resumeBtn.setPreserveRatio(true);
+            int finalI = i;
+            resumeBtn.setOnMouseClicked(mouseEvent ->{
+                try {
+                    savedGames.get(finalI).setMode(1);
+                    savedGames.get(finalI).start(primaryStage);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
 
             Star star = new Star();
             Group starImage = star.show();
@@ -707,6 +717,7 @@ class Game extends Main implements Serializable {
     private int stars;
     private int diamonds;
     private int score;
+    private int mode;
     private Player player;
 
     Game(Player p){
@@ -714,6 +725,10 @@ class Game extends Main implements Serializable {
         this.diamonds=0;
         this.score = 0;
         this.player=p;
+    }
+
+    public void setMode(int a){
+        mode = a;
     }
 
     public int getStars() {
@@ -1099,14 +1114,19 @@ class Game extends Main implements Serializable {
         pane.getChildren().add(exitBtn);
         exitBtn.relocate(10,400);
         exitBtn.setOnMouseClicked(mouseEvent ->{
-//            try {
-//                prizes = prize(primaryStage);
-//                mainMenu = mainMenu(primaryStage, prizes,player);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            primaryStage.setScene(mainMenu);
+            try {
+                prizes = prize(primaryStage);
+                mainMenu = mainMenu(primaryStage, prizes,player);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            primaryStage.setScene(mainMenu);
+            if(this.mode == 1 ){
+                player.getSavedGames().remove(this);
+            }
             player.getSavedGames().add(this);
+            return;
+
         });
 
         pane.setStyle("-fx-background-color: #282828");
