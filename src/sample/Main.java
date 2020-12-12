@@ -9,6 +9,7 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -753,14 +754,32 @@ class Game extends Main implements Serializable {
         b.setCenterX(ballx);
         b.setCenterY(bally.get());
         Pane pane = new Pane();
+        Pane endPane = new Pane();
 
-        class GravityTimer extends AnimationTimer{
-            @Override
-            public void handle(long now){
-                b.setCenterY(b.getCenterY()+1.5);
-                bally.set(b.getCenterY());
+        Button leave = new Button("Exit");
+        leave.getStyleClass().add("btn");
+        leave.relocate(50, 125);
+        leave.setStyle("-fx-border-color: black; -fx-text-fill: black");
+        leave.setOnMouseClicked(mouseEvent -> {
+            try {
+                mainMenu = mainMenu(primaryStage, prize(primaryStage), this.player);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        }
+            primaryStage.setScene(mainMenu);
+        });
+
+        Text t = new Text("GAME OVER");
+        t.setStyle("-fx-font-size: 25px; -fx-font-family: Helvetica; -fx-text-fill: #e537ba;");
+        t.relocate(50,25);
+
+        Text endScore = new Text("Score : "+this.score);
+        endScore.setStyle("-fx-font-size: 20px; -fx-font-family: Helvetica; -fx-text-fill: #e537ba;");
+        endScore.relocate(80, 70);
+
+        endPane.setStyle("-fx-background-color: #a5b8aa; -fx-min-height: 170px; -fx-min-width: 250px;");
+        endPane.relocate(25,150);
+        endPane.getChildren().addAll(t, endScore, leave);
 
         ColorChanger colorChanger = new ColorChanger();
         Group changer = colorChanger.show(150,0);
@@ -835,10 +854,10 @@ class Game extends Main implements Serializable {
         pane.getChildren().add(scoreText);
 
         Circular circle = new Circular();
-        Group root = circle.show(150,300,70.0f,56.0f);
+        Group root = circle.show(0,0,90.0f,76.0f);
+        root.setTranslateY(215);
+        root.setTranslateX(65);
         circle.move(root,360);
-        root.setLayoutX(80);
-        root.setLayoutY(235);
         root.relocate(root.getLayoutX(),root.getLayoutY());
         pane.getChildren().add(root);
 
@@ -848,9 +867,9 @@ class Game extends Main implements Serializable {
 
         HorizontalLine horizontalLine = new HorizontalLine();
         HorizontalLine horizontalLine2 = new HorizontalLine();
-        Group horizontal = horizontalLine.show(130.0f,85.0f);
+        Group horizontal = horizontalLine.show(130.0f,105.0f);
         horizontalLine.moveLeft(horizontal);
-        Group horizontal2 = horizontalLine2.show(250.0f,85.0f);
+        Group horizontal2 = horizontalLine2.show(250.0f,105.0f);
         horizontalLine2.moveRight(horizontal2);
         Group horizontalObstacle = new Group(horizontal,horizontal2);
         horizontalObstacle.relocate(-800,-10);
@@ -919,7 +938,56 @@ class Game extends Main implements Serializable {
         AtomicInteger nextObstacleY = new AtomicInteger(obstacley[2]);
 
         AtomicBoolean firstMouse = new AtomicBoolean(true);
+
+        AtomicBoolean gamePaused = new AtomicBoolean(false);
+
+        AtomicBoolean endPaneAdded = new AtomicBoolean(false);
+
+        class GravityTimer extends AnimationTimer{
+            @Override
+            public void handle(long now) {
+                b.setCenterY(b.getCenterY() + 1.5);
+                bally.set(b.getCenterY());
+                for (int i = 0; i < obstacles.length; ++i) {
+                    if(!pane.getChildren().contains(obstacles[i])){
+                        continue;
+                    }
+                    for (Node child : obstacles[i].getChildren()) {
+                        Shape intersect = null;
+                        if (child instanceof Group) {
+                            for(Node line: ((Group)child).getChildren()){
+                                intersect = Shape.intersect(b, (Shape)line);
+                                if(intersect != null&& intersect.getBoundsInParent().getWidth()>0){
+                                    if(((Shape)line).getFill()!=null && !b.getFill().equals(((Shape)line).getFill())){
+                                        if(!endPaneAdded.get()){
+                                            endPaneAdded.set(true);
+                                            pane.getChildren().add(endPane);
+                                        }
+                                        gamePaused.set(true);
+                                        this.stop();
+                                    }
+                                }
+                            }
+                        } else {
+                            Paint color = ((Shape)child).getFill();
+                            if(color.equals(Color.TRANSPARENT)) color = ((Shape)child).getStroke();
+                            if(intersect != null&& intersect.getBoundsInParent().getWidth()>0) {
+                                if(((Shape)child).getFill()!=null && !b.getFill().equals(color)){
+                                    if(!endPaneAdded.get()){
+                                        endPaneAdded.set(true);
+                                        pane.getChildren().add(endPane);
+                                    }
+                                    gamePaused.set(true);
+                                    this.stop();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         AnimationTimer gravity = new GravityTimer();
+
 
         class MoveBall extends AnimationTimer{
             @Override
@@ -930,31 +998,46 @@ class Game extends Main implements Serializable {
                     this.stop();
                 }
                 for(int i = 0;i<obstacles.length;i++){
-                    ObservableList obs =obstacles[i].getChildren();
-                    obs.forEach((o ->
-                    {
-                        try{
-                            Shape shape = (Shape)o;
-                            if(b.intersects(shape.getBoundsInParent())){
-                                if(!b.getFill().equals(shape.getFill())) {
-//                                    System.out.println("different color, game over");
+                    if(!pane.getChildren().contains(obstacles[i])){
+                        continue;
+                    }
+                    for(Node child : obstacles[i].getChildren()){
+                        Shape intersect = null;
+                        if(child instanceof Group){
+                            for(Node line: ((Group)child).getChildren()){
+                                intersect = Shape.intersect(b, (Shape)line);
+                                if(intersect != null&& intersect.getBoundsInParent().getWidth()>0){
+                                    if(((Shape)line).getFill()!=null && !b.getFill().equals(((Shape)line).getFill())){
+                                        if(!endPaneAdded.get()){
+                                            endPaneAdded.set(true);
+                                            pane.getChildren().add(endPane);
+                                        }
+                                        gamePaused.set(true);
+                                        gravity.stop();
+                                    }
                                 }
                             }
                         }
-                        catch (Exception e){
-                            Group grp = (Group)o;
-                            ObservableList obs2 = grp.getChildren();
-                            obs2.forEach((o1 ->{
-                                Shape shape = (Shape)o1;
-                                if(b.intersects(shape.getBoundsInParent())){
-                                    if(!b.getFill().equals(shape.getFill())) {
-//                                        System.out.println("different color, game over");
-                                    }
-                                }
-                            }));
+                        else{
+                            intersect = Shape.intersect(b, (Shape) child);
                         }
+                        if(intersect != null&& intersect.getBoundsInParent().getWidth()>0){
+                            Paint color = ((Shape)child).getFill();
+                            if(color.equals(Color.TRANSPARENT)) color = ((Shape)child).getStroke();
+                            System.out.println(color+ " "+b.getFill());
+                            if(intersect != null&& intersect.getBoundsInParent().getWidth()>0) {
+                                if(((Shape)child).getFill()!=null && !b.getFill().equals(color)){
+                                    if(!endPaneAdded.get()){
+                                        endPaneAdded.set(true);
+                                        pane.getChildren().add(endPane);
+                                    }
+                                    gamePaused.set(true);
+                                    gravity.stop();
+                                }
+                            }
+                        }
+                    }
 
-                    }));
                 }
             }
         }
@@ -962,7 +1045,6 @@ class Game extends Main implements Serializable {
         AnimationTimer moveBall = new MoveBall();
         AnimationTimer moveChangers = new MoveChangers();
         AnimationTimer moveRewards = new MoveRewards();
-        AtomicBoolean gamePaused = new AtomicBoolean(false);
 
         pane.getChildren().add(b);
 
@@ -1070,6 +1152,7 @@ class Game extends Main implements Serializable {
                             this.score+=10;
                         }
                         scoreText.setText("Score "+Integer.toString(this.score));
+                        endScore.setText("Score "+ Integer.toString(this.score));
                         pane.getChildren().remove(rewards.get(i));
                         rewards.remove(i);
                         rewardsType.remove(i);
@@ -1297,7 +1380,7 @@ class Ball{
 
     }
     public Circle show(){
-        return new Circle(10.f,Color.valueOf("#f7f7f7"));
+        return new Circle(10.f,Color.valueOf("#8a49ef"));
     }
 
     public Rectangle showRectangle(){
@@ -1389,7 +1472,6 @@ class ColorChanger{
         Paint paint[] = {Color.valueOf("#e53e7b"),Color.valueOf("#8a49ef"),Color.valueOf("#eed948"),Color.valueOf("#5edcea")};
         for(int i=0;i<4;i++){
             arcs[i] = new Arc(x,y,radius,radius,angle,90.0f);
-
             arcs[i].setType(ArcType.ROUND);
             arcs[i].setFill(paint[i]);
             angle+=90.0f;
@@ -1509,6 +1591,7 @@ class HorizontalLine extends Linear{
             lines[i+12] = new Line(i*len,y,(i+1)*len,y);
             lines[i+12].setStrokeWidth(strokeWidth);
             lines[i+12].setStroke(paint[Math.abs(i%4)]);
+            lines[i+12].setFill(paint[Math.abs(i%4)]);
         }
 
         Group root = new Group();
@@ -1544,18 +1627,21 @@ class Plus extends Rotating{
         Line line1 = new Line(centerx,centery-length,centerx,centery);
         line1.setStrokeWidth(strokeWidth);
         line1.setStroke(Color.valueOf("#e53e7b"));
+        line1.setFill(Color.valueOf("#e53e7b"));
 
         Line line2 = new Line(centerx,centery,centerx,centery+length);
         line2.setStrokeWidth(strokeWidth);
         line2.setStroke(Color.valueOf("#8a49ef"));
+        line2.setFill(Color.valueOf("#8a49ef"));
 
         Line line3 = new Line(centerx,centery,centerx+length,centery);
         line3.setStrokeWidth(strokeWidth);
-        line3.setStroke(Color.valueOf("#eed948"));
+        line3.setFill(Color.valueOf("#eed948"));
 
         Line line4 = new Line(centerx-length,centery,centerx,centery);
         line4.setStrokeWidth(strokeWidth);
         line4.setStroke(Color.valueOf("#5edcea"));
+        line4.setFill(Color.valueOf("#5edcea"));
 
         Group root = new Group(line1,line2,line3,line4);
         return root;
@@ -1573,18 +1659,22 @@ class Square extends Rotating{
         Line line1 = new Line(x,y,x+length,y);
         line1.setStrokeWidth(strokeWidth);
         line1.setStroke(Color.valueOf("#e53e7b"));
+        line1.setFill(Color.valueOf("#e53e7b"));
 
         Line line2 = new Line(x,y+breadth,x+length,y+breadth);
         line2.setStrokeWidth(strokeWidth);
         line2.setStroke(Color.valueOf("#8a49ef"));
+        line2.setFill(Color.valueOf("#8a49ef"));
 
         Line line3 = new Line(x,y,x,y+breadth);
         line3.setStrokeWidth(strokeWidth);
         line3.setStroke(Color.valueOf("#eed948"));
+        line3.setFill(Color.valueOf("#eed948"));
 
         Line line4 = new Line(x+length,y,x+length,y+breadth);
         line4.setStrokeWidth(strokeWidth);
         line4.setStroke(Color.valueOf("#5edcea"));
+        line4.setFill(Color.valueOf("#5edcea"));
 
         Group root = new Group(line1,line2,line3,line4);
         return root;
@@ -1594,17 +1684,21 @@ class Square extends Rotating{
 class Circular extends Rotating{
     public Group show(float x,float y,float radiusOuter,float radiusInner){
         float angle = 0.0f;
-        Shape arcs[] = new Shape[4];
+        Arc arcs[] = new Arc[4];
 
         Paint paint[] = {Color.valueOf("#e53e7b"),Color.valueOf("#8a49ef"),Color.valueOf("#eed948"),Color.valueOf("#5edcea")};
         for(int i=0;i<4;i++){
-            Arc arc1o = new Arc(x,y,radiusOuter,radiusOuter,angle,90.0f);
-            Arc arc1i = new Arc(x,y,radiusInner,radiusInner,angle,90.0f);
-            arc1o.setType(ArcType.ROUND);
-            arc1i.setType(ArcType.ROUND);
-            arcs[i] = Shape.subtract(arc1o,arc1i);
-            arcs[i].setFill(paint[i]);
-            arc1i.setFill(null);
+            arcs[i] = new Arc();
+            arcs[i].setCenterX(x);
+            arcs[i].setCenterY(y);
+            arcs[i].setRadiusX(radiusInner);
+            arcs[i].setRadiusY(radiusInner);
+            arcs[i].setStartAngle(angle);
+            arcs[i].setLength(90.0f);
+            arcs[i].setType(ArcType.OPEN);
+            arcs[i].setStroke(paint[i]);
+            arcs[i].setFill(Color.TRANSPARENT);
+            arcs[i].setStrokeWidth(14);
             angle+=90.0f;
         }
         Group root = new Group(arcs[0],arcs[1],arcs[2],arcs[3]);
