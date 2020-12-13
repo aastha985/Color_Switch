@@ -594,6 +594,7 @@ class Player implements Serializable{
     private int stars;
     private int diamonds;
     private int highScore;
+    private int ball;
     private ArrayList<Game> savedGames;
     private static final long SerialVersionUID = 99;
 
@@ -602,6 +603,7 @@ class Player implements Serializable{
         this.stars=0;
         this.diamonds=0;
         this.highScore=0;
+        this.ball=1;
         this.savedGames = new ArrayList<>();
     }
     public void start(Stage primaryStage) throws IOException,ClassNotFoundException{
@@ -612,6 +614,10 @@ class Player implements Serializable{
 
     public void incrementStars(int val){
         this.stars+=val;
+    }
+
+    public int getBall() {
+        return ball;
     }
 
     public void incrementDiamonds(int val){
@@ -795,9 +801,15 @@ class Game extends Main implements Serializable {
         AtomicInteger ballDistance = new AtomicInteger(35);
         AtomicBoolean gamePaused = new AtomicBoolean(false);
         Ball ball = new Ball();
-        Circle b = ball.show();
-        b.setCenterX(ballx);
-        b.setCenterY(bally.get());
+        Shape b;
+        if(player.getBall()==1)
+            b = ball.show();
+        else if(player.getBall()==2)
+            b = ball.showRectangle();
+        else
+            b = ball.showTriangle();
+        b.setTranslateX(ballx);
+        b.setTranslateY(bally.get());
         Pane pane = new Pane();
         Pane endPane = new Pane();
 
@@ -999,8 +1011,8 @@ class Game extends Main implements Serializable {
         class GravityTimer extends AnimationTimer{
             @Override
             public void handle(long now) {
-                b.setCenterY(b.getCenterY() + 1.5);
-                bally.set(b.getCenterY());
+                b.setTranslateY(b.getTranslateY() + 1.5);
+                bally.set(b.getTranslateY());
                 for (int i = 0; i < obstacles.length; ++i) {
                     if(!pane.getChildren().contains(obstacles[i])){
                         continue;
@@ -1060,9 +1072,9 @@ class Game extends Main implements Serializable {
         class MoveBall extends AnimationTimer{
             @Override
             public void handle(long now){
-                b.setCenterY(b.getCenterY()-ballSpeed.get());
-                if(b.getCenterY()<=ballMemory.get()-ballDistance.get()){
-                    bally.set(b.getCenterY());
+                b.setTranslateY(b.getTranslateY()-ballSpeed.get());
+                if(b.getTranslateY()<=ballMemory.get()-ballDistance.get()){
+                    bally.set(b.getTranslateY());
                     this.stop();
                 }
                 for(int i = 0;i<obstacles.length;i++){
@@ -1134,7 +1146,7 @@ class Game extends Main implements Serializable {
                 gravity.stop();
                 if(bally.get()>350){
                     //move ball
-                    ballMemory.set((int)b.getCenterY());
+                    ballMemory.set((int)b.getTranslateY());
                     ballDistance.set(35);
                     ballSpeed.set(6);
                     moveBall.start();
@@ -1142,7 +1154,7 @@ class Game extends Main implements Serializable {
                 }
                 else{
                     //move ball
-                    ballMemory.set((int)b.getCenterY());
+                    ballMemory.set((int)b.getTranslateY());
                     ballDistance.set(15);
                     ballSpeed.set(4);
                     moveBall.start();
