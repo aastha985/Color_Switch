@@ -720,12 +720,49 @@ class Game extends Main implements Serializable {
     private int score;
     private int mode;
     private Player player;
+    private Group savedObstacles[];
+    private int savedMaxYIndexes[];
+    Group[] obstacles;
 
     Game(Player p){
         this.stars=0;
         this.diamonds=0;
         this.score = 0;
         this.player=p;
+        this.savedObstacles = new Group[3];
+        this.savedMaxYIndexes = new int[3];
+        this.obstacles = new Group[5];
+
+        Circular circle = new Circular();
+        Group root = circle.show(150,0,90.0f,76.0f);
+        circle.move(root,360);
+
+        Plus plus = new Plus();
+        Group plusRoot = plus.show(200.0f,0.0f,75.0f);
+        plus.move(plusRoot,360);
+
+        HorizontalLine horizontalLine = new HorizontalLine();
+        HorizontalLine horizontalLine2 = new HorizontalLine();
+        Group horizontal = horizontalLine.show(0.0f,105.0f);
+        horizontalLine.moveLeft(horizontal);
+        Group horizontal2 = horizontalLine2.show(110.0f,105.0f);
+        horizontalLine2.moveRight(horizontal2);
+        Group horizontalObstacle = new Group(horizontal,horizontal2);
+        horizontalObstacle.setTranslateX(-800);
+
+        Square rectangle = new Square();
+        Group rectangleRoot = rectangle.show(100.0f,0.0f,120.0f,135.0f);
+        rectangle.move(rectangleRoot,360);
+
+        Square square = new Square();
+        Group squareRoot = square.show(100.0f,0.0f,120.0f,120.0f);
+        square.move(squareRoot,360);
+
+        this.obstacles[0] = root;
+        this.obstacles[1] = horizontalObstacle;
+        this.obstacles[2] = squareRoot;
+        this.obstacles[3] = plusRoot;
+        this.obstacles[4] = rectangleRoot;
     }
 
     public void setMode(int a){
@@ -853,41 +890,25 @@ class Game extends Main implements Serializable {
         scoreText.relocate(10,10);
         pane.getChildren().add(scoreText);
 
-        Circular circle = new Circular();
-        Group root = circle.show(0,0,90.0f,76.0f);
-        root.setTranslateY(215);
-        root.setTranslateX(65);
-        circle.move(root,360);
-        root.relocate(root.getLayoutX(),root.getLayoutY());
-        pane.getChildren().add(root);
+        if(this.savedObstacles[0] == null){
+            this.savedObstacles = new Group[]{this.obstacles[0], this.obstacles[1], (Group) null};
+        }
 
-        Plus plus = new Plus();
-        Group plusRoot = plus.show(200.0f,300.0f,75.0f);
-        plus.move(plusRoot,360);
+        if(this.savedMaxYIndexes[0] == 0 ){
+            this.savedMaxYIndexes = new int[]{295,10,0};
+        }
 
-        HorizontalLine horizontalLine = new HorizontalLine();
-        HorizontalLine horizontalLine2 = new HorizontalLine();
-        Group horizontal = horizontalLine.show(130.0f,105.0f);
-        horizontalLine.moveLeft(horizontal);
-        Group horizontal2 = horizontalLine2.show(250.0f,105.0f);
-        horizontalLine2.moveRight(horizontal2);
-        Group horizontalObstacle = new Group(horizontal,horizontal2);
-        horizontalObstacle.relocate(-800,-10);
-        pane.getChildren().add(horizontalObstacle);
+        AtomicReference<Group> obstacle1 = new AtomicReference<>(this.savedObstacles[0]);
+        AtomicReference<Group> obstacle2 = new AtomicReference<>(this.savedObstacles[1]);
+        AtomicReference<Group> obstacle3 = new AtomicReference<>(this.savedObstacles[2]);
 
-        Square rectangle = new Square();
-        Group rectangleRoot = rectangle.show(100.0f,150.0f,120.0f,135.0f);
-        rectangle.move(rectangleRoot,360);
-
-        Square square = new Square();
-        Group squareRoot = square.show(100.0f,150.0f,120.0f,120.0f);
-        square.move(squareRoot,360);
-
-        AtomicReference<Group> obstacle1 = new AtomicReference<>(root);
-        AtomicReference<Group> obstacle2 = new AtomicReference<>(horizontalObstacle);
-        AtomicReference<Group> obstacle3 = new AtomicReference<>((Group) null);
         AtomicBoolean flag= new AtomicBoolean(true);
-        AtomicReference<Group> memory = new AtomicReference<>(squareRoot);
+
+        obstacle1.get().setTranslateY(this.savedMaxYIndexes[0]);
+        obstacle2.get().setTranslateY(this.savedMaxYIndexes[1]);
+        pane.getChildren().addAll(obstacle1.get(), obstacle2.get());
+
+        AtomicReference<Group> memory = new AtomicReference<>(this.obstacles[2]);
 
         AtomicInteger obstacleMemory = new AtomicInteger(0);
 
@@ -908,13 +929,6 @@ class Game extends Main implements Serializable {
 
         AnimationTimer moveObstacles = new MoveObstacles();
 
-        Group[] obstacles = new Group[5];
-        obstacles[0] = root;
-        obstacles[1] = horizontalObstacle;
-        obstacles[2] = squareRoot;
-        obstacles[3] = plusRoot;
-        obstacles[4] = rectangleRoot;
-
         int[] obstaclex = new int[5];
         int[] obstacley = new int[5];
 
@@ -925,7 +939,7 @@ class Game extends Main implements Serializable {
         obstacley[1] = -240;
 
         obstaclex[2] = 90;
-        obstacley[2] = -240;
+        obstacley[2] = -280;
 
         obstaclex[3] = 100;
         obstacley[3] = -260;
@@ -1024,7 +1038,6 @@ class Game extends Main implements Serializable {
                         if(intersect != null&& intersect.getBoundsInParent().getWidth()>0){
                             Paint color = ((Shape)child).getFill();
                             if(color.equals(Color.TRANSPARENT)) color = ((Shape)child).getStroke();
-                            System.out.println(color+ " "+b.getFill());
                             if(intersect != null&& intersect.getBoundsInParent().getWidth()>0) {
                                 if(((Shape)child).getFill()!=null && !b.getFill().equals(color)){
                                     if(!endPaneAdded.get()){
@@ -1085,7 +1098,7 @@ class Game extends Main implements Serializable {
                         flag.set(false);
                         obstacle3.set(memory.get());
                         obstacle3.get().setTranslateY(0);
-                        obstacle3.get().relocate(nextObstacleX.get(), nextObstacleY.get());
+                        obstacle3.get().setTranslateY(nextObstacleY.get());
                         pane.getChildren().add(obstacle3.get());
                         Reward reward=null;
                         if(count.get()%2==0) {
@@ -1111,7 +1124,7 @@ class Game extends Main implements Serializable {
                         pane.getChildren().add(rewardgrp);
                         ColorChanger colorChangerPer = new ColorChanger();
                         Group Changer = colorChangerPer.show(150,0);
-                        Changer.setTranslateY(nextObstacleY.get()-75);
+                        Changer.setTranslateY(nextObstacleY.get()-50);
                         changers.add(Changer);
                         pane.getChildren().add(Changer);
                     }
@@ -1207,6 +1220,11 @@ class Game extends Main implements Serializable {
             if(this.mode == 1 ){
                 player.getSavedGames().remove(this);
             }
+            this.savedObstacles[0] = obstacle1.get();
+            this.savedObstacles[1] = obstacle2.get();
+            this.savedObstacles[2] = obstacle3.get();
+            this.savedMaxYIndexes[0] = (int) obstacle1.get().getBoundsInParent().getCenterY();
+            this.savedMaxYIndexes[1] = (int) obstacle2.get().getBoundsInParent().getCenterY();
             player.getSavedGames().add(this);
             return;
 
@@ -1501,8 +1519,8 @@ class Linear extends Obstacles{
 
     public void moveLeft(Group root){
         TranslateTransition translate = new TranslateTransition();
-        translate.setByX(-300);
-        translate.setDuration(Duration.millis(2000));
+        translate.setByX(-600);
+        translate.setDuration(Duration.millis(4000));
         translate.setCycleCount(500);
         translate.setAutoReverse(true);
         translate.setNode(root);
@@ -1511,8 +1529,8 @@ class Linear extends Obstacles{
 
     public  void moveRight(Group root){
         TranslateTransition translate = new TranslateTransition();
-        translate.setByX(300);
-        translate.setDuration(Duration.millis(2000));
+        translate.setByX(600);
+        translate.setDuration(Duration.millis(4000));
         translate.setCycleCount(500);
         translate.setAutoReverse(true);
         translate.setNode(root);
@@ -1637,6 +1655,7 @@ class Plus extends Rotating{
         Line line3 = new Line(centerx,centery,centerx+length,centery);
         line3.setStrokeWidth(strokeWidth);
         line3.setFill(Color.valueOf("#eed948"));
+        line3.setStroke(Color.valueOf("#eed948"));
 
         Line line4 = new Line(centerx-length,centery,centerx,centery);
         line4.setStrokeWidth(strokeWidth);
