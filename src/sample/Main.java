@@ -44,6 +44,7 @@ public class Main extends Application implements Serializable{
     protected Scene playerDetails,titleScreen,splashScreen,mainMenu,enterName,prizes,shop;
     private Player player;
     private HashMap<String,Player> players;
+    private static final long SerialVersionUID = 100;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -594,6 +595,7 @@ class Player implements Serializable{
     private int diamonds;
     private int highScore;
     private ArrayList<Game> savedGames;
+    private static final long SerialVersionUID = 99;
 
     Player(String name){
         this.name = name;
@@ -630,6 +632,10 @@ class Player implements Serializable{
 
     public int getStars() {
         return stars;
+    }
+
+    public void decrementStars(int val){
+        this.stars-=val;
     }
 
     public int getDiamonds() {
@@ -723,6 +729,7 @@ class Game extends Main implements Serializable {
     private Group savedObstacles[];
     private int savedMaxYIndexes[];
     Group[] obstacles;
+    private static final long SerialVersionUID = 98;
 
     Game(Player p){
         this.stars=0;
@@ -786,6 +793,7 @@ class Game extends Main implements Serializable {
         AtomicReference<Double> bally = new AtomicReference<>((double) 450);
         AtomicInteger ballSpeed = new AtomicInteger(6);
         AtomicInteger ballDistance = new AtomicInteger(35);
+        AtomicBoolean gamePaused = new AtomicBoolean(false);
         Ball ball = new Ball();
         Circle b = ball.show();
         b.setCenterX(ballx);
@@ -953,9 +961,40 @@ class Game extends Main implements Serializable {
 
         AtomicBoolean firstMouse = new AtomicBoolean(true);
 
-        AtomicBoolean gamePaused = new AtomicBoolean(false);
-
         AtomicBoolean endPaneAdded = new AtomicBoolean(false);
+
+
+        Pane resumePane = new Pane();
+
+        Button resume = new Button("Resume[5 Stars]");
+        resume.getStyleClass().add("btn");
+        resume.relocate(40, 115);
+        resume.setStyle("-fx-border-color: black; -fx-text-fill: black; -fx-pref-width: 170px");
+
+        Button exit = new Button("Exit");
+        exit.getStyleClass().add("btn");
+        exit.relocate(40,165);
+        exit.setStyle("-fx-border-color: black; -fx-text-fill: black; -fx-pref-width: 170px");
+        exit.setOnMouseClicked(mouseEvent -> {
+            try {
+                mainMenu = mainMenu(primaryStage, prize(primaryStage), this.player);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            primaryStage.setScene(mainMenu);
+        });
+
+        Text game_over = new Text("GAME OVER");
+        game_over.setStyle("-fx-font-size: 25px; -fx-font-family: Helvetica; -fx-text-fill: #e537ba;");
+        game_over.relocate(50,25);
+
+        Text end_score = new Text("Score : "+this.score);
+        end_score.setStyle("-fx-font-size: 20px; -fx-font-family: Helvetica; -fx-text-fill: #e537ba;");
+        end_score.relocate(80, 70);
+
+        resumePane.setStyle("-fx-background-color: #a5b8aa; -fx-min-height: 190px; -fx-min-width: 250px;");
+        resumePane.relocate(25,150);
+        resumePane.getChildren().addAll(game_over, end_score, resume,exit);
 
         class GravityTimer extends AnimationTimer{
             @Override
@@ -975,7 +1014,10 @@ class Game extends Main implements Serializable {
                                     if(((Shape)line).getFill()!=null && !b.getFill().equals(((Shape)line).getFill())){
                                         if(!endPaneAdded.get()){
                                             endPaneAdded.set(true);
-                                            pane.getChildren().add(endPane);
+                                            if(player.getStars()>=5)
+                                                pane.getChildren().add(resumePane);
+                                            else
+                                                pane.getChildren().add(endPane);
                                         }
                                         gamePaused.set(true);
                                         this.stop();
@@ -989,7 +1031,10 @@ class Game extends Main implements Serializable {
                                 if(((Shape)child).getFill()!=null && !b.getFill().equals(color)){
                                     if(!endPaneAdded.get()){
                                         endPaneAdded.set(true);
-                                        pane.getChildren().add(endPane);
+                                        if(player.getStars()>=5)
+                                            pane.getChildren().add(resumePane);
+                                        else
+                                            pane.getChildren().add(endPane);
                                     }
                                     gamePaused.set(true);
                                     this.stop();
@@ -1001,6 +1046,15 @@ class Game extends Main implements Serializable {
             }
         }
         AnimationTimer gravity = new GravityTimer();
+
+        resume.setOnMouseClicked(mouseEvent ->{
+            gamePaused.set(false);
+            gravity.start();
+            player.decrementStars(5);
+            pane.getChildren().remove(resumePane);
+            endPaneAdded.set(false);
+            b.setFill(Color.valueOf("#8a49ef"));
+        });
 
 
         class MoveBall extends AnimationTimer{
@@ -1024,7 +1078,10 @@ class Game extends Main implements Serializable {
                                     if(((Shape)line).getFill()!=null && !b.getFill().equals(((Shape)line).getFill())){
                                         if(!endPaneAdded.get()){
                                             endPaneAdded.set(true);
-                                            pane.getChildren().add(endPane);
+                                            if(player.getStars()>=5)
+                                                pane.getChildren().add(resumePane);
+                                            else
+                                                pane.getChildren().add(endPane);
                                         }
                                         gamePaused.set(true);
                                         gravity.stop();
@@ -1042,7 +1099,10 @@ class Game extends Main implements Serializable {
                                 if(((Shape)child).getFill()!=null && !b.getFill().equals(color)){
                                     if(!endPaneAdded.get()){
                                         endPaneAdded.set(true);
-                                        pane.getChildren().add(endPane);
+                                        if(player.getStars()>=5)
+                                            pane.getChildren().add(resumePane);
+                                        else
+                                            pane.getChildren().add(endPane);
                                     }
                                     gamePaused.set(true);
                                     gravity.stop();
@@ -1166,6 +1226,7 @@ class Game extends Main implements Serializable {
                         }
                         scoreText.setText("Score "+Integer.toString(this.score));
                         endScore.setText("Score "+ Integer.toString(this.score));
+                        end_score.setText("Score "+Integer.toString(this.score));
                         pane.getChildren().remove(rewards.get(i));
                         rewards.remove(i);
                         rewardsType.remove(i);
