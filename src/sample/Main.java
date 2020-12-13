@@ -11,6 +11,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -242,11 +243,13 @@ public class Main extends Application implements Serializable{
         Ball triangle = new Ball();
         Polygon triangleBall = triangle.showTriangle();
 
-        Button generalBtn = new Button("Purchase for 50 Diamonds");
-        Button corporalBtn = new Button("Purchase for 25 Diamonds");
-        Button recruitBtn = new Button("Purchase for 10 Diamonds");
-        Button squareBallBtn = new Button("Purchase for 30 Diamonds");
-        Button triangleBallBtn = new Button("Purchase for 50 Diamonds");
+        boolean shop[] = player.getShop();
+
+        Button generalBtn = new Button(shop[0] ? "Purchased" : "Purchase for 50 Diamonds");
+        Button corporalBtn = new Button(shop[1] ? "Purchased" :"Purchase for 25 Diamonds");
+        Button recruitBtn = new Button(shop[2] ? "Purchased" : "Purchase for 10 Diamonds");
+        Button squareBallBtn = new Button(shop[3] ? "Purchased" : "Purchase for 30 Diamonds");
+        Button triangleBallBtn = new Button(shop[4]? "Purchased" : "Purchase for 50 Diamonds");
 
         Line line = new Line(0,0,300,0);
         line.setStrokeWidth(140);
@@ -277,11 +280,40 @@ public class Main extends Application implements Serializable{
         squareBallBtn.relocate(100,300);
         triangleBallBtn.relocate(100,360);
 
-        recruitBtn.getStyleClass().add("purchase-btn");
-        corporalBtn.getStyleClass().add("purchase-btn");
-        generalBtn.getStyleClass().add("purchase-btn");
-        squareBallBtn.getStyleClass().add("purchase-btn");
-        triangleBallBtn.getStyleClass().add("purchase-btn");
+        recruitBtn.getStyleClass().add(shop[0] ? "bought-btn" : "purchase-btn");
+        corporalBtn.getStyleClass().add(shop[1] ? "bought-btn" : "purchase-btn");
+        generalBtn.getStyleClass().add(shop[2] ? "bought-btn" : "purchase-btn");
+        squareBallBtn.getStyleClass().add(shop[3] ? "bought-btn" : "purchase-btn");
+        triangleBallBtn.getStyleClass().add(shop[4] ? "bought-btn" : "purchase-btn");
+
+        Alert a = new Alert(Alert.AlertType.INFORMATION);
+        a.setContentText("Insufficient Diamonds!");
+
+        squareBallBtn.setOnMouseClicked(mouseEvent -> {
+            if(!shop[3] && player.getDiamonds()>=30){
+                shop[3] = true;
+                player.setBall(2);
+                squareBallBtn.getStyleClass().remove("purchase-btn");
+                squareBallBtn.getStyleClass().add("bought-btn");
+                squareBallBtn.setText("Purchased");
+            }
+            else if(player.getDiamonds()<30){
+                a.show();
+            }
+        });
+
+        triangleBallBtn.setOnMouseClicked(mouseEvent ->{
+            if(!shop[4] && player.getDiamonds()>=70){
+                shop[4] = true;
+                player.setBall(3);
+                triangleBallBtn.getStyleClass().remove("purchase-btn");
+                triangleBallBtn.getStyleClass().add("bought-btn");
+                triangleBallBtn.setText("Purchased");
+            }
+            else if(player.getDiamonds()<70){
+                a.show();
+            }
+        });
 
         Scene scene = new Scene(pane,300,500);
         scene.getStylesheets().add("Theme.css");
@@ -595,6 +627,7 @@ class Player implements Serializable{
     private int diamonds;
     private int highScore;
     private int ball;
+    private boolean shop[];
     private ArrayList<Game> savedGames;
     private static final long SerialVersionUID = 99;
 
@@ -605,6 +638,7 @@ class Player implements Serializable{
         this.highScore=0;
         this.ball=1;
         this.savedGames = new ArrayList<>();
+        this.shop = new boolean[]{false,false,false,false,false};
     }
     public void start(Stage primaryStage) throws IOException,ClassNotFoundException{
         Game G = new Game(this);
@@ -612,8 +646,16 @@ class Player implements Serializable{
         G.start(primaryStage);
     }
 
+    public boolean[] getShop() {
+        return shop;
+    }
+
     public void incrementStars(int val){
         this.stars+=val;
+    }
+
+    public void setBall(int ball) {
+        this.ball = ball;
     }
 
     public int getBall() {
@@ -1213,36 +1255,35 @@ class Game extends Main implements Serializable {
                     }
                 }
                 for(int i=0;i<changers.size();++i){
-                    if(b.intersects(changers.get(i).getBoundsInParent())){
+                    if(b.getBoundsInParent().intersects(changers.get(i).getBoundsInParent())){
                         pane.getChildren().remove(changers.get(i));
                         changers.remove(i);
                         String color;
-                        do{
+                        do {
                             color = ColorChanger.generateRandomColor();
-                        }while(Color.valueOf(color).equals(b.getFill()));
+                        } while (Color.valueOf(color).equals(b.getFill()));
                         b.setFill(Color.valueOf(color));
                         break;
                     }
                 }
                 for(int i=0;i<rewards.size();i++){
-                    if(b.intersects(rewards.get(i).getBoundsInParent())){
-                        if(rewardsType.get(i)) {
+                    if(b.getBoundsInParent().intersects(rewards.get(i).getBoundsInParent())) {
+                        if (rewardsType.get(i)) {
                             player.incrementStars(1);
                             this.stars++;
-                            this.score+=5;
-                        }
-                        else{
+                            this.score += 5;
+                        } else {
                             player.incrementDiamonds(1);
                             this.diamonds++;
-                            this.score+=10;
+                            this.score += 10;
                         }
-                        scoreText.setText("Score "+Integer.toString(this.score));
-                        endScore.setText("Score "+ Integer.toString(this.score));
-                        end_score.setText("Score "+Integer.toString(this.score));
+                        scoreText.setText("Score " + Integer.toString(this.score));
+                        endScore.setText("Score " + Integer.toString(this.score));
+                        end_score.setText("Score " + Integer.toString(this.score));
                         pane.getChildren().remove(rewards.get(i));
                         rewards.remove(i);
                         rewardsType.remove(i);
-                        player.setHighScore(Math.max(player.getHighScore(),this.score));
+                        player.setHighScore(Math.max(player.getHighScore(), this.score));
                     }
                 }
                 gravity.start();
@@ -1475,7 +1516,7 @@ class Ball{
     }
 
     public Rectangle showRectangle(){
-        return new Rectangle(17.0f,17.0f,Color.valueOf("#f7f7f7"));
+        return new Rectangle(17.0f,17.0f,Color.valueOf("#8a49ef"));
     }
 
     public Polygon showTriangle(){
@@ -1484,7 +1525,7 @@ class Ball{
                 0.0, 0.0,
                 12.5, -15.0,
                 25.0, 0.0 });
-        triangle.setFill(Color.valueOf("#f7f7f7"));
+        triangle.setFill(Color.valueOf("#eed948"));
         return triangle;
     }
 }

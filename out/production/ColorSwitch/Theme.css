@@ -58,6 +58,10 @@
     -fx-text-fill: white;
     -fx-background-color: red;
 }
+.bought-btn{
+    -fx-text-fill: white;
+    -fx-background-color: green;
+}
 .background{
     -fx-background-image: url("images/background.jpg");
 }
