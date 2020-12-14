@@ -246,7 +246,6 @@ public class Main extends Application implements Serializable{
     }
 
     private Scene shop(Stage primaryStage)throws IOException{
-        //TODO when gems are purchased, update in stats screen
         Text balls = new Text("Balls");
         balls.getStyleClass().add("title-text");
 
@@ -465,6 +464,7 @@ public class Main extends Application implements Serializable{
 
         root.setOnMouseClicked(mouseEvent -> {
             try {
+                player.incrementGamesPlayed();
                 player.start(primaryStage);
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
@@ -547,6 +547,7 @@ public class Main extends Application implements Serializable{
         start.getStyleClass().add("btn");
         start.setOnAction(e-> {
             try {
+                player.incrementGamesPlayed();
                 player.start(primaryStage);
             } catch (IOException | ClassNotFoundException ioException) {
                 ioException.printStackTrace();
@@ -690,6 +691,7 @@ class Player implements Serializable{
     private int ball;
     private boolean shop[];
     private int type;
+    private int gamesPlayed;
     private ArrayList<Game> savedGames;
     private static final long SerialVersionUID = 99;
 
@@ -700,6 +702,7 @@ class Player implements Serializable{
         this.highScore=0;
         this.ball=1;
         this.type=1;
+        this.gamesPlayed=0;
         this.savedGames = new ArrayList<>();
         this.shop = new boolean[]{false,false,false,false,false};
     }
@@ -719,6 +722,14 @@ class Player implements Serializable{
 
     public int getType() {
         return type;
+    }
+
+    public void incrementGamesPlayed(){
+        this.gamesPlayed++;
+    }
+
+    public int getGamesPlayed() {
+        return gamesPlayed;
     }
 
     public void incrementStars(int val){
@@ -932,11 +943,14 @@ class Game extends Main implements Serializable {
         leave.setStyle("-fx-border-color: black; -fx-text-fill: black");
         leave.setOnMouseClicked(mouseEvent -> {
             try {
-                mainMenu = mainMenu(primaryStage, prize(primaryStage), this.player);
+                if(player.getGamesPlayed()%5==0) bonusLevel(primaryStage);
+                else {
+                    mainMenu = mainMenu(primaryStage, prize(primaryStage), this.player);
+                    primaryStage.setScene(mainMenu);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            primaryStage.setScene(mainMenu);
         });
 
         Text t = new Text("GAME OVER");
@@ -1102,11 +1116,14 @@ class Game extends Main implements Serializable {
         exit.setStyle("-fx-border-color: black; -fx-text-fill: black; -fx-pref-width: 170px");
         exit.setOnMouseClicked(mouseEvent -> {
             try {
-                mainMenu = mainMenu(primaryStage, prize(primaryStage), this.player);
+                if(player.getGamesPlayed()%5==0) bonusLevel(primaryStage);
+                else {
+                    mainMenu = mainMenu(primaryStage, prize(primaryStage), this.player);
+                    primaryStage.setScene(mainMenu);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            primaryStage.setScene(mainMenu);
         });
 
         Text game_over = new Text("GAME OVER");
