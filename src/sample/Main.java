@@ -141,7 +141,7 @@ public class Main extends Application implements Serializable{
     private Scene playerDetails(Stage primaryStage) throws IOException{
         Text name = new Text(this.player.getName());
         Text highScore = new Text("High Score:");
-        Text highScoreNo = new Text(Integer.toString(this.player.getHighScore())); //TODO update high score,stars and diamonds after game over
+        Text highScoreNo = new Text(Integer.toString(this.player.getHighScore()));
         Text stars = new Text("Stars");
         Text starsno = new Text(Integer.toString(this.player.getStars()));
         Text diamonds = new Text("Diamonds");
@@ -312,6 +312,7 @@ public class Main extends Application implements Serializable{
 
         recruitBtn.setOnMouseClicked(mouseEvent -> {
             if(!shop[0] && player.getDiamonds()>=10){
+                this.player.decrementDiamonds(10);
                 shop[0] = true;
                 player.setType(2);
                 recruitBtn.getStyleClass().remove("purchase-btn");
@@ -325,6 +326,7 @@ public class Main extends Application implements Serializable{
 
         corporalBtn.setOnMouseClicked(mouseEvent -> {
             if(!shop[1] && player.getDiamonds()>=25){
+                this.player.decrementDiamonds(25);
                 shop[1] = true;
                 player.setType(3);
                 corporalBtn.getStyleClass().remove("purchase-btn");
@@ -338,6 +340,7 @@ public class Main extends Application implements Serializable{
 
         generalBtn.setOnMouseClicked(mouseEvent -> {
             if(!shop[2] && player.getDiamonds()>=50){
+                this.player.decrementDiamonds(50);
                 shop[2] = true;
                 player.setType(4);
                 generalBtn.getStyleClass().remove("purchase-btn");
@@ -351,6 +354,7 @@ public class Main extends Application implements Serializable{
 
         squareBallBtn.setOnMouseClicked(mouseEvent -> {
             if(!shop[3] && player.getDiamonds()>=30){
+                this.player.decrementDiamonds(30);
                 shop[3] = true;
                 player.setBall(2);
                 squareBallBtn.getStyleClass().remove("purchase-btn");
@@ -364,6 +368,7 @@ public class Main extends Application implements Serializable{
 
         triangleBallBtn.setOnMouseClicked(mouseEvent ->{
             if(!shop[4] && player.getDiamonds()>=70){
+                this.player.decrementDiamonds(70);
                 shop[4] = true;
                 player.setBall(3);
                 triangleBallBtn.getStyleClass().remove("purchase-btn");
@@ -730,6 +735,10 @@ class Player implements Serializable{
 
     public int getGamesPlayed() {
         return gamesPlayed;
+    }
+
+    public void decrementDiamonds(int val){
+        this.diamonds-=val;
     }
 
     public void incrementStars(int val){
@@ -1439,7 +1448,6 @@ class Game extends Main implements Serializable {
     }
 
     public void bonusLevel(Stage primaryStage) throws IOException{
-        //TODO save games in player and show bonus scene after every 5th game is over
         //TODO add moving ball and 10 stars
         Text text = new Text("BONUS");
         text.getStyleClass().add("title-text");
