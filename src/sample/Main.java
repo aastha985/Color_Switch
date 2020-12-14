@@ -194,6 +194,22 @@ public class Main extends Application implements Serializable{
             hbox.getChildren().add(new Circle(300.0f,100.0f,10.f,Color.valueOf("#ff3333")));
         }
 
+        DisplayImage displayImage = new DisplayImage();
+        ImageView playerType;
+        Text playerTypeText;
+        if(player.getType()==2){
+            playerType = displayImage.show("gem3.png",50);
+            playerTypeText = new Text("Recruit");
+        }
+        else if(player.getType()==3){
+            playerType = displayImage.show("gem2.png",50);
+            playerTypeText = new Text("Corporal");
+        }
+        else{
+            playerType = displayImage.show("gem1.png",50);
+            playerTypeText = new Text("General");
+        }
+
         Text headerText = new Text("STATS");
         headerText.setFont(new Font(27));
         headerText.setStyle("-fx-fill: #f7f7f7");
@@ -203,9 +219,16 @@ public class Main extends Application implements Serializable{
         pane.getChildren().add(headerText);
         hbox.relocate(0,60);
 
+        if(player.getType()!=1){
+            pane.getChildren().addAll(playerType,playerTypeText);
+            playerType.relocate(240,95);
+            playerTypeText.relocate(170,115);
+            playerTypeText.getStyleClass().add("white-text");
+        }
+
         ringg.relocate(115,20);
         icon.relocate(115,20);
-        name.relocate(63,115);
+        name.relocate(45,115);
         highScore.relocate(100,200);
         highScoreNo.relocate(200,200);
         Image.relocate(50,180);
@@ -224,7 +247,6 @@ public class Main extends Application implements Serializable{
 
     private Scene shop(Stage primaryStage)throws IOException{
         //TODO when gems are purchased, update in stats screen
-        //TODO when ball purchased, change ball in game
         Text balls = new Text("Balls");
         balls.getStyleClass().add("title-text");
 
@@ -245,9 +267,9 @@ public class Main extends Application implements Serializable{
 
         boolean shop[] = player.getShop();
 
-        Button generalBtn = new Button(shop[0] ? "Purchased" : "Purchase for 50 Diamonds");
+        Button generalBtn = new Button(shop[2] ? "Purchased" : "Purchase for 50 Diamonds");
         Button corporalBtn = new Button(shop[1] ? "Purchased" :"Purchase for 25 Diamonds");
-        Button recruitBtn = new Button(shop[2] ? "Purchased" : "Purchase for 10 Diamonds");
+        Button recruitBtn = new Button(shop[0] ? "Purchased" : "Purchase for 10 Diamonds");
         Button squareBallBtn = new Button(shop[3] ? "Purchased" : "Purchase for 30 Diamonds");
         Button triangleBallBtn = new Button(shop[4]? "Purchased" : "Purchase for 50 Diamonds");
 
@@ -288,6 +310,45 @@ public class Main extends Application implements Serializable{
 
         Alert a = new Alert(Alert.AlertType.INFORMATION);
         a.setContentText("Insufficient Diamonds!");
+
+        recruitBtn.setOnMouseClicked(mouseEvent -> {
+            if(!shop[0] && player.getDiamonds()>=10){
+                shop[0] = true;
+                player.setType(2);
+                recruitBtn.getStyleClass().remove("purchase-btn");
+                recruitBtn.getStyleClass().add("bought-btn");
+                recruitBtn.setText("Purchased");
+            }
+            else if(player.getDiamonds()<10){
+                a.show();
+            }
+        });
+
+        corporalBtn.setOnMouseClicked(mouseEvent -> {
+            if(!shop[1] && player.getDiamonds()>=25){
+                shop[1] = true;
+                player.setType(3);
+                corporalBtn.getStyleClass().remove("purchase-btn");
+                corporalBtn.getStyleClass().add("bought-btn");
+                corporalBtn.setText("Purchased");
+            }
+            else if(player.getDiamonds()<25){
+                a.show();
+            }
+        });
+
+        generalBtn.setOnMouseClicked(mouseEvent -> {
+            if(!shop[2] && player.getDiamonds()>=50){
+                shop[2] = true;
+                player.setType(4);
+                generalBtn.getStyleClass().remove("purchase-btn");
+                generalBtn.getStyleClass().add("bought-btn");
+                generalBtn.setText("Purchased");
+            }
+            else if(player.getDiamonds()<50){
+                a.show();
+            }
+        });
 
         squareBallBtn.setOnMouseClicked(mouseEvent -> {
             if(!shop[3] && player.getDiamonds()>=30){
@@ -628,6 +689,7 @@ class Player implements Serializable{
     private int highScore;
     private int ball;
     private boolean shop[];
+    private int type;
     private ArrayList<Game> savedGames;
     private static final long SerialVersionUID = 99;
 
@@ -637,6 +699,7 @@ class Player implements Serializable{
         this.diamonds=0;
         this.highScore=0;
         this.ball=1;
+        this.type=1;
         this.savedGames = new ArrayList<>();
         this.shop = new boolean[]{false,false,false,false,false};
     }
@@ -648,6 +711,14 @@ class Player implements Serializable{
 
     public boolean[] getShop() {
         return shop;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public int getType() {
+        return type;
     }
 
     public void incrementStars(int val){
