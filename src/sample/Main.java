@@ -928,11 +928,38 @@ class Game extends Main implements Serializable {
     }
 
     public void start(Stage primaryStage) throws IOException{
+
+        //declarations
         double ballx = 150;
+        int[] obstaclex = new int[]{85, -800, 90, 100, 9};
+        int[] obstacley = new int[]{-300, -240, -280, -260, -310};
         AtomicReference<Double> bally = new AtomicReference<>((double) 450);
         AtomicInteger ballSpeed = new AtomicInteger(6);
         AtomicInteger ballDistance = new AtomicInteger(35);
         AtomicBoolean gamePaused = new AtomicBoolean(false);
+        AtomicInteger ballMemory = new AtomicInteger(0);
+        AtomicInteger changerMemory = new AtomicInteger(0);
+        AtomicInteger rewardMemory = new AtomicInteger(0);
+        AtomicReference<Group> obstacle1 = new AtomicReference<>(this.savedObstacles[0]);
+        AtomicReference<Group> obstacle2 = new AtomicReference<>(this.savedObstacles[1]);
+        AtomicReference<Group> obstacle3 = new AtomicReference<>(this.savedObstacles[2]);
+        AtomicInteger obstacleCounter = new AtomicInteger(3);
+        AtomicInteger nextObstacleX = new AtomicInteger(obstaclex[2]);
+        AtomicInteger nextObstacleY = new AtomicInteger(obstacley[2]);
+        AtomicBoolean firstMouse = new AtomicBoolean(true);
+        AtomicBoolean endPaneAdded = new AtomicBoolean(false);
+        ArrayList<Group> rewards = new ArrayList<>();
+        ArrayList<Boolean> rewardsType = new ArrayList<>();
+        AtomicInteger count = new AtomicInteger(0);
+        ArrayList<Group> changers = new ArrayList<Group>();
+        AtomicBoolean flag= new AtomicBoolean(true);
+        AtomicReference<Group> memory = new AtomicReference<>(this.obstacles[2]);
+        AtomicInteger obstacleMemory = new AtomicInteger(0);
+
+
+
+//=========================================================================================================================================
+        //make ball
         Ball ball = new Ball();
         Shape b;
         if(player.getBall()==1)
@@ -943,9 +970,10 @@ class Game extends Main implements Serializable {
             b = ball.showTriangle();
         b.setTranslateX(ballx);
         b.setTranslateY(bally.get());
-        Pane pane = new Pane();
-        Pane endPane = new Pane();
 
+//=========================================================================================================================================
+        //construct game ending pane
+        Pane endPane = new Pane();
         Button leave = new Button("Exit");
         leave.getStyleClass().add("btn");
         leave.relocate(50, 125);
@@ -961,59 +989,103 @@ class Game extends Main implements Serializable {
                 e.printStackTrace();
             }
         });
-
         Text t = new Text("GAME OVER");
         t.setStyle("-fx-font-size: 25px; -fx-font-family: Helvetica; -fx-text-fill: #e537ba;");
         t.relocate(50,25);
-
         Text endScore = new Text("Score : "+this.score);
         endScore.setStyle("-fx-font-size: 20px; -fx-font-family: Helvetica; -fx-text-fill: #e537ba;");
         endScore.relocate(80, 70);
-
         endPane.setStyle("-fx-background-color: #a5b8aa; -fx-min-height: 170px; -fx-min-width: 250px;");
         endPane.relocate(25,150);
         endPane.getChildren().addAll(t, endScore, leave);
 
+//=========================================================================================================================================
+        //construct game ending with stars game
+        Pane resumePane = new Pane();
+        Button resume = new Button("Resume[5 Stars]");
+        resume.getStyleClass().add("btn");
+        resume.relocate(40, 115);
+        resume.setStyle("-fx-border-color: black; -fx-text-fill: black; -fx-pref-width: 170px");
+        Button exit = new Button("Exit");
+        exit.getStyleClass().add("btn");
+        exit.relocate(40,165);
+        exit.setStyle("-fx-border-color: black; -fx-text-fill: black; -fx-pref-width: 170px");
+        exit.setOnMouseClicked(mouseEvent -> {
+            try {
+                mainMenu = mainMenu(primaryStage, prize(primaryStage), this.player);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            primaryStage.setScene(mainMenu);
+        });
+        Text game_over = new Text("GAME OVER");
+        game_over.setStyle("-fx-font-size: 25px; -fx-font-family: Helvetica; -fx-text-fill: #e537ba;");
+        game_over.relocate(50,25);
+        Text end_score = new Text("Score : "+this.score);
+        end_score.setStyle("-fx-font-size: 20px; -fx-font-family: Helvetica; -fx-text-fill: #e537ba;");
+        end_score.relocate(80, 70);
+        resumePane.setStyle("-fx-background-color: #a5b8aa; -fx-min-height: 190px; -fx-min-width: 250px;");
+        resumePane.relocate(25,150);
+        resumePane.getChildren().addAll(game_over, end_score, resume,exit);
+
+//=========================================================================================================================================
+
+        //construct main pane
+        Pane pane = new Pane();
+
+        //declare color changers
         ColorChanger colorChanger = new ColorChanger();
         Group changer = colorChanger.show(150,0);
-
+        changer.setTranslateY(180);
         ColorChanger colorChanger2 = new ColorChanger();
         Group changer2 = colorChanger2.show(150,0);
-
-        ArrayList<Group> changers = new ArrayList<Group>();
         changers.add(changer);
         changers.add(changer2);
-
-        changer.setTranslateY(180);
         changer2.setTranslateY(-100);
         pane.getChildren().addAll(changer,changer2);
 
+
+        //declare rewards
         Reward reward1 = new Star();
         Group starReward = reward1.show();
         reward1.blink(starReward);
-
         Reward reward2 = new Diamond();
         Group diamondReward = reward2.show();
         reward2.blink(diamondReward);
-
-        ArrayList<Group> rewards = new ArrayList<>();
-        ArrayList<Boolean> rewardsType = new ArrayList<>();
         rewards.add(starReward);
         rewardsType.add(true);
         rewards.add(diamondReward);
         rewardsType.add(false);
-
         starReward.relocate(135,0);
         diamondReward.relocate(135,0);
         starReward.setTranslateY(283);
         diamondReward.setTranslateY(40);
         pane.getChildren().addAll(starReward,diamondReward);
 
-        AtomicInteger ballMemory = new AtomicInteger(0);
-        AtomicInteger changerMemory = new AtomicInteger(0);
-        AtomicInteger rewardMemory = new AtomicInteger(0);
 
-        class MoveChangers extends AnimationTimer{
+        //add score text
+        Text scoreText = new Text("Score "+Integer.toString(this.score));
+        scoreText.getStyleClass().add("white-text");
+        scoreText.relocate(10,10);
+        pane.getChildren().add(scoreText);
+
+        //add initial obstacles
+        if(this.savedObstacles[0] == null){
+            this.savedObstacles = new Group[]{this.obstacles[0], this.obstacles[1], (Group) null};
+        }
+        if(this.savedMaxYIndexes[0] == 0 ){
+            this.savedMaxYIndexes = new int[]{295,10,0};
+        }
+        obstacle1.get().setTranslateY(this.savedMaxYIndexes[0]);
+        obstacle2.get().setTranslateY(this.savedMaxYIndexes[1]);
+        pane.getChildren().addAll(obstacle1.get(), obstacle2.get());
+        pane.getChildren().add(b);
+
+
+//=========================================================================================================================================
+
+        //make animation  timers
+        class MoveChangers extends AnimationTimer{                                  // to move color changers
             @Override
             public void handle(long now){
                 changerMemory.set(changerMemory.get()+4);
@@ -1026,8 +1098,7 @@ class Game extends Main implements Serializable {
                 }
             }
         }
-
-        class MoveRewards extends AnimationTimer{
+        class MoveRewards extends AnimationTimer{                                   //to move rewards
             @Override
             public void handle(long now){
                 rewardMemory.set(rewardMemory.get()+4);
@@ -1040,35 +1111,7 @@ class Game extends Main implements Serializable {
                 }
             }
         }
-
-        Text scoreText = new Text("Score "+Integer.toString(this.score));
-        scoreText.getStyleClass().add("white-text");
-        scoreText.relocate(10,10);
-        pane.getChildren().add(scoreText);
-
-        if(this.savedObstacles[0] == null){
-            this.savedObstacles = new Group[]{this.obstacles[0], this.obstacles[1], (Group) null};
-        }
-
-        if(this.savedMaxYIndexes[0] == 0 ){
-            this.savedMaxYIndexes = new int[]{295,10,0};
-        }
-
-        AtomicReference<Group> obstacle1 = new AtomicReference<>(this.savedObstacles[0]);
-        AtomicReference<Group> obstacle2 = new AtomicReference<>(this.savedObstacles[1]);
-        AtomicReference<Group> obstacle3 = new AtomicReference<>(this.savedObstacles[2]);
-
-        AtomicBoolean flag= new AtomicBoolean(true);
-
-        obstacle1.get().setTranslateY(this.savedMaxYIndexes[0]);
-        obstacle2.get().setTranslateY(this.savedMaxYIndexes[1]);
-        pane.getChildren().addAll(obstacle1.get(), obstacle2.get());
-
-        AtomicReference<Group> memory = new AtomicReference<>(this.obstacles[2]);
-
-        AtomicInteger obstacleMemory = new AtomicInteger(0);
-
-        class MoveObstacles extends AnimationTimer{
+        class MoveObstacles extends AnimationTimer{                                 //to move obstacles
             @Override
             public void handle(long now){
                 obstacleMemory.set(obstacleMemory.get()+4);
@@ -1083,71 +1126,7 @@ class Game extends Main implements Serializable {
             }
         }
 
-        AnimationTimer moveObstacles = new MoveObstacles();
-
-        int[] obstaclex = new int[5];
-        int[] obstacley = new int[5];
-
-        obstaclex[0] = 85;
-        obstacley[0] = -300;
-
-        obstaclex[1] = -800;
-        obstacley[1] = -240;
-
-        obstaclex[2] = 90;
-        obstacley[2] = -280;
-
-        obstaclex[3] = 100;
-        obstacley[3] = -260;
-
-        obstaclex[4] = 90;
-        obstacley[4] = -310;
-
-        AtomicInteger obstacleCounter = new AtomicInteger(3);
-        AtomicInteger nextObstacleX = new AtomicInteger(obstaclex[2]);
-        AtomicInteger nextObstacleY = new AtomicInteger(obstacley[2]);
-
-        AtomicBoolean firstMouse = new AtomicBoolean(true);
-
-        AtomicBoolean endPaneAdded = new AtomicBoolean(false);
-
-
-        Pane resumePane = new Pane();
-
-        Button resume = new Button("Resume[5 Stars]");
-        resume.getStyleClass().add("btn");
-        resume.relocate(40, 115);
-        resume.setStyle("-fx-border-color: black; -fx-text-fill: black; -fx-pref-width: 170px");
-
-        Button exit = new Button("Exit");
-        exit.getStyleClass().add("btn");
-        exit.relocate(40,165);
-        exit.setStyle("-fx-border-color: black; -fx-text-fill: black; -fx-pref-width: 170px");
-        exit.setOnMouseClicked(mouseEvent -> {
-            try {
-                if(player.getGamesPlayed()%5==0) bonusLevel(primaryStage);
-                else {
-                    mainMenu = mainMenu(primaryStage, prize(primaryStage), this.player);
-                    primaryStage.setScene(mainMenu);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-
-        Text game_over = new Text("GAME OVER");
-        game_over.setStyle("-fx-font-size: 25px; -fx-font-family: Helvetica; -fx-text-fill: #e537ba;");
-        game_over.relocate(50,25);
-
-        Text end_score = new Text("Score : "+this.score);
-        end_score.setStyle("-fx-font-size: 20px; -fx-font-family: Helvetica; -fx-text-fill: #e537ba;");
-        end_score.relocate(80, 70);
-
-        resumePane.setStyle("-fx-background-color: #a5b8aa; -fx-min-height: 190px; -fx-min-width: 250px;");
-        resumePane.relocate(25,150);
-        resumePane.getChildren().addAll(game_over, end_score, resume,exit);
-
-        class GravityTimer extends AnimationTimer{
+        class GravityTimer extends AnimationTimer{                                 //to add gravity to pane
             @Override
             public void handle(long now) {
                 b.setTranslateY(b.getTranslateY() + 1.5);
@@ -1197,18 +1176,7 @@ class Game extends Main implements Serializable {
             }
         }
         AnimationTimer gravity = new GravityTimer();
-
-        resume.setOnMouseClicked(mouseEvent ->{
-            gamePaused.set(false);
-            gravity.start();
-            player.decrementStars(5);
-            pane.getChildren().remove(resumePane);
-            endPaneAdded.set(false);
-            b.setFill(Color.valueOf("#8a49ef"));
-        });
-
-
-        class MoveBall extends AnimationTimer{
+        class MoveBall extends AnimationTimer{                                              // to move ball on click
             @Override
             public void handle(long now){
                 b.setTranslateY(b.getTranslateY()-ballSpeed.get());
@@ -1265,14 +1233,86 @@ class Game extends Main implements Serializable {
                 }
             }
         }
-
+        //initialising Animation Timer variables
         AnimationTimer moveBall = new MoveBall();
-        AnimationTimer moveChangers = new MoveChangers();
         AnimationTimer moveRewards = new MoveRewards();
+        AnimationTimer moveChangers = new MoveChangers();
+        AnimationTimer moveObstacles = new MoveObstacles();
 
-        pane.getChildren().add(b);
+//=========================================================================================================================================
 
-        AtomicInteger count = new AtomicInteger(0);
+        //add listener to resume  button in resumegame pane after game end
+        resume.setOnMouseClicked(mouseEvent ->{
+            gamePaused.set(false);
+            gravity.start();
+            player.decrementStars(5);
+            pane.getChildren().remove(resumePane);
+            endPaneAdded.set(false);
+            b.setFill(Color.valueOf("#8a49ef"));
+        });
+
+//=========================================================================================================================================
+        //add action buttons in main pane
+        //declare buttons
+        Image pausebtn = new Image(new FileInputStream("src/images/pause.png"));
+        Image resumebtn = new Image(new FileInputStream("src/images/play.png"));
+        Image exitbtn = new Image(new FileInputStream("src/images/stop.png"));
+        ImageView pauseBtn = new ImageView(pausebtn);
+        ImageView resumeBtn = new ImageView(resumebtn);
+        ImageView exitBtn = new ImageView(exitbtn);
+
+        //add pause button
+        pauseBtn.setFitWidth(35);
+        pauseBtn.setPreserveRatio(true);
+        pauseBtn.relocate(10,450);
+        pauseBtn.setOnMouseClicked(mouseEvent -> {
+            pane.getChildren().add(resumeBtn);
+            pane.getChildren().remove(pauseBtn);
+            resumeBtn.relocate(10,450);
+            gravity.stop();
+            gamePaused.set(true);
+        });
+        pane.getChildren().add(pauseBtn);
+
+        //add resume button
+        resumeBtn.setFitWidth(35);
+        resumeBtn.setPreserveRatio(true);
+        resumeBtn.setOnMouseClicked(mouseEvent -> {
+            pane.getChildren().add(pauseBtn);
+            pane.getChildren().remove(resumeBtn);
+            pauseBtn.relocate(10,450);
+            gravity.start();
+            gamePaused.set(false);
+        });
+
+        //add exit button
+        exitBtn.setFitWidth(35);
+        exitBtn.setPreserveRatio(true);
+        pane.getChildren().add(exitBtn);
+        exitBtn.relocate(10,400);
+        exitBtn.setOnMouseClicked(mouseEvent ->{
+            try {
+                prizes = prize(primaryStage);
+                mainMenu = mainMenu(primaryStage, prizes,player);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            primaryStage.setScene(mainMenu);
+            if(this.mode == 1 ){
+                player.getSavedGames().remove(this);
+            }
+            this.savedObstacles[0] = obstacle1.get();
+            this.savedObstacles[1] = obstacle2.get();
+            this.savedObstacles[2] = obstacle3.get();
+            this.savedMaxYIndexes[0] = (int) obstacle1.get().getBoundsInParent().getCenterY();
+            this.savedMaxYIndexes[1] = (int) obstacle2.get().getBoundsInParent().getCenterY();
+            player.getSavedGames().add(this);
+            return;
+
+        });
+
+
+//=========================================================================================================================================
 
         //handle click
         pane.addEventHandler(MouseEvent.MOUSE_RELEASED,e->{
@@ -1387,59 +1427,7 @@ class Game extends Main implements Serializable {
             }
         });
 
-        Image resumebtn = new Image(new FileInputStream("src/images/play.png"));
-        ImageView resumeBtn = new ImageView(resumebtn);
-        resumeBtn.setFitWidth(35);
-        resumeBtn.setPreserveRatio(true);
-
-        Image pausebtn = new Image(new FileInputStream("src/images/pause.png"));
-        ImageView pauseBtn = new ImageView(pausebtn);
-        pauseBtn.setFitWidth(35);
-        pauseBtn.setPreserveRatio(true);
-        pane.getChildren().add(pauseBtn);
-        pauseBtn.relocate(10,450);
-        pauseBtn.setOnMouseClicked(mouseEvent -> {
-            pane.getChildren().add(resumeBtn);
-            pane.getChildren().remove(pauseBtn);
-            resumeBtn.relocate(10,450);
-            gravity.stop();
-            gamePaused.set(true);
-        });
-
-        resumeBtn.setOnMouseClicked(mouseEvent -> {
-            pane.getChildren().add(pauseBtn);
-            pane.getChildren().remove(resumeBtn);
-            pauseBtn.relocate(10,450);
-            gravity.start();
-            gamePaused.set(false);
-        });
-
-        Image exitbtn = new Image(new FileInputStream("src/images/stop.png"));
-        ImageView exitBtn = new ImageView(exitbtn);
-        exitBtn.setFitWidth(35);
-        exitBtn.setPreserveRatio(true);
-        pane.getChildren().add(exitBtn);
-        exitBtn.relocate(10,400);
-        exitBtn.setOnMouseClicked(mouseEvent ->{
-            try {
-                prizes = prize(primaryStage);
-                mainMenu = mainMenu(primaryStage, prizes,player);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            primaryStage.setScene(mainMenu);
-            if(this.mode == 1 ){
-                player.getSavedGames().remove(this);
-            }
-            this.savedObstacles[0] = obstacle1.get();
-            this.savedObstacles[1] = obstacle2.get();
-            this.savedObstacles[2] = obstacle3.get();
-            this.savedMaxYIndexes[0] = (int) obstacle1.get().getBoundsInParent().getCenterY();
-            this.savedMaxYIndexes[1] = (int) obstacle2.get().getBoundsInParent().getCenterY();
-            player.getSavedGames().add(this);
-            return;
-
-        });
+//=========================================================================================================================================
 
         pane.setStyle("-fx-background-color: #282828");
         Scene startScene = new Scene(pane,300,500);
