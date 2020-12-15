@@ -1072,12 +1072,16 @@ class Game extends Main implements Serializable {
         //add initial obstacles
         if(this.savedObstacles[0] == null){
             this.savedObstacles = new Group[]{this.obstacles[0], this.obstacles[1], (Group) null};
+            obstacle1.set(this.savedObstacles[0]);
+            obstacle2.set(this.savedObstacles[1]);
         }
         if(this.savedMaxYIndexes[0] == 0 ){
             this.savedMaxYIndexes = new int[]{295,10,0};
         }
         obstacle1.get().setTranslateY(this.savedMaxYIndexes[0]);
+        System.out.println(obstacle1.get()+ " "+obstacle1.get().getTranslateY());
         obstacle2.get().setTranslateY(this.savedMaxYIndexes[1]);
+        System.out.println(obstacle2.get()+ " "+obstacle2.get().getTranslateY());
         pane.getChildren().addAll(obstacle1.get(), obstacle2.get());
         pane.getChildren().add(b);
 
@@ -1301,6 +1305,7 @@ class Game extends Main implements Serializable {
             if(this.mode == 1 ){
                 player.getSavedGames().remove(this);
             }
+            System.out.println("Saving obstacles");
             this.savedObstacles[0] = obstacle1.get();
             this.savedObstacles[1] = obstacle2.get();
             this.savedObstacles[2] = obstacle3.get();
