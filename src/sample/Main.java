@@ -1515,7 +1515,7 @@ class Game extends Main implements Serializable {
                     PauseTransition pauseTransition = new PauseTransition(Duration.seconds(5));
                     pauseTransition.setOnFinished( event -> {
                         try {
-                            primaryStage.setScene(mainMenu(primaryStage, prize(primaryStage), player));
+                            primaryStage.setScene(mainMenu(primaryStage, prize(primaryStage), player, players));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
