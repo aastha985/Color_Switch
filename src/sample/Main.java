@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class Main extends Application implements Serializable{
     protected Scene playerDetails,titleScreen,splashScreen,mainMenu,enterName,prizes,shop;
     private Player player;
-    private HashMap<String,Player> players;
+    private static HashMap<String,Player> players;
     private static final long SerialVersionUID = 100;
 
     @Override
@@ -72,8 +72,9 @@ public class Main extends Application implements Serializable{
         ObjectOutputStream out = null;
         try{
             out = new ObjectOutputStream(new FileOutputStream("users.txt"));
+            System.out.println(players);
             if(players!=null)
-            out.writeObject(players);
+                out.writeObject(players);
 
         }catch (IOException ioException) {
             ioException.printStackTrace();
