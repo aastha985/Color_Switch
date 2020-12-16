@@ -34,19 +34,15 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Main extends Application implements Serializable{
-    protected Scene playerDetails,titleScreen,splashScreen,mainMenu,enterName,prizes,shop;
+    protected transient Scene playerDetails,titleScreen,splashScreen,mainMenu,enterName,prizes,shop;
     private Player player;
     private HashMap<String,Player> players;
-    private static final long SerialVersionUID = 100;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -73,7 +69,6 @@ public class Main extends Application implements Serializable{
         ObjectOutputStream out = null;
         try{
             out = new ObjectOutputStream(new FileOutputStream("users.txt"));
-            System.out.println(players);
             if(players!=null)
                 out.writeObject(players);
 
@@ -104,7 +99,6 @@ public class Main extends Application implements Serializable{
         }
         if(players.containsKey(name)) this.player = players.get(name);
         else{
-            System.out.println("had to make new player");
             player = new Player(name);
             players.put(name,player);
             serialize();
@@ -542,7 +536,7 @@ public class Main extends Application implements Serializable{
 
         Pane pane = new Pane(root,start,resume,exit,circle,icon,circle2,icon2,icon3);
         pane.setStyle("-fx-background-color: #282828");
-        root.relocate(30,40);
+        root.relocate(37,40);
         start.relocate(80,300);
         resume.relocate(80,350);
         exit.relocate(80,400);
@@ -550,7 +544,7 @@ public class Main extends Application implements Serializable{
         icon.relocate(243,353);
         circle2.relocate(20,350);
         icon2.relocate(20,350);
-        icon3.relocate(20,400);
+        icon3.relocate(130,445);
 
         Scene scene = new Scene(pane,300,500);
         start.getStyleClass().add("btn");
@@ -701,9 +695,8 @@ class Player implements Serializable{
     private boolean shop[];
     private int type;
     private int gamesPlayed;
-    private transient ArrayList<Game> savedGames;
+    private ArrayList<Game> savedGames;
     private HashMap<String,Player> players;
-    private static final long SerialVersionUID = 99;
 
     Player(String name){
         this.name = name;
@@ -875,24 +868,15 @@ class Game extends Main implements Serializable {
     private int score;
     private int mode;
     private Player player;
-    private Group savedObstacles[];
+    private transient Group savedObstacles[];
     private int savedMaxYIndexes[];
-    private Group[] obstacles;
+    private transient Group[] obstacles;
     private int savedNextObstacle;
     private boolean savedFlag;
-    private HashMap<String,Player> players;
-    private static final long SerialVersionUID = 98;
+    private int[] savedObstacleIndexes;
+    private transient HashMap<String,Player> players;
 
-    Game(Player p){
-        this.stars=0;
-        this.diamonds=0;
-        this.score = 0;
-        this.player=p;
-        this.savedObstacles = new Group[3];
-        this.savedMaxYIndexes = new int[3];
-        this.obstacles = new Group[5];
-        this.savedNextObstacle = 3;
-
+    public void initialiseMembers(){
         Circular circle = new Circular();
         Group root = circle.show(150,0,90.0f,76.0f);
         circle.move(root,360);
@@ -918,12 +902,30 @@ class Game extends Main implements Serializable {
         Group squareRoot = square.show(100.0f,0.0f,120.0f,120.0f);
         square.move(squareRoot,360);
 
-        this.savedFlag = true;
+        this.obstacles = new Group[5];
         this.obstacles[0] = root;
         this.obstacles[1] = horizontalObstacle;
         this.obstacles[2] = squareRoot;
         this.obstacles[3] = plusRoot;
         this.obstacles[4] = rectangleRoot;
+        this.savedObstacles = new Group[3];
+        this.savedObstacles[0] = this.obstacles[this.savedObstacleIndexes[0]];
+        this.savedObstacles[1] = this.obstacles[this.savedObstacleIndexes[1]];
+        if(savedObstacleIndexes[2]!=-1){
+            this.savedObstacles[2] = this.obstacles[this.savedObstacleIndexes[2]];
+        }
+    }
+
+    Game(Player p){
+        this.stars=0;
+        this.diamonds=0;
+        this.score = 0;
+        this.player=p;
+        this.savedObstacles = new Group[3];
+        this.savedMaxYIndexes = new int[3];
+        this.savedNextObstacle = 3;
+        this.savedFlag = true;
+        this.savedObstacleIndexes = new int[]{0,1,-1};
     }
 
     public void setMode(int a){
@@ -943,8 +945,9 @@ class Game extends Main implements Serializable {
     }
 
     public void start(Stage primaryStage,HashMap<String,Player> players) throws IOException{
-        this.players = players;
+        initialiseMembers();
         //declarations
+        this.players = players;
         double ballx = 150;
         int[] obstaclex = new int[]{85, -800, 90, 100, 9};
         int[] obstacley = new int[]{-300, -240, -280, -220, -310};
@@ -1324,15 +1327,15 @@ class Game extends Main implements Serializable {
             if(this.mode == 1 ){
                 player.getSavedGames().remove(this);
             }
-            this.savedObstacles[0] = obstacle1.get();
-            this.savedObstacles[1] = obstacle2.get();
-            this.savedObstacles[2] = obstacle3.get();
+            this.savedObstacleIndexes[0] = Arrays.asList(obstacles).indexOf(obstacle1.get());
+            this.savedObstacleIndexes[1] = Arrays.asList(obstacles).indexOf(obstacle2.get());
+            if(obstacle3.get()!=null) this.savedObstacleIndexes[2] = Arrays.asList(obstacles).indexOf(obstacle3.get());
+            else this.savedObstacleIndexes[2] = -1;
             this.savedNextObstacle = (obstacleCounter.get()+1)%5;
             this.savedMaxYIndexes[0] = (int) obstacle1.get().getTranslateY();
             this.savedMaxYIndexes[1] = (int) obstacle2.get().getTranslateY();
             this.savedFlag = flag.get();
-            if(obstacle3.get()!=null)
-                this.savedMaxYIndexes[2] = (int) obstacle3.get().getTranslateY();
+            if(obstacle3.get()!=null) this.savedMaxYIndexes[2] = (int) obstacle3.get().getTranslateY();
             player.getSavedGames().add(this);
             return;
 
@@ -1356,7 +1359,6 @@ class Game extends Main implements Serializable {
                     ballDistance.set(35);
                     ballSpeed.set((int) (6 * Math.pow(1.1,this.score/10)));
                     moveBall.start();
-//                TODO: remove gravity on page close or pause.
                 }
                 else{
                     //move ball
@@ -1403,6 +1405,10 @@ class Game extends Main implements Serializable {
                         ColorChanger colorChangerPer = new ColorChanger();
                         Group Changer = colorChangerPer.show(150,0);
                         Changer.setTranslateY(nextObstacleY.get()-80);
+                        if(obstacle3.get().getChildren().get(0) instanceof Arc){
+                            rewardgrp.setTranslateY(nextObstacleY.get()-10);
+                            Changer.setTranslateY(nextObstacleY.get()-120);
+                        }
                         changers.add(Changer);
                         pane.getChildren().add(Changer);
                     }
@@ -1871,7 +1877,6 @@ class Circular extends Rotating{
 }
 
 class DisplayImage{
-    //TODO use this class for all images
     public ImageView show(String image,int width) throws IOException{
         Image cartImage = new Image(new FileInputStream("src/images/"+image));
         ImageView icon3 = new ImageView(cartImage);
