@@ -103,6 +103,7 @@ public class Main extends Application implements Serializable{
         }
         if(players.containsKey(name)) this.player = players.get(name);
         else{
+            System.out.println("had to make new player");
             player = new Player(name);
             players.put(name,player);
             serialize();
@@ -1344,7 +1345,7 @@ class Game extends Main implements Serializable {
                     //move ball
                     ballMemory.set((int)b.getTranslateY());
                     ballDistance.set(35);
-                    ballSpeed.set(6);
+                    ballSpeed.set((int) (6 * Math.pow(1.1,this.score/10)));
                     moveBall.start();
 //                TODO: remove gravity on page close or pause.
                 }
@@ -1352,7 +1353,7 @@ class Game extends Main implements Serializable {
                     //move ball
                     ballMemory.set((int)b.getTranslateY());
                     ballDistance.set(15);
-                    ballSpeed.set(4);
+                    ballSpeed.set((int) (4 * Math.pow(1.1,this.score/10)));
                     moveBall.start();
 
                     moveChangers.start();
@@ -1452,157 +1453,77 @@ class Game extends Main implements Serializable {
         primaryStage.setScene(startScene);
     }
 
-    public void bonusLevel(Stage primaryStage) throws IOException{
-        //TODO add moving ball and 10 stars
-        Text text = new Text("BONUS");
+    public void bonusLevel(Stage primaryStage) throws IOException {
+        Text text = new Text("BONUS COLLECTED!");
         text.getStyleClass().add("title-text");
-        text.relocate(100,30);
-
-        Text scoreText = new Text("Score "+Integer.toString(this.score));
-
-        DisplayImage displayImage = new DisplayImage();
-        ImageView bonus1 = displayImage.show("bonus.png",40);
-        ImageView bonus2 = displayImage.show("bonus.png",40);
-        bonus1.relocate(55,10);
-        bonus2.relocate(195,10);
-
-        double ballx = 150;
-        AtomicReference<Double> bally = new AtomicReference<>((double) 450);
-
+        text.relocate(25,100);
+        Pane bonusPane = new Pane();
+        int yIndex = 350;
+        AtomicInteger yMemory = new AtomicInteger(0);
+        Group[] rewards = new Group[10];
+        for(int i=0;i<10;++i){
+            Reward reward = new Star();
+            Group rewardGroup = reward.show();
+            rewardGroup.relocate(135, yIndex);
+            yIndex -=40;
+            rewards[i] = rewardGroup;
+            bonusPane.getChildren().add(rewards[i]);
+        }
         Ball ball = new Ball();
         Circle b = ball.show();
-        b.setCenterX(ballx);
-        b.setCenterY(bally.get());
-
-        class GravityTimer extends AnimationTimer{
-            @Override
-            public void handle(long now){
-                b.setCenterY(b.getCenterY()+1.5);
-                bally.set(b.getCenterY());
-            }
-        }
-
-        Reward reward1 = new Star();
-        Group starReward = reward1.show();
-        reward1.blink(starReward);
-
-        Reward reward2 = new Diamond();
-        Group diamondReward = reward2.show();
-        reward2.blink(diamondReward);
-
-        AtomicInteger rewardMemory = new AtomicInteger(0);
-        ArrayList<Group> rewards = new ArrayList<>();
-        ArrayList<Boolean> rewardsType = new ArrayList<>();
-        rewards.add(starReward);
-        rewardsType.add(true);
-        rewards.add(diamondReward);
-        rewardsType.add(false);
-
-        class MoveRewards extends AnimationTimer{
-            @Override
-            public void handle(long now){
-                rewardMemory.set(rewardMemory.get()+4);
-                for(int i=0;i<rewards.size();i++){
-                    rewards.get(i).setTranslateY(rewards.get(i).getTranslateY()+4);
-                }
-                if(rewardMemory.get()>=40){
-                    rewardMemory.set(0);
-                    this.stop();
-                }
-            }
-        }
-
-        AtomicInteger ballSpeed = new AtomicInteger(6);
-        AtomicInteger ballDistance = new AtomicInteger(35);
-        AtomicInteger ballMemory = new AtomicInteger(0);
-
+        b.relocate(142, 450);
+        bonusPane.getChildren().add(b);
         class MoveBall extends AnimationTimer{
             @Override
             public void handle(long now){
-                b.setCenterY(b.getCenterY()-ballSpeed.get());
-                if(b.getCenterY()<=ballMemory.get()-ballDistance.get()){
-                    bally.set(b.getCenterY());
+                b.setCenterY(b.getCenterY()-6);
+                for(Group i : rewards){
+                    if(b.getBoundsInParent().intersects(i.getBoundsInParent())){
+                        bonusPane.getChildren().remove(i);
+                    }
+                }
+                yMemory.set(yMemory.get()+6);
+                if(yMemory.get()>=35){
+                    yMemory.set(0);
                     this.stop();
                 }
             }
         }
-
-        AnimationTimer gravity = new GravityTimer();
-        AtomicBoolean firstMouse = new AtomicBoolean(true);
-        AnimationTimer moveBall = new MoveBall();
-        AnimationTimer moveRewards = new MoveRewards();
-        AtomicInteger count = new AtomicInteger(0);
-
-        Pane pane = new Pane(text,bonus1,bonus2,b);
-
-        pane.addEventHandler(MouseEvent.MOUSE_RELEASED,e->{
-            if(firstMouse.get()){
-                firstMouse.set(false);
-                gravity.start();
-            }
-            gravity.stop();
-            if(bally.get()>350){
-                //move ball
-                ballMemory.set((int)b.getCenterY());
-                ballDistance.set(35);
-                ballSpeed.set(6);
-                moveBall.start();
-//                TODO: remove gravity on page close
-            }
-            else{
-                //move ball
-                ballMemory.set((int)b.getCenterY());
-                ballDistance.set(15);
-                ballSpeed.set(4);
-                moveBall.start();
-                moveRewards.start();
-                Reward reward=null;
-                if(count.get()%2==0) {
-                    reward = new Star();
-                    rewardsType.add(true);
-                }
-                else{
-                    reward = new Diamond();
-                    rewardsType.add(false);
-                }
-                count.set(count.get()+1);
-                Group rewardgrp = null;
-                try {
-                    rewardgrp = reward.show();
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                }
-                rewardgrp.relocate(135,0);
-                rewardgrp.setTranslateY(-100);
-                rewardgrp.setTranslateX(0);
-                reward.blink(rewardgrp);
-                rewards.add(rewardgrp);
-                pane.getChildren().add(rewardgrp);
-                for(int i=0;i<rewards.size();i++){
-                    if(b.intersects(rewards.get(i).getBoundsInParent())){
-                        if(rewardsType.get(i)) {
-                            player.incrementStars(1);
-                            this.stars++;
-                            this.score+=5;
-                        }
-                        else{
-                            player.incrementDiamonds(1);
-                            this.diamonds++;
-                            this.score+=10;
-                        }
-                        scoreText.setText("Score "+Integer.toString(this.score));
-                        pane.getChildren().remove(rewards.get(i));
-                        rewards.remove(i);
-                        rewardsType.remove(i);
-                        player.setHighScore(Math.max(player.getHighScore(),this.score));
+        class Gravity extends AnimationTimer{
+            @Override
+            public void handle(long now){
+                b.setCenterY(b.getCenterY()+1.5);
+                for(Group i : rewards){
+                    if(b.getBoundsInParent().intersects(i.getBoundsInParent())){
+                        bonusPane.getChildren().remove(i);
                     }
                 }
-                gravity.start();
+                if(!bonusPane.getChildren().contains(rewards[9])){
+                    if(!bonusPane.getChildren().contains(text)){
+                        player.incrementStars(10);
+                        bonusPane.getChildren().add(text);
+                    }
+                    PauseTransition pauseTransition = new PauseTransition(Duration.seconds(5));
+                    pauseTransition.setOnFinished( event -> {
+                        try {
+                            primaryStage.setScene(mainMenu(primaryStage, prize(primaryStage), player));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                    pauseTransition.play();
+                    this.stop();
+                }
             }
+        }
+        AnimationTimer jump = new MoveBall();
+        AnimationTimer gravity = new Gravity();
+        bonusPane.addEventHandler(MouseEvent.MOUSE_RELEASED, mouseEvent -> {
+            gravity.start();
+            jump.start();
         });
-
-        pane.getStyleClass().add("background");
-        Scene bonusScene = new Scene(pane,300,500);
+        Scene bonusScene = new  Scene(bonusPane, 300, 500);
+        bonusPane.getStyleClass().add("background");
         bonusScene.getStylesheets().add("Theme.css");
         primaryStage.setScene(bonusScene);
     }
