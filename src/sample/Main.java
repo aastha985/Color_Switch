@@ -36,6 +36,7 @@ import javafx.scene.media.MediaPlayer;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -44,7 +45,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class Main extends Application implements Serializable{
     protected Scene playerDetails,titleScreen,splashScreen,mainMenu,enterName,prizes,shop;
     private Player player;
-    private static HashMap<String,Player> players;
+    private HashMap<String,Player> players;
     private static final long SerialVersionUID = 100;
 
     @Override
@@ -407,7 +408,7 @@ public class Main extends Application implements Serializable{
                         }
                         try {
                             prizes = prize(primaryStage);
-                            mainMenu = mainMenu(primaryStage, prizes,player);
+                            mainMenu = mainMenu(primaryStage, prizes,player,players);
                         } catch (IOException ioException) {
                             ioException.printStackTrace();
                         }
@@ -462,8 +463,9 @@ public class Main extends Application implements Serializable{
         return mediaView;
     }
 
-    protected Scene mainMenu(Stage primaryStage, Scene prizes,Player p) throws IOException{
+    protected Scene mainMenu(Stage primaryStage, Scene prizes,Player p,HashMap<String,Player> players) throws IOException{
         this.player = p;
+        this.players = players;
         Group root = circleAnimation(primaryStage);
         Button start = new Button("START");
         Button resume = new Button("RESUME");
@@ -472,7 +474,7 @@ public class Main extends Application implements Serializable{
         root.setOnMouseClicked(mouseEvent -> {
             try {
                 player.incrementGamesPlayed();
-                player.start(primaryStage);
+                player.start(primaryStage,players);
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
@@ -555,7 +557,7 @@ public class Main extends Application implements Serializable{
         start.setOnAction(e-> {
             try {
                 player.incrementGamesPlayed();
-                player.start(primaryStage);
+                player.start(primaryStage,players);
             } catch (IOException | ClassNotFoundException ioException) {
                 ioException.printStackTrace();
             }
@@ -699,7 +701,8 @@ class Player implements Serializable{
     private boolean shop[];
     private int type;
     private int gamesPlayed;
-    private ArrayList<Game> savedGames;
+    private transient ArrayList<Game> savedGames;
+    private HashMap<String,Player> players;
     private static final long SerialVersionUID = 99;
 
     Player(String name){
@@ -713,10 +716,11 @@ class Player implements Serializable{
         this.savedGames = new ArrayList<>();
         this.shop = new boolean[]{false,false,false,false,false};
     }
-    public void start(Stage primaryStage) throws IOException,ClassNotFoundException{
+    public void start(Stage primaryStage, HashMap<String,Player> players) throws IOException,ClassNotFoundException{
         Game G = new Game(this);
+        this.players = players;
         G.setMode(0);
-        G.start(primaryStage);
+        G.start(primaryStage,players);
     }
 
     public boolean[] getShop() {
@@ -784,6 +788,8 @@ class Player implements Serializable{
     }
 
     public ArrayList<Game>  getSavedGames() {
+        if(savedGames==null)
+            savedGames = new ArrayList<>();
         return savedGames;
     }
 
@@ -817,45 +823,47 @@ class Player implements Serializable{
         pane.getChildren().add(backbtn);
         backbtn.setOnMouseClicked(mouseEvent -> primaryStage.setScene(mainMenu));
 
-        for(int i = 0;i<savedGames.size();i++){
-            Text stars = new Text(Integer.toString(savedGames.get(i).getStars()));
-            Text diamonds = new Text(Integer.toString(savedGames.get(i).getDiamonds()));
-            Text score = new Text("Score "+Integer.toString(savedGames.get(i).getScore()));
+        if(savedGames!=null){
+            for(int i = 0;i<savedGames.size();i++){
+                Text stars = new Text(Integer.toString(savedGames.get(i).getStars()));
+                Text diamonds = new Text(Integer.toString(savedGames.get(i).getDiamonds()));
+                Text score = new Text("Score "+Integer.toString(savedGames.get(i).getScore()));
 
-            Image resumebtn = new Image(new FileInputStream("src/images/play.png"));
-            ImageView resumeBtn = new ImageView(resumebtn);
-            resumeBtn.setFitWidth(35);
-            resumeBtn.setPreserveRatio(true);
-            int finalI = i;
-            resumeBtn.setOnMouseClicked(mouseEvent ->{
-                try {
-                    savedGames.get(finalI).setMode(1);
-                    savedGames.get(finalI).start(primaryStage);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
+                Image resumebtn = new Image(new FileInputStream("src/images/play.png"));
+                ImageView resumeBtn = new ImageView(resumebtn);
+                resumeBtn.setFitWidth(35);
+                resumeBtn.setPreserveRatio(true);
+                int finalI = i;
+                resumeBtn.setOnMouseClicked(mouseEvent ->{
+                    try {
+                        savedGames.get(finalI).setMode(1);
+                        savedGames.get(finalI).start(primaryStage,players);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
 
-            Star star = new Star();
-            Group starImage = star.show();
-            star.blink(starImage);
+                Star star = new Star();
+                Group starImage = star.show();
+                star.blink(starImage);
 
-            Diamond diamond = new Diamond();
-            Group dia = diamond.show();
-            diamond.blink(dia);
+                Diamond diamond = new Diamond();
+                Group dia = diamond.show();
+                diamond.blink(dia);
 
-            int y = 80*(i+2);
+                int y = 80*(i+2);
 
-            stars.relocate(25,y);
-            starImage.relocate(45,y-15);
-            diamonds.relocate(90,y);
-            dia.relocate(110,y-10);
-            score.relocate(160,y);
-            resumeBtn.relocate(240,y-10);
-            pane.getChildren().addAll(stars,diamonds,score,resumeBtn,starImage,dia);
-            stars.getStyleClass().add("white-text");
-            diamonds.getStyleClass().add("white-text");
-            score.getStyleClass().add("white-text");
+                stars.relocate(25,y);
+                starImage.relocate(45,y-15);
+                diamonds.relocate(90,y);
+                dia.relocate(110,y-10);
+                score.relocate(160,y);
+                resumeBtn.relocate(240,y-10);
+                pane.getChildren().addAll(stars,diamonds,score,resumeBtn,starImage,dia);
+                stars.getStyleClass().add("white-text");
+                diamonds.getStyleClass().add("white-text");
+                score.getStyleClass().add("white-text");
+            }
         }
     }
 
@@ -872,6 +880,7 @@ class Game extends Main implements Serializable {
     private Group[] obstacles;
     private int savedNextObstacle;
     private boolean savedFlag;
+    private HashMap<String,Player> players;
     private static final long SerialVersionUID = 98;
 
     Game(Player p){
@@ -933,8 +942,8 @@ class Game extends Main implements Serializable {
         return score;
     }
 
-    public void start(Stage primaryStage) throws IOException{
-
+    public void start(Stage primaryStage,HashMap<String,Player> players) throws IOException{
+        this.players = players;
         //declarations
         double ballx = 150;
         int[] obstaclex = new int[]{85, -800, 90, 100, 9};
@@ -989,7 +998,7 @@ class Game extends Main implements Serializable {
                 if(player.getGamesPlayed()%5==0) bonusLevel(primaryStage);
                 else {
                     if(this.player.getSavedGames().contains(this)) this.player.getSavedGames().remove(this);
-                    mainMenu = mainMenu(primaryStage, prize(primaryStage), this.player);
+                    mainMenu = mainMenu(primaryStage, prize(primaryStage), this.player,this.players);
                     primaryStage.setScene(mainMenu);
                 }
             } catch (IOException e) {
@@ -1019,7 +1028,7 @@ class Game extends Main implements Serializable {
         exit.setStyle("-fx-border-color: black; -fx-text-fill: black; -fx-pref-width: 170px");
         exit.setOnMouseClicked(mouseEvent -> {
             try {
-                mainMenu = mainMenu(primaryStage, prize(primaryStage), this.player);
+                mainMenu = mainMenu(primaryStage, prize(primaryStage), this.player,this.players);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -1307,7 +1316,7 @@ class Game extends Main implements Serializable {
         exitBtn.setOnMouseClicked(mouseEvent ->{
             try {
                 prizes = prize(primaryStage);
-                mainMenu = mainMenu(primaryStage, prizes,player);
+                mainMenu = mainMenu(primaryStage, prizes,player,this.players);
             } catch (IOException e) {
                 e.printStackTrace();
             }
