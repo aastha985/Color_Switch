@@ -867,7 +867,9 @@ class Game extends Main implements Serializable {
     private Player player;
     private Group savedObstacles[];
     private int savedMaxYIndexes[];
-    Group[] obstacles;
+    private Group[] obstacles;
+    private int savedNextObstacle;
+    private boolean savedFlag;
     private static final long SerialVersionUID = 98;
 
     Game(Player p){
@@ -878,6 +880,7 @@ class Game extends Main implements Serializable {
         this.savedObstacles = new Group[3];
         this.savedMaxYIndexes = new int[3];
         this.obstacles = new Group[5];
+        this.savedNextObstacle = 3;
 
         Circular circle = new Circular();
         Group root = circle.show(150,0,90.0f,76.0f);
@@ -904,6 +907,7 @@ class Game extends Main implements Serializable {
         Group squareRoot = square.show(100.0f,0.0f,120.0f,120.0f);
         square.move(squareRoot,360);
 
+        this.savedFlag = true;
         this.obstacles[0] = root;
         this.obstacles[1] = horizontalObstacle;
         this.obstacles[2] = squareRoot;
@@ -932,7 +936,7 @@ class Game extends Main implements Serializable {
         //declarations
         double ballx = 150;
         int[] obstaclex = new int[]{85, -800, 90, 100, 9};
-        int[] obstacley = new int[]{-300, -240, -280, -260, -310};
+        int[] obstacley = new int[]{-300, -240, -280, -220, -310};
         AtomicReference<Double> bally = new AtomicReference<>((double) 450);
         AtomicInteger ballSpeed = new AtomicInteger(6);
         AtomicInteger ballDistance = new AtomicInteger(35);
@@ -943,17 +947,17 @@ class Game extends Main implements Serializable {
         AtomicReference<Group> obstacle1 = new AtomicReference<>(this.savedObstacles[0]);
         AtomicReference<Group> obstacle2 = new AtomicReference<>(this.savedObstacles[1]);
         AtomicReference<Group> obstacle3 = new AtomicReference<>(this.savedObstacles[2]);
-        AtomicInteger obstacleCounter = new AtomicInteger(3);
-        AtomicInteger nextObstacleX = new AtomicInteger(obstaclex[2]);
-        AtomicInteger nextObstacleY = new AtomicInteger(obstacley[2]);
+        AtomicInteger obstacleCounter = new AtomicInteger(this.savedNextObstacle);
+        AtomicInteger nextObstacleX = new AtomicInteger(obstaclex[(obstacleCounter.get()+4)%5]);
+        AtomicInteger nextObstacleY = new AtomicInteger(obstacley[(obstacleCounter.get()+4)%5]);
         AtomicBoolean firstMouse = new AtomicBoolean(true);
         AtomicBoolean endPaneAdded = new AtomicBoolean(false);
         ArrayList<Group> rewards = new ArrayList<>();
         ArrayList<Boolean> rewardsType = new ArrayList<>();
         AtomicInteger count = new AtomicInteger(0);
         ArrayList<Group> changers = new ArrayList<Group>();
-        AtomicBoolean flag= new AtomicBoolean(true);
-        AtomicReference<Group> memory = new AtomicReference<>(this.obstacles[2]);
+        AtomicBoolean flag= new AtomicBoolean(this.savedFlag);
+        AtomicReference<Group> memory = new AtomicReference<>(this.obstacles[obstacleCounter.get()]);
         AtomicInteger obstacleMemory = new AtomicInteger(0);
 
 
@@ -982,6 +986,7 @@ class Game extends Main implements Serializable {
             try {
                 if(player.getGamesPlayed()%5==0) bonusLevel(primaryStage);
                 else {
+                    if(this.player.getSavedGames().contains(this)) this.player.getSavedGames().remove(this);
                     mainMenu = mainMenu(primaryStage, prize(primaryStage), this.player);
                     primaryStage.setScene(mainMenu);
                 }
@@ -1074,15 +1079,18 @@ class Game extends Main implements Serializable {
             this.savedObstacles = new Group[]{this.obstacles[0], this.obstacles[1], (Group) null};
             obstacle1.set(this.savedObstacles[0]);
             obstacle2.set(this.savedObstacles[1]);
+            obstacle3.set(this.savedObstacles[2]);
         }
         if(this.savedMaxYIndexes[0] == 0 ){
             this.savedMaxYIndexes = new int[]{295,10,0};
         }
         obstacle1.get().setTranslateY(this.savedMaxYIndexes[0]);
-        System.out.println(obstacle1.get()+ " "+obstacle1.get().getTranslateY());
         obstacle2.get().setTranslateY(this.savedMaxYIndexes[1]);
-        System.out.println(obstacle2.get()+ " "+obstacle2.get().getTranslateY());
         pane.getChildren().addAll(obstacle1.get(), obstacle2.get());
+        if(obstacle3.get()!=null){
+            obstacle3.get().setTranslateY(this.savedMaxYIndexes[2]);
+            pane.getChildren().add(obstacle3.get());
+        }
         pane.getChildren().add(b);
 
 
@@ -1305,12 +1313,15 @@ class Game extends Main implements Serializable {
             if(this.mode == 1 ){
                 player.getSavedGames().remove(this);
             }
-            System.out.println("Saving obstacles");
             this.savedObstacles[0] = obstacle1.get();
             this.savedObstacles[1] = obstacle2.get();
             this.savedObstacles[2] = obstacle3.get();
-            this.savedMaxYIndexes[0] = (int) obstacle1.get().getBoundsInParent().getCenterY();
-            this.savedMaxYIndexes[1] = (int) obstacle2.get().getBoundsInParent().getCenterY();
+            this.savedNextObstacle = (obstacleCounter.get()+1)%5;
+            this.savedMaxYIndexes[0] = (int) obstacle1.get().getTranslateY();
+            this.savedMaxYIndexes[1] = (int) obstacle2.get().getTranslateY();
+            this.savedFlag = flag.get();
+            if(obstacle3.get()!=null)
+                this.savedMaxYIndexes[2] = (int) obstacle3.get().getTranslateY();
             player.getSavedGames().add(this);
             return;
 
@@ -1380,17 +1391,17 @@ class Game extends Main implements Serializable {
                         pane.getChildren().add(rewardgrp);
                         ColorChanger colorChangerPer = new ColorChanger();
                         Group Changer = colorChangerPer.show(150,0);
-                        Changer.setTranslateY(nextObstacleY.get()-50);
+                        Changer.setTranslateY(nextObstacleY.get()-80);
                         changers.add(Changer);
                         pane.getChildren().add(Changer);
                     }
                     if(boundsInScreen.getMinY()>=650 && !flag.get()){
                         flag.set(true);
                         pane.getChildren().remove(obstacle1.get());
+                        obstacleCounter.set((obstacleCounter.get() + 1) % 5);
                         nextObstacleX.set(obstaclex[obstacleCounter.get()]);
                         nextObstacleY.set(obstacley[obstacleCounter.get()]);
                         memory.set(obstacles[obstacleCounter.get()]);
-                        obstacleCounter.set((obstacleCounter.get() + 1) % 5);
                         obstacle1.set(obstacle2.get());
                         obstacle2.set(obstacle3.get());
                         obstacle3.set(null);
