@@ -99,7 +99,7 @@ public class Main extends Application implements Serializable{
         }
         if(players.containsKey(name)) this.player = players.get(name);
         else{
-            player = new Player(name);
+            player = Player.getInstance(name);
             players.put(name,player);
             serialize();
         }
@@ -112,7 +112,7 @@ public class Main extends Application implements Serializable{
         root.setLayoutY(140);
         circle.move(root,360);
         Ball ball = new Ball();
-        Circle b = ball.show();
+        Circle b = (Circle) ball.show(1);
         b.setCenterX(150);
         b.setCenterY(450);
         Pane layout = new Pane();
@@ -696,9 +696,9 @@ class Player implements Serializable{
     private int type;
     private int gamesPlayed;
     private ArrayList<Game> savedGames;
-    private HashMap<String,Player> players;
+    private transient static HashMap<String,Player> players = new HashMap<String, Player>();
 
-    Player(String name){
+    private Player(String name){
         this.name = name;
         this.stars=0;
         this.diamonds=0;
@@ -709,6 +709,14 @@ class Player implements Serializable{
         this.savedGames = new ArrayList<>();
         this.shop = new boolean[]{false,false,false,false,false};
     }
+
+    public static Player getInstance(String name){
+        if(!players.containsKey(name)){
+            players.put(name, new Player(name));
+        }
+        return players.get(name);
+    }
+
     public void start(Stage primaryStage, HashMap<String,Player> players) throws IOException,ClassNotFoundException{
         Game G = new Game(this);
         this.players = players;
@@ -980,12 +988,7 @@ class Game extends Main implements Serializable {
         //make ball
         Ball ball = new Ball();
         Shape b;
-        if(player.getBall()==1)
-            b = ball.show();
-        else if(player.getBall()==2)
-            b = ball.showRectangle();
-        else
-            b = ball.showTriangle();
+        b = ball.show(player.getBall());
         b.setTranslateX(ballx);
         b.setTranslateY(bally.get());
 
@@ -1424,10 +1427,12 @@ class Game extends Main implements Serializable {
                         obstacle3.set(null);
                     }
                 }
-                for(int i=0;i<changers.size();++i){
-                    if(b.getBoundsInParent().intersects(changers.get(i).getBoundsInParent())){
-                        pane.getChildren().remove(changers.get(i));
-                        changers.remove(i);
+                Iterator it = changers.iterator();
+                while(it.hasNext()){
+                    Group currentChanger = (Group)it.next();
+                    if(b.getBoundsInParent().intersects(currentChanger.getBoundsInParent())){
+                        pane.getChildren().remove(currentChanger);
+                        changers.remove(currentChanger);
                         String color;
                         do {
                             color = ColorChanger.generateRandomColor();
@@ -1485,7 +1490,7 @@ class Game extends Main implements Serializable {
             bonusPane.getChildren().add(rewards[i]);
         }
         Ball ball = new Ball();
-        Circle b = ball.show();
+        Circle b = (Circle) ball.show(1);
         b.relocate(142, 450);
         bonusPane.getChildren().add(b);
         class MoveBall extends AnimationTimer{
@@ -1546,9 +1551,18 @@ class Game extends Main implements Serializable {
 
 class Ball{
     Ball(){
-
     }
-    public Circle show(){
+
+    public Shape show(int mode){
+        switch(mode){
+            case 1: return showCircle();
+            case 2: return showRectangle();
+            case 3: return showTriangle();
+        }
+        return null;
+    }
+
+    private Circle showCircle(){
         return new Circle(10.f,Color.valueOf("#8a49ef"));
     }
 
