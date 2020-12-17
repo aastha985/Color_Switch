@@ -565,7 +565,14 @@ public class Main extends Application implements Serializable{
             }
         });
         exit.getStyleClass().add("btn");
-        exit.setOnAction(e->System.exit(1));
+        exit.setOnAction(e->{
+            try {
+                serialize();
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
+            System.exit(1);
+        });
         scene.getStylesheets().add("Theme.css");
         return scene;
     }
