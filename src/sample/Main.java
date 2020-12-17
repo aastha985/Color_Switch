@@ -1165,6 +1165,8 @@ class Game extends Main implements Serializable {
                         continue;
                     }
                     for (Node child : obstacles[i].getChildren()) {
+                        if(b.getFill().equals(Color.valueOf("#ffffff")))
+                            break;
                         Shape intersect = null;
                         if (child instanceof Group) {
                             for(Node line: ((Group)child).getChildren()){
@@ -1219,6 +1221,8 @@ class Game extends Main implements Serializable {
                     }
                     for(Node child : obstacles[i].getChildren()){
                         Shape intersect = null;
+                        if(b.getFill().equals(Color.valueOf("#ffffff")))
+                            break;
                         if(child instanceof Group){
                             for(Node line: ((Group)child).getChildren()){
                                 intersect = Shape.intersect(b, (Shape)line);
@@ -1272,12 +1276,12 @@ class Game extends Main implements Serializable {
 
         //add listener to resume  button in resumegame pane after game end
         resume.setOnMouseClicked(mouseEvent ->{
+            b.setFill(Color.valueOf("#ffffff"));
             gamePaused.set(false);
             gravity.start();
             player.decrementStars(5);
             pane.getChildren().remove(resumePane);
             endPaneAdded.set(false);
-            b.setFill(Color.valueOf("#8a49ef"));
         });
 
 //=========================================================================================================================================
