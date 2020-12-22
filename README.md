@@ -1,4 +1,4 @@
-# Color_Switch_Game
+# Color Switch
 
 ## :rocket: Features
 * Play a never ending game with ever increasing difficulty, and see how far you are able to go!
